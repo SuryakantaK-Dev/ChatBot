@@ -12,6 +12,9 @@ export const getSessionId = (): string | null => {
 export const clearSession = (): void => {
   sessionStorage.removeItem('sessionId');
   sessionStorage.removeItem('username');
+  
+  // Dispatch custom event to notify App component
+  window.dispatchEvent(new Event('sessionClear'));
 };
 
 export const setAuthHeaders = (headers: HeadersInit = {}): HeadersInit => {

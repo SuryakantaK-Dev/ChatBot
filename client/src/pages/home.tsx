@@ -3,6 +3,7 @@ import Sidebar from "@/components/sidebar";
 import ChatArea from "@/components/chat-area";
 import DocumentPreview from "@/components/document-preview";
 import DocumentListModal from "@/components/document-list-modal";
+import LoadingTransition from "@/components/loading-transition";
 import { DocumentPreviewData } from "@/types";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
@@ -16,6 +17,7 @@ export default function Home() {
   const [isAllDocsModalOpen, setIsAllDocsModalOpen] = useState(false);
   const [documentPreviewData, setDocumentPreviewData] = useState<DocumentPreviewData | null>(null);
   const [username, setUsername] = useState<string>("");
+  const [showLogoutTransition, setShowLogoutTransition] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -48,14 +50,22 @@ export default function Home() {
   };
 
   const handleLogout = () => {
-    clearSession();
+    setShowLogoutTransition(true);
+    
     toast({
-      title: "Logged Out",
-      description: "You have been logged out successfully.",
+      title: "Logging Out",
+      description: "Securely ending your session...",
     });
-    // Reload to trigger auth check
-    window.location.reload();
+    
+    setTimeout(() => {
+      clearSession();
+      // The App component will detect the session change and show login
+    }, 1500);
   };
+
+  if (showLogoutTransition) {
+    return <LoadingTransition message="Logging you out securely..." duration={1500} />;
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">

@@ -17,7 +17,9 @@ function Router() {
     // Check authentication status
     const checkAuth = () => {
       const authStatus = isAuthenticated();
-      setAuthenticated(authStatus);
+      if (authStatus !== authenticated) {
+        setAuthenticated(authStatus);
+      }
       setLoading(false);
     };
 
@@ -29,16 +31,23 @@ function Router() {
       checkAuth();
     };
 
+    // Custom event for same-tab logout
+    const handleLogout = () => {
+      setAuthenticated(false);
+    };
+
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('sessionClear', handleLogout);
     
     // Also check periodically in case sessionStorage changed in same tab
-    const interval = setInterval(checkAuth, 500);
+    const interval = setInterval(checkAuth, 300);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('sessionClear', handleLogout);
       clearInterval(interval);
     };
-  }, []);
+  }, [authenticated]);
 
   if (loading) {
     return (
