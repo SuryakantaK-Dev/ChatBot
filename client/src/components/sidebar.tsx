@@ -281,17 +281,7 @@ export default function Sidebar({
         </Button>
       </div>
 
-      {/* Developer Info Footer */}
-      <div className="p-4 border-t border-gray-200 bg-gray-50">
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <User className="h-4 w-4 text-gray-400" />
-            <div className="text-xs font-semibold text-gray-700">Developed By</div>
-          </div>
-          <div className="text-sm font-medium text-gray-900">Suryakanta Karan</div>
-          <div className="text-xs text-blue-600 font-medium">Wissen Technology</div>
-        </div>
-      </div>
+
     </div>
   );
 }
