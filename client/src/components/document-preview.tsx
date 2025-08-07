@@ -374,53 +374,6 @@ Features:
                 <p className="text-sm">Loading document...</p>
               </div>
             </div>
-          ) : isGoogleDriveDocument(data.fileLink) ? (
-            <div className="h-[600px] relative bg-white">
-              <iframe
-                src={getEmbedUrl(data.fileLink)}
-                className="w-full h-full border-0"
-                title={data.fileName}
-                onLoad={() => setIsLoading(false)}
-                onError={() => setIsLoading(false)}
-                allow="autoplay"
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-              />
-              
-              {/* Overlay with document info */}
-              {!isLoading && (
-                <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center">
-                  <div className="text-center text-gray-500 max-w-sm mx-auto p-6">
-                    <FileText className="mx-auto mb-4 text-blue-500" size={48} />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">{data.fileName}</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Google Drive Document
-                    </p>
-                    {data.from && data.to && (
-                      <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4">
-                        <div className="flex items-center justify-center space-x-2">
-                          <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                          <span className="text-sm text-yellow-800 font-medium">
-                            Answer highlighted in document
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    <p className="text-xs text-gray-500 mb-4">
-                      Due to Google Drive security settings, preview may not be available for all documents.
-                    </p>
-                    <div className="text-xs text-blue-600 font-medium">
-                      Use "Open Full Document" to view in Google Drive
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {data.from && data.to && (
-                <div className="absolute top-2 right-2 bg-yellow-200 border border-yellow-400 rounded px-2 py-1 text-xs text-yellow-800 shadow-sm z-10">
-                  Highlighted Content
-                </div>
-              )}
-            </div>
           ) : isPdf && isGoogleDriveDocument(data.fileLink) && pdfDoc ? (
             <div className="h-[600px] relative bg-gray-50 flex flex-col">
               {/* PDF Navigation Header */}
@@ -506,6 +459,59 @@ Features:
                   />
                 )}
               </div>
+              
+              {data.from && data.to && !renderError && (
+                <div className="absolute top-12 right-4 bg-yellow-200 border border-yellow-400 rounded px-2 py-1 text-xs text-yellow-800 shadow-sm z-10">
+                  Highlighted Content
+                </div>
+              )}
+            </div>
+          ) : isGoogleDriveDocument(data.fileLink) ? (
+            <div className="h-[600px] relative bg-white">
+              <iframe
+                src={getEmbedUrl(data.fileLink)}
+                className="w-full h-full border-0"
+                title={data.fileName}
+                onLoad={() => setIsLoading(false)}
+                onError={() => setIsLoading(false)}
+                allow="autoplay"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              />
+              
+              {/* Overlay with document info */}
+              {!isLoading && (
+                <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center">
+                  <div className="text-center text-gray-500 max-w-sm mx-auto p-6">
+                    <FileText className="mx-auto mb-4 text-blue-500" size={48} />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">{data.fileName}</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Google Drive Document
+                    </p>
+                    {data.from && data.to && (
+                      <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4">
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                          <span className="text-sm text-yellow-800 font-medium">
+                            Answer highlighted in document
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500 mb-4">
+                      Due to Google Drive security settings, preview may not be available for all documents.
+                    </p>
+                    <div className="text-xs text-blue-600 font-medium">
+                      Use "Open Full Document" to view in Google Drive
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {data.from && data.to && (
+                <div className="absolute top-2 right-2 bg-yellow-200 border border-yellow-400 rounded px-2 py-1 text-xs text-yellow-800 shadow-sm z-10">
+                  Highlighted Content
+                </div>
+              )}
             </div>
           ) : isPdf ? (
             <div className="h-[600px] relative">
