@@ -168,7 +168,7 @@ export default function Sidebar({
       <div className="flex-1 overflow-hidden">
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-900">Chat Sessions</h3>
+            <h3 className="text-sm font-semibold text-gray-900">Chat Sessions - View and manage your conversations</h3>
             <Button variant="ghost" size="sm">
               <Trash2 className="mr-1 h-3 w-3" />
               Clear All
@@ -186,7 +186,7 @@ export default function Sidebar({
             />
           </div>
 
-          <ScrollArea className="h-[calc(100vh-160px)]">
+          <ScrollArea className="h-[calc(100vh-140px)]">
             {filteredSessions.length === 0 ? (
               <div className="text-center text-gray-500 py-12">
                 <History className="mx-auto h-12 w-12 mb-2 opacity-20" />
