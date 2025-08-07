@@ -61,8 +61,8 @@ export default function Sidebar({
             const chatHistory = await response.json();
             
             // Get the first user message for preview
-            const firstUserMessage = chatHistory.find((msg: any) => msg.role === 'user');
-            const previewText = firstUserMessage ? firstUserMessage.content : 'New Chat';
+            const firstUserMessage = chatHistory.find((msg: any) => msg.message?.type === 'human');
+            const previewText = firstUserMessage ? firstUserMessage.message.content : 'Empty Chat';
             
             return {
               id: sessionId,
