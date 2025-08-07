@@ -6,7 +6,14 @@ This is a full-stack Document RAG + Web Search application that combines documen
 
 ## Recent Changes
 
-### August 7, 2025
+### August 7, 2025 (Latest)
+- **Layout Redesign**: Updated main interface to match user's design diagram with clean, centered layout
+- **Sidebar Redesign**: Moved WISSEN logo and search bar to sidebar header for cleaner navigation
+- **Welcome Interface**: Created centered welcome screen with chat bot icon and suggested prompts
+- **Bottom Input Design**: Implemented fixed bottom message input area matching design specifications
+- **Enhanced UX**: Added interactive welcome prompts and improved visual hierarchy
+
+### August 7, 2025 (Earlier)
 - **Sidebar Enhancement**: Removed hardcoded chat sections and replaced with dynamic session previews
 - **Smart Chat History**: Sessions now display actual user message content instead of generic "Session" labels
 - **Integrated Search Functionality**: Added working search bar at top of sidebar that filters through chat content

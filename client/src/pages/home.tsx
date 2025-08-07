@@ -134,16 +134,55 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          // Default layout: Chat centered with proper spacing
-          <div className="flex-1 flex justify-center items-start bg-white py-8 pb-0">
-            <div className="w-full max-w-4xl mx-auto px-8">
-              <ChatArea
-                sessionId={currentSessionId}
-                onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-                onViewAllDocs={() => setIsAllDocsModalOpen(true)}
-                onDocumentPreview={handleDocumentPreview}
-                isCompact={false}
-              />
+          // Default layout: Clean centered layout matching diagram
+          <div className="flex-1 flex flex-col bg-white">
+            <div className="flex-1 flex items-center justify-center">
+              <div className="w-full max-w-4xl mx-auto px-8 text-center">
+                <div className="mb-8">
+                  <div className="w-16 h-16 mx-auto mb-6 bg-blue-600 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl text-gray-700 mb-8 font-medium">Hi there, what can I help you with today?</h2>
+                  
+                  <div className="space-y-3 max-w-lg w-full mx-auto">
+                    <button
+                      className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
+                    >
+                      What's the start date?
+                    </button>
+                    <button
+                      className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
+                    >
+                      Summarize the document
+                    </button>
+                    <button
+                      className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
+                    >
+                      Who are the service providers?
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Bottom Message Input */}
+            <div className="border-t border-gray-200 p-6 bg-white">
+              <div className="max-w-4xl mx-auto">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Type Your Message"
+                    className="w-full p-4 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-700 placeholder-gray-500"
+                  />
+                  <button className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -188,29 +188,39 @@ export default function Sidebar({
   return (
     <div className="w-80 bg-white border-r border-border flex flex-col">
       {/* Logo/Header */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-6 border-b border-border">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
             <WissenLogo className="h-8" />
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleMinimize}
-            className="p-2"
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost" 
+              size="sm"
+              onClick={onNewChat}
+              className="p-2"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleMinimize}
+              className="p-2"
+            >
+              <PanelLeftClose className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search..."
+            placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-9 text-sm"
+            className="pl-10 rounded-full border-gray-300 bg-gray-50 focus:bg-white"
           />
         </div>
       </div>
