@@ -4,7 +4,7 @@ import ChatArea from "@/components/chat-area";
 import DocumentPreview from "@/components/document-preview";
 import DocumentListModal from "@/components/document-list-modal";
 import LoadingTransition from "@/components/loading-transition";
-
+import WissenLogo from "@/components/wissen-logo";
 import { DocumentPreviewData } from "@/types";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
@@ -70,7 +70,39 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
+    <div className="flex flex-col h-screen bg-white overflow-hidden">
+      {/* Top Header */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center">
+          <WissenLogo className="h-8" />
+        </div>
+        <div className="flex-1 flex justify-center">
+          <h1 className="text-xl font-medium text-gray-900">
+            Client Engagement Overview
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            onClick={() => setIsAllDocsModalOpen(true)}
+          >
+            View All Documents
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-1 text-gray-500 hover:text-gray-700"
+          >
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+            </svg>
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar
           isOpen={isSidebarOpen}
           isMinimized={isSidebarMinimized}
@@ -122,5 +154,6 @@ export default function Home() {
           onDocumentPreview={handleDocumentPreview}
         />
       </div>
+    </div>
   );
 }
