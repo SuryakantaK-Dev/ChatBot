@@ -328,7 +328,7 @@ Features:
   };
 
   return (
-    <div className="w-[700px] bg-white border-l border-border">
+    <div className="w-[900px] bg-white border-l border-border">
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h3 className="text-lg font-semibold text-gray-900">Document Preview</h3>
         <div className="flex items-center space-x-2">
@@ -461,8 +461,9 @@ Features:
               </div>
               
               {data.from && data.to && !renderError && (
-                <div className="absolute top-12 right-4 bg-yellow-200 border border-yellow-400 rounded px-2 py-1 text-xs text-yellow-800 shadow-sm z-10">
-                  Highlighted Content
+                <div className="absolute top-12 right-4 bg-yellow-200 border border-yellow-400 rounded px-3 py-2 text-xs text-yellow-800 shadow-sm z-10">
+                  <div className="font-medium">Lines {data.from}-{data.to}</div>
+                  <div className="text-xs opacity-75">Navigate to find highlighted content</div>
                 </div>
               )}
             </div>
