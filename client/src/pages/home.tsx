@@ -72,23 +72,26 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Top Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-center relative">
-        <h1 className="text-xl font-medium text-gray-900">
-          Client Engagement Overview
-        </h1>
-        <div className="absolute right-4 flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-            View All Documents
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-1 text-gray-500 hover:text-gray-700"
-          >
-            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-            </svg>
-          </Button>
+      <div className="bg-white border-b border-gray-200 flex items-center justify-center relative">
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
+        <div className="px-4 py-4 flex items-center justify-center w-full relative">
+          <h1 className="text-xl font-medium text-gray-900">
+            Client Engagement Overview
+          </h1>
+          <div className="absolute right-4 flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+              View All Documents
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-1 text-gray-500 hover:text-gray-700"
+            >
+              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+              </svg>
+            </Button>
+          </div>
         </div>
       </div>
 
