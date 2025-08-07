@@ -6,6 +6,13 @@ This is a full-stack document chatbot application that allows users to interact 
 
 ## Recent Changes
 
+### January 8, 2025
+- **UI Simplification**: Removed documents section from sidebar, keeping only chat history since "View All Documents" option is available in main chat area
+- **Google Drive Integration**: Updated document preview to properly handle Google Drive links with format `https://drive.google.com/file/d/{fileId}/view`
+- **Enhanced Document Preview**: Implemented embedded Google Drive document viewer with fallback interface when iframe restrictions apply
+- **Clean Answer Display**: Removed line number references (Lines 411-414) from answer sections as requested, replaced with "Answer highlighted in document"
+- **Improved UX**: Added proper loading states, timeout handling, and clear messaging about Google Drive security limitations
+
 ### January 7, 2025
 - Added search and pagination functionality to Documents and History sections in the sidebar
 - Implemented search bars with real-time filtering for both documents and chat sessions

@@ -228,7 +228,7 @@ Features:
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-yellow-200 border border-yellow-500 rounded-sm"></div>
               <p className="text-xs text-gray-600">
-                Highlighted content shown below
+                Answer section highlighted
               </p>
             </div>
           )}
@@ -269,7 +269,7 @@ Features:
                         <div className="flex items-center justify-center space-x-2">
                           <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                           <span className="text-sm text-yellow-800 font-medium">
-                            Answer found in lines {data.from}-{data.to}
+                            Answer highlighted in document
                           </span>
                         </div>
                       </div>
@@ -286,7 +286,7 @@ Features:
               
               {data.from && data.to && (
                 <div className="absolute top-2 right-2 bg-yellow-200 border border-yellow-400 rounded px-2 py-1 text-xs text-yellow-800 shadow-sm z-10">
-                  Highlighted: Lines {data.from}-{data.to}
+                  Highlighted Content
                 </div>
               )}
             </div>
