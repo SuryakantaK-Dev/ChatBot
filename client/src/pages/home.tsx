@@ -72,21 +72,21 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Top Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold text-gray-900">
+      <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <h1 className="text-lg font-medium text-gray-900">
             Client Engagement Overview
           </h1>
         </div>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" className="text-blue-600 hover:text-blue-700">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 text-sm">
             View All Documents
           </Button>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
           >
             <LogOut className="h-4 w-4" />
             Logout
