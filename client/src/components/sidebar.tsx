@@ -281,17 +281,13 @@ export default function Sidebar({
         </Button>
       </div>
 
-      {/* Developer Info Footer - Single Line */}
-      <div className="px-3 py-2 border-t border-gray-200 bg-gray-50">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-1 text-xs">
-            <User className="h-3 w-3 text-gray-400" />
-            <span className="text-gray-600">Developed By</span>
-            <span className="font-medium text-gray-800">Suryakanta Karan</span>
-            <span className="text-gray-500">(</span>
-            <span className="text-blue-600">Wissen Technology</span>
-            <span className="text-gray-500">)</span>
-          </div>
+      {/* Developer Info Footer - Minimal */}
+      <div className="px-2 py-1 border-t border-gray-200 bg-gray-50">
+        <div className="text-center text-xs text-gray-500">
+          <span>By </span>
+          <span className="font-medium text-gray-700">S. Karan</span>
+          <span> | </span>
+          <span className="text-blue-600">Wissen</span>
         </div>
       </div>
     </div>
