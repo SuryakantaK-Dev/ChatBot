@@ -70,7 +70,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+    <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Header with welcome message */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -104,14 +104,14 @@ export default function Home() {
         {/* Dynamic Layout Based on Document Preview State */}
         {isDocumentPreviewOpen && documentPreviewData ? (
           // Layout when document is open: Document in middle, Chat on right
-          <div className="flex-1 flex">
-            <div className="flex-1 border-r border-gray-200 max-h-screen">
+          <div className="flex-1 flex bg-white">
+            <div className="flex-1 border-r border-gray-200 max-h-screen bg-white">
               <DocumentPreview
                 data={documentPreviewData}
                 onClose={handleCloseDocumentPreview}
               />
             </div>
-            <div className="w-2/5">
+            <div className="w-2/5 bg-white">
               <ChatArea
                 sessionId={currentSessionId}
                 onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -123,7 +123,7 @@ export default function Home() {
           </div>
         ) : (
           // Default layout: Chat centered with proper spacing
-          <div className="flex-1 flex justify-center items-start bg-gray-50 py-8 pb-0">
+          <div className="flex-1 flex justify-center items-start bg-white py-8 pb-0">
             <div className="w-full max-w-4xl mx-auto px-8">
               <ChatArea
                 sessionId={currentSessionId}
