@@ -6,6 +6,14 @@ This is a full-stack Document RAG + Web Search application that combines documen
 
 ## Recent Changes
 
+### August 7, 2025
+- **Sidebar Enhancement**: Removed hardcoded chat sections and replaced with dynamic session previews
+- **Smart Chat History**: Sessions now display actual user message content instead of generic "Session" labels
+- **Integrated Search Functionality**: Added working search bar at top of sidebar that filters through chat content
+- **Header Design Update**: Centered page title with green accent line and improved button positioning
+- **Content Preview System**: First user message from each chat appears as preview text with message count
+- **Session Organization**: Chat sessions sorted by most recent activity for better user experience
+
 ### January 8, 2025
 - **Enhanced Login Experience**: Added smooth loading transitions to eliminate white screen flash during login
 - **Reactive Authentication System**: Implemented real-time session state checking without page reloads
