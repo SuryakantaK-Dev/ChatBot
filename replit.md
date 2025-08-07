@@ -4,6 +4,16 @@
 
 This is a full-stack document chatbot application that allows users to interact with AI agents while referencing ingested documents. The system provides a chat interface with document management capabilities, featuring a React frontend with shadcn/ui components and an Express.js backend that integrates with external N8N webhook services for document processing and AI responses.
 
+## Recent Changes
+
+### January 7, 2025
+- Added search and pagination functionality to Documents and History sections in the sidebar
+- Implemented search bars with real-time filtering for both documents and chat sessions
+- Added pagination controls with Previous/Next buttons and page indicators
+- Enhanced document list modal with search and pagination capabilities
+- Added fallback mock data for testing when N8N service is unavailable
+- Set items per page to 5 for sidebar sections and 8 for document modal
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
