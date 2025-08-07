@@ -152,7 +152,7 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-200px)]">
+    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-200px)]" style={{ paddingBottom: '80px' }}>
       {/* Chat Header - Always show for non-compact */}
       {!isCompact && (
         <div className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
@@ -298,31 +298,35 @@ export default function ChatArea({
         </ScrollArea>
       </div>
 
-      {/* Chat Input - Always fixed at bottom */}
-      <div className="border-t border-gray-200 p-4 flex-shrink-0 bg-white sticky bottom-0">
-        <div className="flex items-center space-x-3 max-w-4xl mx-auto">
-          <div className="flex-1 relative">
-            <Textarea
-              ref={textareaRef}
-              value={message}
-              onChange={handleTextareaChange}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message here..."
-              className="resize-none h-12 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3 pr-40 min-h-12 max-h-12"
-              rows={1}
-            />
-            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap">
-              Press Enter to send, Shift+Enter for new line
-            </span>
+      {/* Chat Input - Absolutely fixed at bottom with maximum stability */}
+      <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white z-50" style={{ height: '80px', minHeight: '80px', maxHeight: '80px' }}>
+        <div className="flex items-center justify-center h-full px-4">
+          <div className="flex items-center space-x-3 w-full max-w-4xl">
+            <div className="flex-1 relative">
+              <Textarea
+                ref={textareaRef}
+                value={message}
+                onChange={handleTextareaChange}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message here..."
+                className="resize-none border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3 pr-40 overflow-hidden"
+                style={{ height: '48px', minHeight: '48px', maxHeight: '48px', lineHeight: '20px' }}
+                rows={1}
+              />
+              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap select-none">
+                Press Enter to send, Shift+Enter for new line
+              </span>
+            </div>
+            <Button
+              size="sm"
+              onClick={handleSendMessage}
+              disabled={!message.trim() || sendMessageMutation.isPending}
+              className="rounded-xl p-0 flex-shrink-0"
+              style={{ height: '48px', width: '48px', minHeight: '48px', minWidth: '48px' }}
+            >
+              <Send size={18} />
+            </Button>
           </div>
-          <Button
-            size="sm"
-            onClick={handleSendMessage}
-            disabled={!message.trim() || sendMessageMutation.isPending}
-            className="h-12 w-12 rounded-xl p-0 flex-shrink-0"
-          >
-            <Send size={18} />
-          </Button>
         </div>
       </div>
     </div>
