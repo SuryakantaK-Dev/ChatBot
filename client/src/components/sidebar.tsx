@@ -38,7 +38,7 @@ export default function Sidebar({
   onNewChat,
   onToggleMinimize
 }: SidebarProps) {
-  const [historySearchQuery, setHistorySearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [historyPage, setHistoryPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -46,6 +46,45 @@ export default function Sidebar({
   const { data: sessions = [] } = useQuery({
     queryKey: ['/api/sessions'],
     queryFn: sessionsApi.getAll,
+  });
+
+  // Fetch chat history for each session to get preview text
+  const { data: sessionsWithContent = [] } = useQuery({
+    queryKey: ['/api/sessions-with-content', sessions],
+    queryFn: async () => {
+      if (!sessions.length) return [];
+      
+      const sessionsData = await Promise.all(
+        sessions.map(async (sessionId) => {
+          try {
+            const response = await fetch(`/api/chat/${sessionId}`);
+            const chatHistory = await response.json();
+            
+            // Get the first user message for preview
+            const firstUserMessage = chatHistory.find((msg: any) => msg.role === 'user');
+            const previewText = firstUserMessage ? firstUserMessage.content : 'New Chat';
+            
+            return {
+              id: sessionId,
+              previewText: previewText.length > 50 ? previewText.substring(0, 50) + '...' : previewText,
+              messageCount: chatHistory.length,
+              lastActivity: chatHistory.length > 0 ? new Date(chatHistory[chatHistory.length - 1].created_at) : new Date()
+            };
+          } catch (error) {
+            return {
+              id: sessionId,
+              previewText: 'Chat Session',
+              messageCount: 0,
+              lastActivity: new Date()
+            };
+          }
+        })
+      );
+      
+      // Sort by last activity
+      return sessionsData.sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime());
+    },
+    enabled: sessions.length > 0,
   });
 
   // Delete session mutation
@@ -65,9 +104,10 @@ export default function Sidebar({
     return date.toLocaleString();
   };
 
-  // Filter and paginate sessions
-  const filteredSessions = sessions.filter(sessionId =>
-    sessionId.toLowerCase().includes(historySearchQuery.toLowerCase())
+  // Filter and paginate sessions based on search query
+  const filteredSessions = sessionsWithContent.filter(session =>
+    session.previewText.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    session.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
   const totalHistoryPages = Math.ceil(filteredSessions.length / itemsPerPage);
   const paginatedSessions = filteredSessions.slice(
@@ -78,7 +118,7 @@ export default function Sidebar({
   // Reset page when search changes
   useEffect(() => {
     setHistoryPage(1);
-  }, [historySearchQuery]);
+  }, [searchQuery]);
 
   if (!isOpen) return null;
 
@@ -168,6 +208,8 @@ export default function Sidebar({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 h-9 text-sm"
           />
         </div>
@@ -193,28 +235,28 @@ export default function Sidebar({
               <div className="text-center text-gray-500 py-12">
                 <History className="mx-auto h-12 w-12 mb-2 opacity-20" />
                 <p className="text-sm">
-                  {historySearchQuery ? 'No sessions match your search' : 'No chat history yet'}
+                  {searchQuery ? 'No sessions match your search' : 'No chat history yet'}
                 </p>
               </div>
             ) : (
               <div className="space-y-2">
-                {paginatedSessions.map((sessionId) => (
+                {paginatedSessions.map((session) => (
                   <div
-                    key={sessionId}
+                    key={session.id}
                     className={`group p-3 rounded-lg cursor-pointer transition-all duration-200 ${
-                      currentSessionId === sessionId
+                      currentSessionId === session.id
                         ? 'bg-blue-100 border-2 border-primary'
                         : 'border border-gray-200 hover:border-primary hover:bg-blue-50'
                     }`}
-                    onClick={() => onSessionChange(sessionId)}
+                    onClick={() => onSessionChange(session.id)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          Session {sessionId.split('_')[2]?.slice(0, 6) || 'Unknown'}
+                          {session.previewText}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          {formatSessionTime(sessionId)}
+                          {formatSessionTime(session.id)} • {session.messageCount} messages
                         </p>
                       </div>
                       <div className="flex items-center space-x-1">
@@ -227,7 +269,7 @@ export default function Sidebar({
                           className="opacity-0 group-hover:opacity-100 transition-opacity p-1 h-6 w-6"
                           onClick={(e) => {
                             e.stopPropagation();
-                            deleteSessionMutation.mutate(sessionId);
+                            deleteSessionMutation.mutate(session.id);
                           }}
                         >
                           <Trash2 className="h-3 w-3 text-red-500" />
