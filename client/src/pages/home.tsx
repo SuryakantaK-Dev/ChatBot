@@ -72,7 +72,7 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Top Header */}
-      <div className="bg-white px-3 py-2 flex items-center justify-between relative">
+      <div className="bg-white px-3 py-2 flex items-center justify-start relative">
         
         <div className="flex items-center gap-2">
           <Button 
@@ -95,8 +95,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Separator Line */}
-      <div className="border-b border-gray-200" style={{ borderBottomWidth: '1px' }}></div>
+
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
