@@ -298,9 +298,9 @@ export default function ChatArea({
         </ScrollArea>
       </div>
 
-      {/* Chat Input - Fixed at bottom */}
-      <div className="border-t border-gray-200 p-4 flex-shrink-0">
-        <div className="flex items-center space-x-3">
+      {/* Chat Input - Always fixed at bottom */}
+      <div className="border-t border-gray-200 p-4 flex-shrink-0 bg-white sticky bottom-0">
+        <div className="flex items-center space-x-3 max-w-4xl mx-auto">
           <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
@@ -308,10 +308,10 @@ export default function ChatArea({
               onChange={handleTextareaChange}
               onKeyPress={handleKeyPress}
               placeholder="Type your message here..."
-              className="resize-none h-12 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3 pr-40"
+              className="resize-none h-12 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3 pr-40 min-h-12 max-h-12"
               rows={1}
             />
-            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap">
               Press Enter to send, Shift+Enter for new line
             </span>
           </div>
@@ -319,7 +319,7 @@ export default function ChatArea({
             size="sm"
             onClick={handleSendMessage}
             disabled={!message.trim() || sendMessageMutation.isPending}
-            className="h-12 w-12 rounded-xl p-0"
+            className="h-12 w-12 rounded-xl p-0 flex-shrink-0"
           >
             <Send size={18} />
           </Button>
