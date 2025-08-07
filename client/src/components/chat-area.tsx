@@ -170,9 +170,8 @@ export default function ChatArea({
       {/* Chat Messages */}
       <div className="flex-1 overflow-hidden min-h-0">
         <ScrollArea className="h-full">
-          <div className="space-y-3 p-4">
             {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
-              <div className="flex flex-col items-center justify-center h-full py-16">
+              <div className="flex flex-col items-center justify-center h-full py-16 px-4">
                 <div className="mb-8">
                   <div className="w-16 h-16 mx-auto mb-6 bg-blue-600 rounded-full flex items-center justify-center">
                     <Bot className="w-8 h-8 text-white" />
@@ -204,7 +203,7 @@ export default function ChatArea({
             )}
             
             {messages.slice(1).map((msg, index) => (
-              <div key={index} className="flex-shrink-0 w-full mb-3">
+              <div key={index} className="flex-shrink-0 w-full mb-3 px-4">
                 <div className={`flex items-start gap-3 ${msg.type === 'human' ? 'justify-end' : 'justify-start'}`}>
                   {msg.type === 'ai' && (
                     <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
@@ -259,7 +258,7 @@ export default function ChatArea({
             ))}
             
             {sendMessageMutation.isPending && (
-              <div className="flex items-start space-x-3">
+              <div className="flex items-start space-x-3 px-4">
                 <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                   <Bot className="text-white" size={16} />
                 </div>
@@ -276,7 +275,6 @@ export default function ChatArea({
             )}
             
             <div ref={messagesEndRef} />
-          </div>
         </ScrollArea>
       </div>
 
