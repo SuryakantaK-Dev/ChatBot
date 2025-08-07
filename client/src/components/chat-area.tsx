@@ -170,7 +170,7 @@ export default function ChatArea({
       {/* Chat Messages */}
       <div className="flex-1 overflow-hidden min-h-0">
         <ScrollArea className="h-full">
-          <div className="space-y-4 p-6">
+          <div className="space-y-3 p-4">
             {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
               <div className="text-center py-16">
                 <div className="text-gray-400 mb-6">
@@ -184,27 +184,27 @@ export default function ChatArea({
             )}
             
             {messages.slice(1).map((msg, index) => (
-              <div key={index} className="w-full">
-                <div className={`flex items-start space-x-3 ${msg.type === 'human' ? 'justify-end' : ''}`}>
+              <div key={index} className="flex-shrink-0 w-full mb-3">
+                <div className={`flex items-start gap-3 ${msg.type === 'human' ? 'justify-end' : 'justify-start'}`}>
                   {msg.type === 'ai' && (
                     <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                       <Bot className="text-white" size={16} />
                     </div>
                   )}
                   
-                  <div className={`flex-1 ${msg.type === 'human' ? 'flex justify-end' : ''}`}>
-                    <div className={`max-w-2xl ${
+                  <div className={`${msg.type === 'human' ? 'max-w-[70%]' : 'max-w-[80%]'}`}>
+                    <div className={`${
                       msg.type === 'human' 
                         ? 'bg-primary text-white rounded-2xl px-4 py-3' 
                         : 'bg-gray-50 rounded-2xl px-4 py-3'
                     }`}>
-                      <p className={`whitespace-pre-line ${msg.type === 'human' ? 'text-white' : 'text-gray-800'}`}>{msg.content}</p>
+                      <p className={`text-sm whitespace-pre-line break-words ${msg.type === 'human' ? 'text-white' : 'text-gray-800'}`}>{msg.content}</p>
                       
                       {msg.documentReference && (
                         <div className="bg-white border border-gray-200 rounded-lg p-3 mt-3">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <FileText className="text-red-500" size={16} />
-                            <span className="text-sm font-medium text-gray-900">
+                          <div className="flex items-center gap-2 mb-2">
+                            <FileText className="text-red-500 flex-shrink-0" size={16} />
+                            <span className="text-sm font-medium text-gray-900 break-words">
                               {msg.documentReference.fileName}
                             </span>
                           </div>
