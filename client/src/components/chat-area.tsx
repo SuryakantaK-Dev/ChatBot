@@ -187,10 +187,7 @@ export default function ChatArea({
                           onClick={() => handleDocumentReference(msg.documentReference)}
                         >
                           <ExternalLink className="mr-1" size={12} />
-                          View Document 
-                          {msg.documentReference.from && msg.documentReference.to && 
-                            ` (Lines ${msg.documentReference.from}-${msg.documentReference.to})`
-                          }
+                          View Document with Highlighted Answer
                         </Button>
                       </div>
                     )}

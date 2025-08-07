@@ -45,7 +45,7 @@ export default function Home() {
         onDocumentPreview={handleDocumentPreview}
       />
       
-      <div className="flex-1 flex">
+      <div className="flex-1 flex relative">
         <ChatArea
           sessionId={currentSessionId}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -54,10 +54,12 @@ export default function Home() {
         />
         
         {isDocumentPreviewOpen && documentPreviewData && (
-          <DocumentPreview
-            data={documentPreviewData}
-            onClose={handleCloseDocumentPreview}
-          />
+          <div className="absolute top-0 right-0 h-full z-10 shadow-2xl">
+            <DocumentPreview
+              data={documentPreviewData}
+              onClose={handleCloseDocumentPreview}
+            />
+          </div>
         )}
       </div>
 
