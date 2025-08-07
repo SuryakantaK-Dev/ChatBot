@@ -52,9 +52,9 @@ export default function Login() {
           description: `Welcome ${data.user.username.replace('.', ' ')} to WISSEN ChatBot`,
         });
         
-        // Small delay to show the welcome message before redirecting
+        // Small delay to show the welcome message, then force a re-render
         setTimeout(() => {
-          setLocation('/');
+          window.location.reload();
         }, 2000);
       } else {
         toast({
