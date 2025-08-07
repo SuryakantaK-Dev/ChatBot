@@ -301,16 +301,19 @@ export default function ChatArea({
       {/* Chat Input - Fixed at bottom */}
       <div className="border-t border-gray-200 p-4 flex-shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="flex-1">
+          <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
               value={message}
               onChange={handleTextareaChange}
               onKeyPress={handleKeyPress}
               placeholder="Type your message here..."
-              className="resize-none h-12 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3"
+              className="resize-none h-12 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3 pr-40"
               rows={1}
             />
+            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+              Press Enter to send, Shift+Enter for new line
+            </span>
           </div>
           <Button
             size="sm"
@@ -321,9 +324,6 @@ export default function ChatArea({
             <Send size={18} />
           </Button>
         </div>
-        <p className="text-xs text-gray-500 mt-2 text-center">
-          Press Enter to send, Shift+Enter for new line
-        </p>
       </div>
     </div>
   );
