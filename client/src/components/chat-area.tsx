@@ -152,10 +152,10 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-200px)]">
+    <div className="flex flex-col bg-white h-[calc(100vh-200px)]">
       {/* Only show header in compact mode */}
       {isCompact && (
-        <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
+        <div className="bg-white px-4 py-3 flex-shrink-0">
           <div className="flex items-center justify-between">
             <h1 className="text-base font-semibold text-gray-900">Chat</h1>
             <div className="flex items-center space-x-2">
@@ -261,7 +261,7 @@ export default function ChatArea({
       </div>
 
       {/* Chat Input - Always fixed at bottom */}
-      <div className="border-t border-gray-200 p-3 flex-shrink-0 bg-white sticky bottom-0">
+      <div className="p-3 flex-shrink-0 bg-white sticky bottom-0">
         <div className={`flex items-center space-x-2 ${isCompact ? 'max-w-none' : 'max-w-4xl mx-auto'}`}>
           <div className="flex-1 relative">
             <Textarea
