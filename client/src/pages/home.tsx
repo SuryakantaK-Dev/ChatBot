@@ -71,32 +71,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
-      {/* Top Header */}
-      <div className="bg-white px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center">
-          <WissenLogo className="h-8" />
-        </div>
 
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-            onClick={() => setIsAllDocsModalOpen(true)}
-          >
-            View All Documents
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-1 text-gray-500 hover:text-gray-700"
-          >
-            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-            </svg>
-          </Button>
-        </div>
-      </div>
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
