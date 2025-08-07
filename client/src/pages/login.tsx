@@ -48,12 +48,14 @@ export default function Login() {
         sessionStorage.setItem('username', data.user.username);
         
         toast({
-          title: "Login Successful",
-          description: `Welcome back, ${data.user.username}!`,
+          title: "Welcome to WISSEN ChatBot!",
+          description: `Welcome ${data.user.username.replace('.', ' ')} to WISSEN ChatBot`,
         });
         
-        // Redirect to chat
-        setLocation('/');
+        // Small delay to show the welcome message before redirecting
+        setTimeout(() => {
+          setLocation('/');
+        }, 2000);
       } else {
         toast({
           title: "Login Failed",

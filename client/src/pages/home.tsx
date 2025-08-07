@@ -4,6 +4,10 @@ import ChatArea from "@/components/chat-area";
 import DocumentPreview from "@/components/document-preview";
 import DocumentListModal from "@/components/document-list-modal";
 import { DocumentPreviewData } from "@/types";
+import { Button } from "@/components/ui/button";
+import { LogOut, User } from "lucide-react";
+import { clearSession } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const [currentSessionId, setCurrentSessionId] = useState<string>("");
@@ -11,10 +15,18 @@ export default function Home() {
   const [isDocumentPreviewOpen, setIsDocumentPreviewOpen] = useState(false);
   const [isAllDocsModalOpen, setIsAllDocsModalOpen] = useState(false);
   const [documentPreviewData, setDocumentPreviewData] = useState<DocumentPreviewData | null>(null);
+  const [username, setUsername] = useState<string>("");
+  const { toast } = useToast();
 
   useEffect(() => {
     // Generate initial session ID
     setCurrentSessionId(generateSessionId());
+    
+    // Get username from session storage
+    const storedUsername = sessionStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername.replace('.', ' ')); // Convert "Suryakanta.Karan" to "Suryakanta Karan"
+    }
   }, []);
 
   const generateSessionId = () => {
@@ -35,17 +47,47 @@ export default function Home() {
     setDocumentPreviewData(null);
   };
 
+  const handleLogout = () => {
+    clearSession();
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out successfully.",
+    });
+    // Reload to trigger auth check
+    window.location.reload();
+  };
+
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      <Sidebar
-        isOpen={isSidebarOpen}
-        currentSessionId={currentSessionId}
-        onSessionChange={setCurrentSessionId}
-        onNewChat={handleNewChat}
-        onDocumentPreview={handleDocumentPreview}
-      />
-      
-      <div className="flex-1 flex relative">
+    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+      {/* Header with welcome message */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <User className="h-5 w-5 text-blue-600" />
+          <h1 className="text-lg font-semibold text-gray-900">
+            Welcome {username} to WISSEN ChatBot
+          </h1>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleLogout}
+          className="flex items-center gap-2"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </Button>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar
+          isOpen={isSidebarOpen}
+          currentSessionId={currentSessionId}
+          onSessionChange={setCurrentSessionId}
+          onNewChat={handleNewChat}
+          onDocumentPreview={handleDocumentPreview}
+        />
+        
+        <div className="flex-1 flex relative">
         <ChatArea
           sessionId={currentSessionId}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -61,6 +103,7 @@ export default function Home() {
             />
           </div>
         )}
+        </div>
       </div>
 
       <DocumentListModal
