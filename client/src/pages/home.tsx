@@ -4,6 +4,7 @@ import ChatArea from "@/components/chat-area";
 import DocumentPreview from "@/components/document-preview";
 import DocumentListModal from "@/components/document-list-modal";
 import LoadingTransition from "@/components/loading-transition";
+import WissenLogo from "@/components/wissen-logo";
 import { DocumentPreviewData } from "@/types";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
@@ -18,6 +19,7 @@ export default function Home() {
   const [documentPreviewData, setDocumentPreviewData] = useState<DocumentPreviewData | null>(null);
   const [username, setUsername] = useState<string>("");
   const [showLogoutTransition, setShowLogoutTransition] = useState(false);
+  const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -71,11 +73,14 @@ export default function Home() {
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       {/* Header with welcome message */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <User className="h-5 w-5 text-blue-600" />
-          <h1 className="text-lg font-semibold text-gray-900">
-            Welcome {username} to WISSEN ChatBot
-          </h1>
+        <div className="flex items-center gap-4">
+          <WissenLogo className="h-8" />
+          <div className="flex items-center gap-2">
+            <User className="h-5 w-5 text-blue-600" />
+            <h1 className="text-lg font-semibold text-gray-900">
+              Welcome {username} to ChatBot
+            </h1>
+          </div>
         </div>
         <Button
           variant="outline"
@@ -91,9 +96,11 @@ export default function Home() {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           isOpen={isSidebarOpen}
+          isMinimized={isSidebarMinimized}
           currentSessionId={currentSessionId}
           onSessionChange={setCurrentSessionId}
           onNewChat={handleNewChat}
+          onToggleMinimize={() => setIsSidebarMinimized(!isSidebarMinimized)}
           onDocumentPreview={handleDocumentPreview}
         />
         

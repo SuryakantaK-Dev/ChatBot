@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import WissenLogo from "@/components/wissen-logo";
 import { sessionsApi } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { 
@@ -12,22 +14,29 @@ import {
   Trash2,
   Search,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  PanelLeftClose,
+  PanelLeft,
+  User
 } from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
+  isMinimized: boolean;
   currentSessionId: string;
   onSessionChange: (sessionId: string) => void;
   onNewChat: () => void;
+  onToggleMinimize: () => void;
   onDocumentPreview: (data: any) => void;
 }
 
 export default function Sidebar({ 
   isOpen, 
+  isMinimized,
   currentSessionId, 
   onSessionChange, 
-  onNewChat
+  onNewChat,
+  onToggleMinimize
 }: SidebarProps) {
   const [historySearchQuery, setHistorySearchQuery] = useState("");
   const [historyPage, setHistoryPage] = useState(1);
@@ -73,14 +82,85 @@ export default function Sidebar({
 
   if (!isOpen) return null;
 
+  if (isMinimized) {
+    return (
+      <div className="w-16 bg-white border-r border-gray-200 flex flex-col">
+        {/* Minimized Header */}
+        <div className="p-3 border-b border-gray-200">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onToggleMinimize}
+                className="w-full p-2"
+              >
+                <PanelLeft className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>Expand Sidebar</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
+        {/* Minimized Actions */}
+        <div className="p-2 space-y-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onNewChat}
+                className="w-full p-2"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>New Chat</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
+        {/* Minimized Logo & Developer Info */}
+        <div className="mt-auto p-2 border-t border-gray-200">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="text-center">
+                <div className="text-xs font-semibold text-blue-600 mb-1">W</div>
+                <User className="h-3 w-3 text-gray-400 mx-auto" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <div className="text-xs">
+                <div className="font-semibold">Developed By:</div>
+                <div>Suryakanta Karan</div>
+                <div className="text-blue-600">Wissen Technology</div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-80 bg-white border-r border-border flex flex-col">
       {/* Logo/Header */}
       <div className="p-6 border-b border-border">
-        <div className="flex items-center space-x-3">
-          <div className="text-2xl font-bold text-gray-800">
-            WISSEN <span className="text-primary">W</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <WissenLogo className="h-8" />
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleMinimize}
+            className="p-2"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
         </div>
         <h2 className="text-sm font-medium text-gray-600 mt-2">Document Chatbot</h2>
       </div>
@@ -200,6 +280,18 @@ export default function Sidebar({
           <Plus className="mr-2 h-4 w-4" />
           New Chat
         </Button>
+      </div>
+
+      {/* Developer Info Footer */}
+      <div className="p-4 border-t border-gray-200 bg-gray-50">
+        <div className="text-center space-y-2">
+          <div className="flex items-center justify-center gap-2">
+            <User className="h-4 w-4 text-gray-400" />
+            <div className="text-xs font-semibold text-gray-700">Developed By</div>
+          </div>
+          <div className="text-sm font-medium text-gray-900">Suryakanta Karan</div>
+          <div className="text-xs text-blue-600 font-medium">Wissen Technology</div>
+        </div>
       </div>
     </div>
   );
