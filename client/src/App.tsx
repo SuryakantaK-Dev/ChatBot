@@ -32,7 +32,7 @@ function Router() {
     window.addEventListener('storage', handleStorageChange);
     
     // Also check periodically in case sessionStorage changed in same tab
-    const interval = setInterval(checkAuth, 1000);
+    const interval = setInterval(checkAuth, 500);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
@@ -42,8 +42,11 @@ function Router() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="text-lg text-gray-700">Loading WISSEN ChatBot...</div>
+        </div>
       </div>
     );
   }

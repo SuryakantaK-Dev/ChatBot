@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, FileText } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import LoadingTransition from "@/components/loading-transition";
 
 interface LoginResponse {
   success: boolean;
@@ -23,6 +23,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showTransition, setShowTransition] = useState(false);
   const { toast } = useToast();
 
   const loginMutation = useMutation({
@@ -52,10 +53,12 @@ export default function Login() {
           description: `Welcome ${data.user.username.replace('.', ' ')} to WISSEN ChatBot`,
         });
         
-        // Small delay to show the welcome message, then force a re-render
+        // Show loading transition before redirect
+        setShowTransition(true);
+        
         setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+          setLocation('/');
+        }, 1500);
       } else {
         toast({
           title: "Login Failed",
@@ -85,6 +88,10 @@ export default function Login() {
     }
     loginMutation.mutate({ username, password });
   };
+
+  if (showTransition) {
+    return <LoadingTransition message="Preparing your workspace..." duration={1500} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">

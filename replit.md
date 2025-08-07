@@ -7,6 +7,13 @@ This is a full-stack document chatbot application that allows users to interact 
 ## Recent Changes
 
 ### January 8, 2025
+- **Enhanced Login Experience**: Added smooth loading transitions to eliminate white screen flash during login
+- **Reactive Authentication System**: Implemented real-time session state checking without page reloads
+- **Welcome Header Integration**: Added persistent welcome message in main app header with logout functionality
+- **Loading Progress Indicator**: Created animated loading transition component with progress bar for better UX
+- **Session Management Improvements**: Made authentication state responsive to sessionStorage changes
+
+### January 8, 2025 (Earlier)
 - **Full-Width Document Preview**: Changed document preview from fixed 900px width to flexible full-width layout (`flex-1`)
 - **Enhanced Line Number Display**: Added specific line number references (e.g., "Lines 411-414") in both chat messages and document preview
 - **Improved Highlighting Guidance**: Replaced generic "Highlighted Content" overlay with specific line numbers and navigation instructions
