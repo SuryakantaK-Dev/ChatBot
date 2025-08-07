@@ -130,11 +130,24 @@ Features:
   const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 25, 50));
 
   const handleDownload = () => {
-    window.open(data.fileLink, '_blank');
+    // Convert Google Drive view link to download link
+    const downloadLink = data.fileLink.replace('/view', '/export?format=pdf');
+    window.open(downloadLink, '_blank');
   };
 
   const handleOpenFull = () => {
     window.open(data.fileLink, '_blank');
+  };
+
+  const getEmbedUrl = (driveUrl: string) => {
+    // Convert Google Drive view URL to embed URL
+    if (driveUrl.includes('drive.google.com/file/d/')) {
+      const fileId = driveUrl.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1];
+      if (fileId) {
+        return `https://drive.google.com/file/d/${fileId}/preview`;
+      }
+    }
+    return driveUrl;
   };
 
   const highlightContent = (content: string) => {
@@ -213,6 +226,22 @@ Features:
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
                 <p className="text-sm">Loading document...</p>
               </div>
+            </div>
+          ) : data.fileLink.includes('drive.google.com') ? (
+            <div className="h-96 relative bg-white">
+              <iframe
+                src={getEmbedUrl(data.fileLink)}
+                className="w-full h-full border-0"
+                title={data.fileName}
+                onLoad={() => setIsLoading(false)}
+                onError={() => setIsLoading(false)}
+                allow="autoplay"
+              />
+              {data.from && data.to && (
+                <div className="absolute top-2 right-2 bg-yellow-200 border border-yellow-400 rounded px-2 py-1 text-xs text-yellow-800 shadow-sm">
+                  Highlighted content: Lines {data.from}-{data.to}
+                </div>
+              )}
             </div>
           ) : isPdf ? (
             <div className="h-96 relative">

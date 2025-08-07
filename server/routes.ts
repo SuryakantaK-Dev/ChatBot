@@ -10,9 +10,9 @@ function generateMockChatResponse(userInput: string): ChatResponse {
   
   // Sample document references for mock responses
   const sampleDocs = [
-    { fileId: "1RKUniO9hI4611Q0G7_trPIMV3RSAAiLD", fileName: "US_TERMS_COND-0056.pdf", fileLink: "https://example.com/doc1.pdf" },
-    { fileId: "2ABCdef789xyz", fileName: "Project_Proposal_2024.docx", fileLink: "https://example.com/doc2.docx" },
-    { fileId: "3XYZ123abc", fileName: "Financial_Report_Q3.xlsx", fileLink: "https://example.com/doc3.xlsx" }
+    { fileId: "1RKUniO9hI4611Q0G7_trPIMV3RSAAiLD", fileName: "US_TERMS_COND-0056.pdf", fileLink: "https://drive.google.com/file/d/1RKUniO9hI4611Q0G7_trPIMV3RSAAiLD/view" },
+    { fileId: "2ABCdef789xyz", fileName: "Project_Proposal_2024.docx", fileLink: "https://drive.google.com/file/d/2ABCdef789xyz/view" },
+    { fileId: "3XYZ123abc", fileName: "Financial_Report_Q3.xlsx", fileLink: "https://drive.google.com/file/d/3XYZ123abc/view" }
   ];
   
   if (input.includes("contract") || input.includes("terms") || input.includes("agreement")) {
@@ -98,14 +98,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Fallback mock data for testing pagination and search
       const mockDocuments: Document[] = [
-        { name: "US_TERMS_COND-0056.pdf", link: "https://example.com/doc1.pdf" },
-        { name: "Project_Proposal_2024.docx", link: "https://example.com/doc2.docx" },
-        { name: "Financial_Report_Q3.xlsx", link: "https://example.com/doc3.xlsx" },
-        { name: "Contract_Agreement.pdf", link: "https://example.com/doc4.pdf" },
-        { name: "Technical_Specification.docx", link: "https://example.com/doc5.docx" },
-        { name: "Budget_Analysis.xlsx", link: "https://example.com/doc6.xlsx" },
-        { name: "User_Manual.pdf", link: "https://example.com/doc7.pdf" },
-        { name: "Meeting_Minutes.docx", link: "https://example.com/doc8.docx" },
+        { name: "US_TERMS_COND-0056.pdf", link: "https://drive.google.com/file/d/1RKUniO9hI4611Q0G7_trPIMV3RSAAiLD/view" },
+        { name: "Project_Proposal_2024.docx", link: "https://drive.google.com/file/d/2ABCdef789xyz/view" },
+        { name: "Financial_Report_Q3.xlsx", link: "https://drive.google.com/file/d/3XYZ123abc/view" },
+        { name: "Contract_Agreement.pdf", link: "https://drive.google.com/file/d/4DEF567ghi/view" },
+        { name: "Technical_Specification.docx", link: "https://drive.google.com/file/d/5GHI890jkl/view" },
+        { name: "Budget_Analysis.xlsx", link: "https://drive.google.com/file/d/6JKL123mno/view" },
+        { name: "User_Manual.pdf", link: "https://drive.google.com/file/d/7MNO456pqr/view" },
+        { name: "Meeting_Minutes.docx", link: "https://drive.google.com/file/d/8PQR789stu/view" },
         { name: "Sales_Data.csv", link: "https://example.com/doc9.csv" },
         { name: "Legal_Documentation.pdf", link: "https://example.com/doc10.pdf" },
         { name: "Marketing_Strategy.docx", link: "https://example.com/doc11.docx" },
