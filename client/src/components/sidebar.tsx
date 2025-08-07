@@ -151,7 +151,7 @@ export default function Sidebar({
       <div className="p-6 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <WissenLogo className="h-8" />
+            <WissenLogo className="h-10" />
           </div>
           <Button
             variant="ghost"
@@ -162,7 +162,6 @@ export default function Sidebar({
             <PanelLeftClose className="h-4 w-4" />
           </Button>
         </div>
-        <h2 className="text-sm font-medium text-gray-600 mt-2">Document Chatbot</h2>
       </div>
 
       {/* Chat History */}
@@ -187,7 +186,7 @@ export default function Sidebar({
             />
           </div>
 
-          <ScrollArea className="h-[calc(100vh-280px)]">
+          <ScrollArea className="h-[calc(100vh-220px)]">
             {filteredSessions.length === 0 ? (
               <div className="text-center text-gray-500 py-12">
                 <History className="mx-auto h-12 w-12 mb-2 opacity-20" />
