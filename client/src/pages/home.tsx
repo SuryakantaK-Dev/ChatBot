@@ -123,7 +123,7 @@ export default function Home() {
           </div>
         ) : (
           // Default layout: Chat aligned with sidebar border
-          <div className="flex-1 flex justify-center items-start bg-gray-50 pt-4 pb-0">
+          <div className="flex-1 flex justify-center items-start bg-gray-50 pt-2 pb-0">
             <div className="w-full max-w-4xl mx-auto px-8">
               <ChatArea
                 sessionId={currentSessionId}

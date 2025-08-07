@@ -152,7 +152,7 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-160px)]">
+    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-120px)]">
       {/* Chat Header - Always show for non-compact */}
       {!isCompact && (
         <div className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
