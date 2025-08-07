@@ -76,7 +76,7 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <User className="h-5 w-5 text-blue-600" />
           <h1 className="text-lg font-semibold text-gray-900">
-            Welcome {username}
+            Welcome {username} to ChatBot
           </h1>
         </div>
         <Button

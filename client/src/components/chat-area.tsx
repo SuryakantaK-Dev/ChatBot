@@ -80,7 +80,7 @@ export default function ChatArea({
   });
 
   useEffect(() => {
-    if (chatHistory && Array.isArray(chatHistory) && chatHistory.length > 0) {
+    if (chatHistory) {
       const historyMessages = chatHistory.map((session: any) => session.message);
       setMessages(historyMessages);
     } else {
