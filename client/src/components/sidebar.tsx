@@ -147,11 +147,35 @@ export default function Sidebar({
 
   return (
     <div className="w-80 bg-white border-r border-border flex flex-col">
-      
+      {/* Logo/Header */}
+      <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <WissenLogo className="h-8" />
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleMinimize}
+            className="p-2"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search..."
+            className="pl-10 h-9 text-sm"
+          />
+        </div>
+      </div>
 
       {/* Chat History */}
       <div className="flex-1 overflow-hidden">
-        <div className="pt-6 px-4 pb-4">
+        <div className="p-4">
 
           
           <div className="flex items-center justify-between mb-4">
