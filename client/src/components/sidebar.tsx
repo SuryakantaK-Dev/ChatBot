@@ -151,7 +151,7 @@ export default function Sidebar({
 
       {/* Chat History */}
       <div className="flex-1 overflow-hidden">
-        <div className="p-4">
+        <div className="pt-6 px-4 pb-4">
 
           
           <div className="flex items-center justify-between mb-4">
