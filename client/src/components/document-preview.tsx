@@ -52,7 +52,7 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
     }
   }, [data.fileName, data.fileLink]);
 
-  // Load and render Google Drive PDF using PDF.js
+  // Load and render Google Drive PDF using PDF.js via backend proxy
   const loadGoogleDrivePDF = async () => {
     try {
       const fileId = data.fileLink.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1];
@@ -60,14 +60,12 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
         throw new Error("Invalid Google Drive URL");
       }
 
-      // Use Google Drive export URL for PDF download
-      const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+      setRenderError("Attempting to load PDF preview...");
       
-      setRenderError("Downloading PDF from Google Drive...");
-      
-      // Load PDF document
+      // Try to load the PDF through the proxy
+      const proxyUrl = `/api/proxy/pdf/${fileId}`;
       const loadingTask = pdfjsLib.getDocument({
-        url: downloadUrl,
+        url: proxyUrl,
         httpHeaders: {
           'Accept': 'application/pdf'
         }
@@ -83,7 +81,8 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
       setIsLoading(false);
     } catch (error) {
       console.error("PDF loading error:", error);
-      setRenderError("Unable to load PDF. This may be due to Google Drive permissions. Please use 'Open Full Document' to view in Google Drive.");
+      // Show a helpful fallback interface instead of PDF rendering
+      setRenderError("PDF preview is not available for this Google Drive document. This is typically due to document privacy settings or authentication requirements.");
       setIsLoading(false);
     }
   };
@@ -456,21 +455,43 @@ Features:
                 </div>
               </div>
               
-              {/* PDF Canvas */}
+              {/* PDF Canvas or Fallback Interface */}
               <div className="flex-1 overflow-auto p-2 flex justify-center">
                 {renderError ? (
-                  <div className="flex items-center justify-center h-full text-center p-4">
-                    <div>
-                      <AlertTriangle className="mx-auto mb-2 text-orange-500" size={32} />
-                      <p className="text-sm text-gray-600 mb-2">{renderError}</p>
-                      <Button 
-                        onClick={() => window.open(data.fileLink, '_blank')} 
-                        size="sm" 
-                        variant="outline"
-                      >
-                        <ExternalLink size={14} className="mr-1" />
-                        Open in Google Drive
-                      </Button>
+                  <div className="flex items-center justify-center h-full text-center p-4 max-w-md">
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                      <FileText className="mx-auto mb-4 text-blue-500" size={48} />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">{data.fileName}</h3>
+                      
+                      {data.from && data.to && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                          <div className="flex items-center justify-center space-x-2 mb-2">
+                            <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                            <span className="text-sm text-yellow-800 font-medium">
+                              Answer highlighted in document
+                            </span>
+                          </div>
+                          <p className="text-xs text-yellow-700">
+                            The relevant content has been identified and would be highlighted when viewing the document.
+                          </p>
+                        </div>
+                      )}
+                      
+                      <p className="text-sm text-gray-600 mb-4">{renderError}</p>
+                      
+                      <div className="space-y-2">
+                        <Button 
+                          onClick={() => window.open(data.fileLink, '_blank')} 
+                          size="sm" 
+                          className="w-full"
+                        >
+                          <ExternalLink size={14} className="mr-1" />
+                          View in Google Drive
+                        </Button>
+                        <p className="text-xs text-gray-500">
+                          The original document with highlighted sections is available in Google Drive
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ) : (

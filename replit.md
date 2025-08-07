@@ -9,8 +9,10 @@ This is a full-stack document chatbot application that allows users to interact 
 ### January 8, 2025
 - **UI Simplification**: Removed documents section from sidebar, keeping only chat history since "View All Documents" option is available in main chat area
 - **Google Drive Integration**: Updated document preview to properly handle Google Drive links with format `https://drive.google.com/file/d/{fileId}/view`
-- **PDF.js Integration**: Implemented PDF.js library for direct PDF rendering and highlighting when Google Drive iframe restrictions apply
+- **PDF.js Integration**: Implemented PDF.js library with backend proxy for direct PDF rendering from Google Drive links
 - **Enhanced Document Preview**: Added PDF canvas rendering with zoom controls, page navigation, and visual highlighting overlays
+- **Smart Fallback System**: Created elegant fallback interface when PDF rendering fails, showing document info and highlighting status
+- **Backend PDF Proxy**: Implemented server-side proxy with multiple Google Drive URL strategies to bypass CORS restrictions
 - **Clean Answer Display**: Removed line number references (Lines 411-414) from answer sections, replaced with "Answer highlighted in document"
 - **Improved UX**: Added proper loading states, timeout handling, and clear error messaging with fallback to Google Drive direct links
 

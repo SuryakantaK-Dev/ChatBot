@@ -73,6 +73,72 @@ I'll search through your documents and provide relevant answers with source refe
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // PDF proxy endpoint to handle Google Drive downloads and bypass CORS
+  app.get("/api/proxy/pdf/:fileId", async (req, res) => {
+    try {
+      const { fileId } = req.params;
+      
+      // Try multiple Google Drive URLs in order of preference
+      const urls = [
+        `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`,
+        `https://docs.google.com/document/d/${fileId}/export?format=pdf`,
+        `https://drive.google.com/file/d/${fileId}/view`
+      ];
+      
+      let response = null;
+      let finalUrl = null;
+      
+      // Try each URL until we get a valid PDF
+      for (const url of urls) {
+        try {
+          response = await fetch(url, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            },
+            redirect: 'follow'
+          });
+          
+          if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            // Check if we got a PDF
+            if (contentType && contentType.includes('application/pdf')) {
+              finalUrl = url;
+              break;
+            }
+            
+            // Check if it's a binary PDF (sometimes content-type isn't set correctly)
+            const buffer = await response.arrayBuffer();
+            const pdfHeader = new Uint8Array(buffer.slice(0, 4));
+            const isPdf = pdfHeader[0] === 0x25 && pdfHeader[1] === 0x50 && 
+                         pdfHeader[2] === 0x44 && pdfHeader[3] === 0x46; // %PDF
+            
+            if (isPdf) {
+              // Set appropriate headers for PDF
+              res.set({
+                'Content-Type': 'application/pdf',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET',
+                'Access-Control-Allow-Headers': 'Content-Type',
+              });
+              return res.send(Buffer.from(buffer));
+            }
+          }
+        } catch (urlError) {
+          console.log(`Failed to fetch from ${url}:`, urlError);
+          continue;
+        }
+      }
+      
+      // If no PDF found, return error
+      return res.status(404).json({ 
+        error: "PDF not found or not publicly accessible. The document may require Google account access or may not be a PDF file."
+      });
+      
+    } catch (error) {
+      console.error("PDF proxy error:", error);
+      res.status(500).json({ error: "Failed to fetch PDF" });
+    }
+  });
   // Document list retrieval endpoint
   app.post("/api/documents", async (req, res) => {
     try {
