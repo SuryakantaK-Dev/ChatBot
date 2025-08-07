@@ -180,6 +180,13 @@ export default function ChatArea({
                             {msg.documentReference.fileName}
                           </span>
                         </div>
+                        {msg.documentReference.from && msg.documentReference.to && (
+                          <div className="mb-2">
+                            <span className="text-xs text-gray-600">
+                              Reference: Lines {msg.documentReference.from}-{msg.documentReference.to}
+                            </span>
+                          </div>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"

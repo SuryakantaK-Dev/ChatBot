@@ -359,7 +359,7 @@ Features:
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-yellow-200 border border-yellow-500 rounded-sm"></div>
               <p className="text-xs text-gray-600">
-                Answer section highlighted
+                Answer highlighted in Lines {data.from}-{data.to}
               </p>
             </div>
           )}
