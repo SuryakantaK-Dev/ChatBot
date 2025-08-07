@@ -74,7 +74,7 @@ export default function Home() {
       {/* Top Header */}
       <div className="bg-white px-3 py-2 flex items-center justify-start relative">
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-4">
           <Button 
             variant="ghost" 
             size="sm" 
