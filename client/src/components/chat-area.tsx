@@ -56,13 +56,21 @@ export default function ChatArea({
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: ({ chatInput, sessionId }: { chatInput: string; sessionId: string }) =>
-      apiRequest('/api/chat', 'POST', { message: chatInput, sessionId }),
+    mutationFn: async ({ chatInput, sessionId }: { chatInput: string; sessionId: string }) => {
+      try {
+        const response = await apiRequest('POST', '/api/chat', { message: chatInput, sessionId });
+        return await response.json();
+      } catch (error) {
+        console.error('Chat API error:', error);
+        throw error;
+      }
+    },
     onSuccess: (aiResponse) => {
       setMessages(prev => [...prev, aiResponse]);
       queryClient.invalidateQueries({ queryKey: ['/api/chat', sessionId] });
     },
     onError: (error: any) => {
+      console.error('Send message error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to send message",
