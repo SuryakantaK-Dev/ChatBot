@@ -214,12 +214,10 @@ export default function Sidebar({
       </div>
 
       {/* Chats Section */}
-      <div className="px-6 py-4">
+      <div className="px-6 py-4 border-b border-gray-100">
         <h3 className="text-sm font-medium text-gray-900 mb-3">Chats</h3>
-      </div>
-
-      {/* Navigation Menu */}
-      <div className="flex-1 px-6">
+        
+        {/* Navigation Menu */}
         <nav className="space-y-2">
           <div className="text-sm font-semibold text-gray-900 py-2 bg-blue-50 px-3 rounded-lg">
             Client Engagement Overview
@@ -237,6 +235,99 @@ export default function Sidebar({
             Feedback and Adjustments Log
           </div>
         </nav>
+      </div>
+
+      {/* Chat History */}
+      <div className="flex-1 overflow-hidden px-6 py-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-gray-900">Chat Sessions</h3>
+          <Button variant="ghost" size="sm">
+            <Trash2 className="mr-1 h-3 w-3" />
+            Clear All
+          </Button>
+        </div>
+
+        <ScrollArea className="h-[calc(100vh-400px)]">
+          {filteredSessions.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">
+              <History className="mx-auto h-8 w-8 mb-2 opacity-20" />
+              <p className="text-xs">
+                {searchQuery ? 'No sessions match your search' : 'No chat history yet'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {paginatedSessions.map((session) => (
+                <div
+                  key={session.id}
+                  className={`group p-3 rounded-lg cursor-pointer transition-all duration-200 ${
+                    currentSessionId === session.id
+                      ? 'bg-blue-100 border-2 border-blue-500'
+                      : 'border border-gray-200 hover:border-blue-500 hover:bg-blue-50'
+                  }`}
+                  onClick={() => onSessionChange(session.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {session.previewText}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formatSessionTime(session.id)} • {session.messageCount} messages
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Badge variant="secondary" className="text-xs">
+                        Chat
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 h-6 w-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteSessionMutation.mutate(session.id);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+
+        {/* History Pagination */}
+        {filteredSessions.length > 0 && totalHistoryPages > 1 && (
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+            <div className="text-xs text-gray-500">
+              Showing {((historyPage - 1) * itemsPerPage) + 1}-{Math.min(historyPage * itemsPerPage, filteredSessions.length)} of {filteredSessions.length}
+            </div>
+            <div className="flex space-x-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setHistoryPage(prev => Math.max(prev - 1, 1))}
+                disabled={historyPage === 1}
+              >
+                <ChevronLeft className="h-3 w-3" />
+              </Button>
+              <span className="text-xs px-2 py-1 text-gray-600">
+                {historyPage} / {totalHistoryPages}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setHistoryPage(prev => Math.min(prev + 1, totalHistoryPages))}
+                disabled={historyPage === totalHistoryPages}
+              >
+                <ChevronRight className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* New Chat Button */}
