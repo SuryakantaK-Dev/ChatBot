@@ -72,7 +72,7 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Top Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <div className="bg-white px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
           <WissenLogo className="h-8" />
         </div>
@@ -134,32 +134,27 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          // Default layout: Clean centered layout matching diagram
+          // Default layout: Clean centered layout with flexible content
           <div className="flex-1 flex flex-col bg-white">
-            <div className="flex-1 flex items-center justify-center">
-              <div className="w-full max-w-4xl mx-auto px-8 text-center">
-                <div className="mb-8">
-                  <div className="w-16 h-16 mx-auto mb-6 bg-blue-600 rounded-full flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center min-h-0 py-8">
+              <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div className="space-y-8">
+                  <div className="w-16 h-16 mx-auto bg-blue-600 rounded-full flex items-center justify-center">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z" />
                     </svg>
                   </div>
-                  <h2 className="text-xl text-gray-700 mb-8 font-medium">Hi there, what can I help you with today?</h2>
                   
-                  <div className="space-y-3 max-w-lg w-full mx-auto">
-                    <button
-                      className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
-                    >
+                  <h2 className="text-xl text-gray-700 font-medium">Hi there, what can I help you with today?</h2>
+                  
+                  <div className="grid gap-3 max-w-2xl mx-auto sm:grid-cols-1 md:grid-cols-3">
+                    <button className="p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700 text-sm">
                       What's the start date?
                     </button>
-                    <button
-                      className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
-                    >
+                    <button className="p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700 text-sm">
                       Summarize the document
                     </button>
-                    <button
-                      className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
-                    >
+                    <button className="p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700 text-sm">
                       Who are the service providers?
                     </button>
                   </div>
@@ -168,7 +163,7 @@ export default function Home() {
             </div>
             
             {/* Bottom Message Input */}
-            <div className="border-t border-gray-200 p-6 bg-white">
+            <div className="p-4 sm:p-6 bg-white">
               <div className="max-w-4xl mx-auto">
                 <div className="relative">
                   <input
