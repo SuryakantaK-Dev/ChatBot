@@ -136,9 +136,9 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col h-full">
       {/* Chat Header */}
-      <div className={`bg-white border-b border-border ${isCompact ? 'px-4 py-3' : 'px-6 py-4'}`}>
+      <div className={`bg-white border-b border-border ${isCompact ? 'px-4 py-3' : 'px-6 py-4'} flex-shrink-0`}>
         <div className="flex items-center justify-between">
           <div>
             <h1 className={`font-semibold text-gray-900 ${isCompact ? 'text-base' : 'text-lg'}`}>
@@ -163,7 +163,7 @@ export default function ChatArea({
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-h-0">
         <ScrollArea className={`h-full ${isCompact ? 'p-4' : 'p-6'}`}>
           <div className="space-y-6">
             {messages.map((msg, index) => (
