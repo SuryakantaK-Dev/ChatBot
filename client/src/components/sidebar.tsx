@@ -216,25 +216,6 @@ export default function Sidebar({
       {/* Chats Section */}
       <div className="px-6 py-4 border-b border-gray-100">
         <h3 className="text-sm font-medium text-gray-900 mb-3">Chats</h3>
-        
-        {/* Navigation Menu */}
-        <nav className="space-y-2">
-          <div className="text-sm font-semibold text-gray-900 py-2 bg-blue-50 px-3 rounded-lg">
-            Client Engagement Overview
-          </div>
-          <div className="text-sm text-gray-600 py-2 px-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-            Project Milestones
-          </div>
-          <div className="text-sm text-gray-600 py-2 px-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-            Team Collab Insights
-          </div>
-          <div className="text-sm text-gray-600 py-2 px-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-            Weekly Progress Summary
-          </div>
-          <div className="text-sm text-gray-600 py-2 px-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-            Feedback and Adjustments Log
-          </div>
-        </nav>
       </div>
 
       {/* Chat History */}
