@@ -1,0 +1,112 @@
+Requirement: Document Chatbot UI (Python-Based, Reference Figma Screens)
+Objective:
+Design and implement an interactive chatbot UI for document-based Q&A, closely following the provided Figma references. The UI should allow users to:
+
+View a list of all available documents (PDF, DOCX, XLSX, CSV, etc.)
+
+Chat with an AI agent, referencing the ingested documents
+
+View chat history by session
+
+Preview document answers with highlights
+
+Easily close document previews
+
+1. Document List Retrieval
+API Endpoint:
+POST http://localhost:5678/webhook/file-load-history
+
+Expected Output:
+Returns a JSON array of objects:
+
+json
+Copy
+Edit
+[
+  {"link": "https://drive.google.com/u/3/uc?id=1RKUniO9hI4611Q0G7_trPIMV3RSAAiLD&export=download&confirm=t&authuser=0", "name": "US_TERMS_COND-0056.pdf"},
+  {"link": "...", "name": "..."}
+]
+UI Expectation:
+
+Display all documents in a left sidebar as clickable items with file-type icons.
+
+On click, allow document preview (embedded for PDFs, download or browser preview for DOCX/XLSX/CSV).
+
+2. Chat Functionality
+Chat API:
+POST http://localhost:5678/webhook/chatbot-api?chatInput={question}&sessionId={session-id}
+
+Sample Output:
+
+json
+Copy
+Edit
+{
+  "output": "```json\n{\n  \"answer\": \"If a supplier fails to deliver goods on time, Apple has two options: ...\",\n  \"FileID\": \"1RKUniO9hI4611Q0G7_trPIMV3RSAAiLD\",\n  \"FileName\": \"US_TERMS_COND-0056.pdf\",\n  \"FileLink\": \"https://drive.google.com/file/d/1RKUniO9hI4611Q0G7_trPIMV3RSAAiLD/view\",\n  \"From\": 411,\n  \"To\": 414\n}\n```"
+}
+UI Expectation:
+
+Display chat bubbles for both user and AI responses.
+
+If a document reference is returned, show a hyperlink to preview the document.
+
+When the document is opened from chat, highlight the answer (lines "From" to "To") in green in the preview.
+
+Provide a close option for the preview.
+
+3. Chat History
+Database:
+PostgreSQL table: n8n_chat_histories
+
+Columns: id, session_id, message
+
+Each message includes type (human/ai) and content (Q/A).
+
+Retrieval:
+SELECT * FROM n8n_chat_histories
+
+UI Expectation:
+
+List past chat sessions in the sidebar.
+
+On session click, load and display the corresponding chat history in the main window.
+
+4. RAG and Web Search
+If the answer is found via RAG (vector search), display the referenced document and highlight the answer as described above.
+
+If not, fallback to web search and show external search results, clearly labeled.
+
+5. UI/UX & Tech
+Figma References:
+
+https://www.figma.com/proto/e5b22r4GWss0SuRhplqX7W/09_Trafigura-Document-Extraction--S-?page-id=1%3A7&node-id=2001-526&p=f&viewport=-1114%2C-2462%2C0.16&t=l1myWWOFngge8A7Y-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=24%3A603
+
+https://www.figma.com/proto/e5b22r4GWss0SuRhplqX7W/09_Trafigura-Document-Extraction--S-?page-id=1%3A7&node-id=2002-589&p=f&viewport=-1114%2C-2462%2C0.16&t=l1myWWOFngge8A7Y-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=24%3A603
+
+https://www.figma.com/proto/e5b22r4GWss0SuRhplqX7W/09_Trafigura-Document-Extraction--S-?page-id=1%3A7&node-id=2002-777&p=f&viewport=-1114%2C-2462%2C0.16&t=l1myWWOFngge8A7Y-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=24%3A603
+
+
+Stack:
+
+Preferred: Python (Flask/FastAPI backend, React frontend for best experience)
+
+Must provide a working preview before final delivery.
+
+Ensure feature parity with Figma screens and functional accuracy per above.
+
+Features:
+
+All document APIs use POST method.
+
+Support embedded PDF preview (PDF.js or equivalent).
+
+DOCX/XLSX preview and download options.
+
+All answers highlighted in document preview when relevant.
+
+Chat session/history navigation.
+
+6. Validation
+Ask for clarification if any requirement is unclear.
+
+Show a preview of the UI before final handoff.
