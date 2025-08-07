@@ -71,23 +71,27 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
-      {/* Header with welcome message */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <User className="h-5 w-5 text-blue-600" />
-          <h1 className="text-lg font-semibold text-gray-900">
-            Welcome {username} to ChatBot
+      {/* Top Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-semibold text-gray-900">
+            Client Engagement Overview
           </h1>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleLogout}
-          className="flex items-center gap-2"
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" className="text-blue-600 hover:text-blue-700">
+            View All Documents
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            className="flex items-center gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">

@@ -172,14 +172,34 @@ export default function ChatArea({
         <ScrollArea className="h-full">
           <div className="space-y-3 p-4">
             {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
-              <div className="text-center py-16">
-                <div className="text-gray-400 mb-6">
-                  <div className="w-16 h-16 mx-auto mb-4 border-2 border-gray-300 rounded-lg flex items-center justify-center">
-                    <Bot className="w-8 h-8 text-gray-400" />
+              <div className="flex flex-col items-center justify-center h-full py-16">
+                <div className="mb-8">
+                  <div className="w-16 h-16 mx-auto mb-6 bg-blue-600 rounded-full flex items-center justify-center">
+                    <Bot className="w-8 h-8 text-white" />
                   </div>
                 </div>
-                <h2 className="text-xl text-gray-600 mb-2">Welcome to the Document Extraction Chatbot</h2>
-                <p className="text-gray-500">Ask me anything about your documents!</p>
+                <h2 className="text-xl text-gray-700 mb-8 font-medium">Hi there, what can I help you with today?</h2>
+                
+                <div className="space-y-3 max-w-lg w-full">
+                  <button
+                    onClick={() => setMessage("What's the start date?")}
+                    className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
+                  >
+                    What's the start date?
+                  </button>
+                  <button
+                    onClick={() => setMessage("Summarize the document")}
+                    className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
+                  >
+                    Summarize the document
+                  </button>
+                  <button
+                    onClick={() => setMessage("Who of are the service providers?")}
+                    className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
+                  >
+                    Who of are the service providers?
+                  </button>
+                </div>
               </div>
             )}
             
@@ -261,31 +281,26 @@ export default function ChatArea({
       </div>
 
       {/* Chat Input - Always fixed at bottom */}
-      <div className="p-3 flex-shrink-0 bg-white sticky bottom-0">
-        <div className={`flex items-center space-x-2 ${isCompact ? 'max-w-none' : 'max-w-4xl mx-auto'}`}>
+      <div className="p-6 flex-shrink-0 bg-white sticky bottom-0">
+        <div className={`flex items-center space-x-3 ${isCompact ? 'max-w-none' : 'max-w-4xl mx-auto'}`}>
           <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
               value={message}
               onChange={handleTextareaChange}
               onKeyPress={handleKeyPress}
-              placeholder={isCompact ? "Type here..." : "Type your message here..."}
-              className={`resize-none h-10 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg px-3 py-2 min-h-10 max-h-10 ${isCompact ? 'pr-3 text-sm' : 'pr-32'}`}
+              placeholder="Type your message here"
+              className="resize-none h-12 overflow-y-auto border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 min-h-12 max-h-12 text-sm shadow-sm"
               rows={1}
             />
-            {!isCompact && (
-              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap">
-                Press Enter to send
-              </span>
-            )}
           </div>
           <Button
             size="sm"
             onClick={handleSendMessage}
             disabled={!message.trim() || sendMessageMutation.isPending}
-            className={`rounded-lg p-0 flex-shrink-0 ${isCompact ? 'h-10 w-10' : 'h-10 w-12'}`}
+            className="rounded-full p-0 flex-shrink-0 h-12 w-12 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300"
           >
-            <Send size={isCompact ? 16 : 18} />
+            <Send size={20} />
           </Button>
         </div>
       </div>
