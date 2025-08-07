@@ -73,11 +73,7 @@ export default function Home() {
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Top Header */}
       <div className="bg-white px-3 py-2 flex items-center justify-between relative">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-medium text-gray-900">
-            Client Engagement Overview
-          </h1>
-        </div>
+        
         <div className="flex items-center gap-2">
           <Button 
             variant="ghost" 
