@@ -124,9 +124,9 @@ export default function Sidebar({
 
   if (isMinimized) {
     return (
-      <div className="w-16 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-16 bg-white flex flex-col">
         {/* Minimized Header */}
-        <div className="p-3 border-b border-gray-200">
+        <div className="p-3">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -164,7 +164,7 @@ export default function Sidebar({
         </div>
 
         {/* Minimized Logo & Developer Info */}
-        <div className="mt-auto p-2 border-t border-gray-200">
+        <div className="mt-auto p-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="text-center">
@@ -186,9 +186,9 @@ export default function Sidebar({
   }
 
   return (
-    <div className="w-80 bg-white border-r border-border flex flex-col">
+    <div className="w-80 bg-white flex flex-col">
       {/* Logo/Header */}
-      <div className="p-6 border-b border-border">
+      <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
             <WissenLogo className="h-8" />
