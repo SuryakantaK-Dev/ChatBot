@@ -72,7 +72,7 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Top Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-center relative">
+      <div className="bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-center relative" style={{ borderBottomWidth: '1px' }}>
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-medium text-gray-900">
             Client Engagement Overview
