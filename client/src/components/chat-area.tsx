@@ -75,14 +75,19 @@ export default function ChatArea({
         timestamp: Date.now()
       }]);
     }
+    // Ensure scroll to bottom after loading
+    setTimeout(scrollToBottom, 200);
   }, [sessionId, chatHistory]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, sendMessageMutation.isPending]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Use timeout to ensure DOM is updated before scrolling
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   const handleSendMessage = () => {
@@ -97,10 +102,11 @@ export default function ChatArea({
     setMessages(prev => [...prev, userMessage]);
     setMessage("");
     
-    // Reset textarea height
+    // Focus back to textarea and scroll to bottom
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.focus();
     }
+    scrollToBottom();
 
     sendMessageMutation.mutate({
       chatInput: message,
