@@ -167,26 +167,7 @@ export default function Sidebar({
       {/* Chat History */}
       <div className="flex-1 overflow-hidden">
         <div className="p-4">
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Chats</h3>
-            <div className="space-y-2">
-              <div className="text-sm text-blue-600 cursor-pointer hover:bg-blue-50 p-2 rounded">
-                Client Engagement Overview
-              </div>
-              <div className="text-sm text-gray-600 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                Project Milestones
-              </div>
-              <div className="text-sm text-gray-600 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                Team Collaboration Insights
-              </div>
-              <div className="text-sm text-gray-600 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                Weekly Progress Summary
-              </div>
-              <div className="text-sm text-gray-600 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                Feedback and Adjustments Log
-              </div>
-            </div>
-          </div>
+
           
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-900">Chat Sessions</h3>
