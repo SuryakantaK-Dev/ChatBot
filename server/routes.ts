@@ -80,9 +80,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Try multiple Google Drive URLs in order of preference
       const urls = [
-        `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`,
-        `https://docs.google.com/document/d/${fileId}/export?format=pdf`,
-        `https://drive.google.com/file/d/${fileId}/view`
+        `https://drive.google.com/uc?export=download&id=${fileId}`,
+        `https://drive.usercontent.google.com/download?id=${fileId}&export=download`,
+        `https://docs.google.com/document/d/${fileId}/export?format=pdf`
       ];
       
       let response = null;
@@ -93,21 +93,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           response = await fetch(url, {
             headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             },
             redirect: 'follow'
           });
           
           if (response.ok) {
-            const contentType = response.headers.get('content-type');
-            // Check if we got a PDF
-            if (contentType && contentType.includes('application/pdf')) {
-              finalUrl = url;
-              break;
-            }
-            
-            // Check if it's a binary PDF (sometimes content-type isn't set correctly)
             const buffer = await response.arrayBuffer();
+            
+            // Check if it's a binary PDF by examining the header
             const pdfHeader = new Uint8Array(buffer.slice(0, 4));
             const isPdf = pdfHeader[0] === 0x25 && pdfHeader[1] === 0x50 && 
                          pdfHeader[2] === 0x44 && pdfHeader[3] === 0x46; // %PDF
@@ -119,6 +113,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET',
                 'Access-Control-Allow-Headers': 'Content-Type',
+                'Content-Length': buffer.byteLength.toString(),
+                'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
               });
               return res.send(Buffer.from(buffer));
             }

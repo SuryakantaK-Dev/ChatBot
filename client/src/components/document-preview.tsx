@@ -30,7 +30,7 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
 
   useEffect(() => {
     // Configure PDF.js worker to match package version (5.4.54)
-    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.54/build/pdf.worker.min.mjs`;
     
     // Reset states
     setIsLoading(true);
@@ -64,20 +64,25 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
       
       // Try to load the PDF through the proxy
       const proxyUrl = `/api/proxy/pdf/${fileId}`;
+      console.log('Loading PDF from:', proxyUrl);
+      
       const loadingTask = pdfjsLib.getDocument({
         url: proxyUrl,
         httpHeaders: {
           'Accept': 'application/pdf'
-        }
+        },
+        verbosity: 1 // Enable PDF.js logging for debugging
       });
 
       const pdf = await loadingTask.promise;
+      console.log('PDF loaded successfully! Pages:', pdf.numPages);
       setPdfDoc(pdf);
       setTotalPages(pdf.numPages);
       setRenderError("");
       
       // Render first page
       await renderPage(pdf, 1);
+      console.log('PDF rendered successfully!');
       setIsLoading(false);
     } catch (error) {
       console.error("PDF loading error:", error);
