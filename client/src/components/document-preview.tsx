@@ -331,37 +331,37 @@ Features:
 
   return (
     <div className="flex-1 bg-white border-l border-border">
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <h3 className="text-lg font-semibold text-gray-900">Document Preview</h3>
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-between p-3 border-b border-border">
+        <h3 className="text-sm font-semibold text-gray-900">Document Preview</h3>
+        <div className="flex items-center space-x-1">
           {(!isPdf || (isPdf && !pdfDoc)) && (
             <>
-              <Button variant="ghost" size="sm" onClick={handleZoomOut} disabled={zoomLevel <= 50}>
-                <ZoomOut className="h-4 w-4" />
+              <Button variant="ghost" size="sm" onClick={handleZoomOut} disabled={zoomLevel <= 50} className="h-7 w-7 p-0">
+                <ZoomOut className="h-3 w-3" />
               </Button>
-              <span className="text-sm text-gray-600">{zoomLevel}%</span>
-              <Button variant="ghost" size="sm" onClick={handleZoomIn} disabled={zoomLevel >= 200}>
-                <ZoomIn className="h-4 w-4" />
+              <span className="text-xs text-gray-600 min-w-[35px] text-center">{zoomLevel}%</span>
+              <Button variant="ghost" size="sm" onClick={handleZoomIn} disabled={zoomLevel >= 200} className="h-7 w-7 p-0">
+                <ZoomIn className="h-3 w-3" />
               </Button>
             </>
           )}
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
+          <Button variant="ghost" size="sm" onClick={onClose} className="h-7 w-7 p-0">
+            <X className="h-3 w-3" />
           </Button>
         </div>
       </div>
       
-      <div className="p-4">
-        <div className="bg-gray-100 rounded-lg p-3 mb-4">
-          <div className="flex items-center space-x-2 mb-2">
-            <FileText className="text-red-500" size={16} />
-            <span className="text-sm font-medium text-gray-900">{data.fileName}</span>
+      <div className="p-3">
+        <div className="bg-gray-100 rounded-lg p-2 mb-3">
+          <div className="flex items-center space-x-2 mb-1">
+            <FileText className="text-red-500" size={14} />
+            <span className="text-xs font-medium text-gray-900">{data.fileName}</span>
           </div>
           {data.from && data.to && (
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-yellow-200 border border-yellow-500 rounded-sm"></div>
+              <div className="w-2 h-2 bg-yellow-200 border border-yellow-500 rounded-sm"></div>
               <p className="text-xs text-gray-600">
-                Answer highlighted in Lines {data.from}-{data.to}
+                Lines {data.from}-{data.to}
               </p>
             </div>
           )}
@@ -377,7 +377,7 @@ Features:
               </div>
             </div>
           ) : isPdf && isGoogleDriveDocument(data.fileLink) && pdfDoc ? (
-            <div className="h-[600px] relative bg-gray-50 flex flex-col">
+            <div className="h-[400px] relative bg-gray-50 flex flex-col">
               {/* PDF Navigation Header */}
               <div className="flex items-center justify-between bg-gray-100 px-3 py-2 border-b">
                 <div className="flex items-center space-x-2">

@@ -249,29 +249,27 @@ export default function ChatArea({
       </div>
 
       {/* Chat Input */}
-      <div className={`bg-white border-t border-border ${isCompact ? 'p-4' : 'p-6'} flex-shrink-0`}>
-        <div className="flex items-center space-x-4">
+      <div className={`bg-white border-t border-border ${isCompact ? 'p-3' : 'p-4'} flex-shrink-0`}>
+        <div className="flex items-center space-x-3">
           <div className="flex-1">
-            <div className="relative">
-              <Textarea
-                ref={textareaRef}
-                value={message}
-                onChange={handleTextareaChange}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message here..."
-                className="resize-none pr-12 h-11 overflow-y-auto"
-                rows={1}
-              />
-              <Button
-                size="sm"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                onClick={handleSendMessage}
-                disabled={!message.trim() || sendMessageMutation.isPending}
-              >
-                <Send size={16} />
-              </Button>
-            </div>
+            <Textarea
+              ref={textareaRef}
+              value={message}
+              onChange={handleTextareaChange}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your message here..."
+              className="resize-none h-10 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary"
+              rows={1}
+            />
           </div>
+          <Button
+            size="sm"
+            onClick={handleSendMessage}
+            disabled={!message.trim() || sendMessageMutation.isPending}
+            className="h-10 px-4"
+          >
+            <Send size={16} />
+          </Button>
         </div>
         <p className="text-xs text-gray-500 mt-2">
           Press Enter to send, Shift+Enter for new line

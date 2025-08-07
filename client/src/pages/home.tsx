@@ -105,7 +105,7 @@ export default function Home() {
         {isDocumentPreviewOpen && documentPreviewData ? (
           // Layout when document is open: Document in middle, Chat on right
           <div className="flex-1 flex">
-            <div className="flex-1 border-r border-gray-200">
+            <div className="flex-1 border-r border-gray-200 max-h-screen">
               <DocumentPreview
                 data={documentPreviewData}
                 onClose={handleCloseDocumentPreview}
