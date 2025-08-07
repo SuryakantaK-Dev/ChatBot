@@ -23,13 +23,15 @@ interface ChatAreaProps {
   onToggleSidebar: () => void;
   onViewAllDocs: () => void;
   onDocumentPreview: (data: DocumentPreviewData) => void;
+  isCompact?: boolean;
 }
 
 export default function ChatArea({ 
   sessionId, 
   onToggleSidebar, 
   onViewAllDocs,
-  onDocumentPreview 
+  onDocumentPreview,
+  isCompact = false
 }: ChatAreaProps) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -134,27 +136,33 @@ export default function ChatArea({
   return (
     <div className="flex-1 flex flex-col">
       {/* Chat Header */}
-      <div className="bg-white border-b border-border px-6 py-4">
+      <div className={`bg-white border-b border-border ${isCompact ? 'px-4 py-3' : 'px-6 py-4'}`}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">Document RAG + Web Search</h1>
-            <p className="text-sm text-gray-600">Intelligent document analysis with web-enhanced research capabilities</p>
+            <h1 className={`font-semibold text-gray-900 ${isCompact ? 'text-base' : 'text-lg'}`}>
+              {isCompact ? 'Chat' : 'Document RAG + Web Search'}
+            </h1>
+            {!isCompact && (
+              <p className="text-sm text-gray-600">Intelligent document analysis with web-enhanced research capabilities</p>
+            )}
           </div>
-          <div className="flex items-center space-x-3">
+          <div className={`flex items-center ${isCompact ? 'space-x-2' : 'space-x-3'}`}>
             <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
               <Menu className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={onViewAllDocs}>
-              <FolderOpen className="mr-2 h-4 w-4" />
-              View All Documents
-            </Button>
+            {!isCompact && (
+              <Button variant="ghost" size="sm" onClick={onViewAllDocs}>
+                <FolderOpen className="mr-2 h-4 w-4" />
+                View All Documents
+              </Button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full p-6">
+        <ScrollArea className={`h-full ${isCompact ? 'p-4' : 'p-6'}`}>
           <div className="space-y-6">
             {messages.map((msg, index) => (
               <div key={index} className={`flex items-start space-x-3 ${msg.type === 'human' ? 'justify-end' : ''}`}>
@@ -239,7 +247,7 @@ export default function ChatArea({
       </div>
 
       {/* Chat Input */}
-      <div className="bg-white border-t border-border p-6">
+      <div className={`bg-white border-t border-border ${isCompact ? 'p-4' : 'p-6'}`}>
         <div className="flex items-end space-x-4">
           <div className="flex-1">
             <div className="relative">

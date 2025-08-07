@@ -101,23 +101,40 @@ export default function Home() {
           onDocumentPreview={handleDocumentPreview}
         />
         
-        <div className="flex-1 flex relative">
-        <ChatArea
-          sessionId={currentSessionId}
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-          onViewAllDocs={() => setIsAllDocsModalOpen(true)}
-          onDocumentPreview={handleDocumentPreview}
-        />
-        
-        {isDocumentPreviewOpen && documentPreviewData && (
-          <div className="absolute top-0 right-0 h-full z-10 shadow-2xl">
-            <DocumentPreview
-              data={documentPreviewData}
-              onClose={handleCloseDocumentPreview}
-            />
+        {/* Dynamic Layout Based on Document Preview State */}
+        {isDocumentPreviewOpen && documentPreviewData ? (
+          // Layout when document is open: Document in middle, Chat on right
+          <div className="flex-1 flex">
+            <div className="flex-1 border-r border-gray-200">
+              <DocumentPreview
+                data={documentPreviewData}
+                onClose={handleCloseDocumentPreview}
+              />
+            </div>
+            <div className="w-2/5">
+              <ChatArea
+                sessionId={currentSessionId}
+                onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                onViewAllDocs={() => setIsAllDocsModalOpen(true)}
+                onDocumentPreview={handleDocumentPreview}
+                isCompact={true}
+              />
+            </div>
+          </div>
+        ) : (
+          // Default layout: Chat centered in middle
+          <div className="flex-1 flex justify-center">
+            <div className="w-full max-w-6xl">
+              <ChatArea
+                sessionId={currentSessionId}
+                onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                onViewAllDocs={() => setIsAllDocsModalOpen(true)}
+                onDocumentPreview={handleDocumentPreview}
+                isCompact={false}
+              />
+            </div>
           </div>
         )}
-        </div>
       </div>
 
       <DocumentListModal
