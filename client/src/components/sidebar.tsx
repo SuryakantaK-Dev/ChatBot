@@ -285,7 +285,7 @@ export default function Sidebar({
       <div className="px-2 py-1 border-t border-gray-200 bg-gray-50">
         <div className="text-center text-xs text-gray-500">
           <span>By </span>
-          <span className="font-medium text-gray-700">S. Karan</span>
+          <span className="font-medium text-gray-700">Suryakanta Karan</span>
           <span> | </span>
           <span className="text-blue-600">Wissen</span>
         </div>
