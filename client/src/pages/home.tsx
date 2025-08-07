@@ -70,7 +70,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden" style={{ paddingBottom: '64px' }}>
+    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       {/* Header with welcome message */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">

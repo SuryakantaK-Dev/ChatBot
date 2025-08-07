@@ -152,10 +152,10 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-160px)]" style={{ paddingBottom: '64px' }}>
-      {/* Chat Header - Always show for non-compact */}
+    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-160px)]">
+      {/* Chat Header with integrated input - Always show for non-compact */}
       {!isCompact && (
-        <div className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
+        <div className="border-b border-gray-200 px-6 py-4 flex-shrink-0 space-y-4">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-semibold text-gray-900">Client Engagement Overview</h1>
             <div className="flex items-center space-x-3">
@@ -169,11 +169,39 @@ export default function ChatArea({
               </Button>
             </div>
           </div>
+          
+          {/* Chat Input within header */}
+          <div className="flex items-center space-x-3">
+            <div className="flex-1 relative">
+              <Textarea
+                ref={textareaRef}
+                value={message}
+                onChange={handleTextareaChange}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message here..."
+                className="resize-none border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-2 pr-40 overflow-hidden"
+                style={{ height: '40px', minHeight: '40px', maxHeight: '40px', lineHeight: '18px' }}
+                rows={1}
+              />
+              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap select-none">
+                Press Enter to send, Shift+Enter for new line
+              </span>
+            </div>
+            <Button
+              size="sm"
+              onClick={handleSendMessage}
+              disabled={!message.trim() || sendMessageMutation.isPending}
+              className="rounded-xl p-0 flex-shrink-0"
+              style={{ height: '40px', width: '40px', minHeight: '40px', minWidth: '40px' }}
+            >
+              <Send size={16} />
+            </Button>
+          </div>
         </div>
       )}
 
       {isCompact && (
-        <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
+        <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0 space-y-3">
           <div className="flex items-center justify-between">
             <h1 className="text-base font-semibold text-gray-900">Chat</h1>
             <div className="flex items-center space-x-2">
@@ -181,6 +209,34 @@ export default function ChatArea({
                 <Menu className="h-4 w-4" />
               </Button>
             </div>
+          </div>
+          
+          {/* Chat Input for compact mode */}
+          <div className="flex items-center space-x-2">
+            <div className="flex-1 relative">
+              <Textarea
+                ref={textareaRef}
+                value={message}
+                onChange={handleTextareaChange}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message here..."
+                className="resize-none border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg px-3 py-2 pr-32 overflow-hidden text-sm"
+                style={{ height: '36px', minHeight: '36px', maxHeight: '36px', lineHeight: '16px' }}
+                rows={1}
+              />
+              <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap select-none">
+                Enter to send
+              </span>
+            </div>
+            <Button
+              size="sm"
+              onClick={handleSendMessage}
+              disabled={!message.trim() || sendMessageMutation.isPending}
+              className="rounded-lg p-0 flex-shrink-0"
+              style={{ height: '36px', width: '36px', minHeight: '36px', minWidth: '36px' }}
+            >
+              <Send size={14} />
+            </Button>
           </div>
         </div>
       )}
@@ -298,37 +354,7 @@ export default function ChatArea({
         </ScrollArea>
       </div>
 
-      {/* Chat Input - Fixed at bottom with reduced height */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white z-50" style={{ height: '64px', minHeight: '64px', maxHeight: '64px' }}>
-        <div className="flex items-center justify-center h-full px-4">
-          <div className="flex items-center space-x-3 w-full max-w-4xl">
-            <div className="flex-1 relative">
-              <Textarea
-                ref={textareaRef}
-                value={message}
-                onChange={handleTextareaChange}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message here..."
-                className="resize-none border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-2 pr-40 overflow-hidden"
-                style={{ height: '40px', minHeight: '40px', maxHeight: '40px', lineHeight: '18px' }}
-                rows={1}
-              />
-              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap select-none">
-                Press Enter to send, Shift+Enter for new line
-              </span>
-            </div>
-            <Button
-              size="sm"
-              onClick={handleSendMessage}
-              disabled={!message.trim() || sendMessageMutation.isPending}
-              className="rounded-xl p-0 flex-shrink-0"
-              style={{ height: '40px', width: '40px', minHeight: '40px', minWidth: '40px' }}
-            >
-              <Send size={16} />
-            </Button>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 }
