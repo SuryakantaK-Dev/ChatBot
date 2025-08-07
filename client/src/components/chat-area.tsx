@@ -153,25 +153,7 @@ export default function ChatArea({
 
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-200px)]">
-      {/* Chat Header - Always show for non-compact */}
-      {!isCompact && (
-        <div className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900">Client Engagement Overview</h1>
-            <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
-                <Menu className="h-4 w-4 mr-2" />
-                Menu
-              </Button>
-              <Button variant="ghost" size="sm" onClick={onViewAllDocs}>
-                <FolderOpen className="mr-2 h-4 w-4" />
-                View All Documents
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* Only show header in compact mode */}
       {isCompact && (
         <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -190,34 +172,14 @@ export default function ChatArea({
         <ScrollArea className="h-full">
           <div className="space-y-4 p-6">
             {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
-              <div className="text-center py-8">
-                <div className="text-gray-500 mb-6">
-                  <Bot className="w-12 h-12 mx-auto mb-2 text-primary" />
+              <div className="text-center py-16">
+                <div className="text-gray-400 mb-6">
+                  <div className="w-16 h-16 mx-auto mb-4 border-2 border-gray-300 rounded-lg flex items-center justify-center">
+                    <Bot className="w-8 h-8 text-gray-400" />
+                  </div>
                 </div>
-                <p className="text-gray-600 mb-4">Welcome to the Document Extraction Chatbot</p>
-                <p className="text-sm text-gray-500 mb-6">Ask me anything about your documents!</p>
-                
-                <div className="space-y-3 max-w-md mx-auto">
-                  <p className="text-sm font-medium text-gray-700 mb-3">Try these sample questions:</p>
-                  <button
-                    onClick={() => setMessage("What is the rate of interest for the Company XYZ?")}
-                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                  >
-                    💰 "What is the rate of interest for the Company XYZ?"
-                  </button>
-                  <button
-                    onClick={() => setMessage("Show me the ROI of Company XYZ")}
-                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                  >
-                    📊 "Show me the ROI of Company XYZ"
-                  </button>
-                  <button
-                    onClick={() => setMessage("Can you summarize the key financial metrics?")}
-                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                  >
-                    📋 "Can you summarize the key financial metrics?"
-                  </button>
-                </div>
+                <h2 className="text-xl text-gray-600 mb-2">Welcome to the Document Extraction Chatbot</h2>
+                <p className="text-gray-500">Ask me anything about your documents!</p>
               </div>
             )}
             
