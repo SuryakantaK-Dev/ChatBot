@@ -186,31 +186,19 @@ export default function Sidebar({
   }
 
   return (
-    <div className="w-80 bg-white flex flex-col">
-      {/* Logo/Header */}
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <WissenLogo className="h-8" />
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost" 
-              size="sm"
-              onClick={onNewChat}
-              className="p-2"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onToggleMinimize}
-              className="p-2"
-            >
-              <PanelLeftClose className="h-4 w-4" />
-            </Button>
-          </div>
+    <div className="w-80 bg-white flex flex-col border-r border-gray-100">
+      {/* Logo and Search */}
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between mb-4">
+          <WissenLogo className="h-8" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleMinimize}
+            className="p-1"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
         </div>
         
         {/* Search Bar */}
@@ -220,122 +208,47 @@ export default function Sidebar({
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 rounded-full border-gray-300 bg-gray-50 focus:bg-white"
+            className="pl-10 rounded-lg border-gray-200 bg-gray-50 focus:bg-white text-sm h-10"
           />
         </div>
       </div>
 
-      {/* Chat History */}
-      <div className="flex-1 overflow-hidden">
-        <div className="p-4">
+      {/* Chats Section */}
+      <div className="px-6 py-4">
+        <h3 className="text-sm font-medium text-gray-900 mb-3">Chats</h3>
+      </div>
 
-          
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-900">Chat Sessions</h3>
-            <Button variant="ghost" size="sm">
-              <Trash2 className="mr-1 h-3 w-3" />
-              Clear All
-            </Button>
+      {/* Navigation Menu */}
+      <div className="flex-1 px-6">
+        <nav className="space-y-2">
+          <div className="text-sm font-semibold text-gray-900 py-2 bg-blue-50 px-3 rounded-lg">
+            Client Engagement Overview
           </div>
-          
-
-
-          <ScrollArea className="h-[calc(100vh-220px)]">
-            {filteredSessions.length === 0 ? (
-              <div className="text-center text-gray-500 py-12">
-                <History className="mx-auto h-12 w-12 mb-2 opacity-20" />
-                <p className="text-sm">
-                  {searchQuery ? 'No sessions match your search' : 'No chat history yet'}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {paginatedSessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className={`group p-3 rounded-lg cursor-pointer transition-all duration-200 ${
-                      currentSessionId === session.id
-                        ? 'bg-blue-100 border-2 border-primary'
-                        : 'border border-gray-200 hover:border-primary hover:bg-blue-50'
-                    }`}
-                    onClick={() => onSessionChange(session.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {session.previewText}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatSessionTime(session.id)} • {session.messageCount} messages
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Badge variant="secondary" className="text-xs">
-                          Chat
-                        </Badge>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 h-6 w-6"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteSessionMutation.mutate(session.id);
-                          }}
-                        >
-                          <Trash2 className="h-3 w-3 text-red-500" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </ScrollArea>
-          
-          {/* History Pagination */}
-          {filteredSessions.length > 0 && totalHistoryPages > 1 && (
-            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
-              <div className="text-xs text-gray-500">
-                Showing {((historyPage - 1) * itemsPerPage) + 1}-{Math.min(historyPage * itemsPerPage, filteredSessions.length)} of {filteredSessions.length}
-              </div>
-              <div className="flex space-x-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setHistoryPage(prev => Math.max(prev - 1, 1))}
-                  disabled={historyPage === 1}
-                >
-                  <ChevronLeft className="h-3 w-3" />
-                </Button>
-                <span className="text-xs px-2 py-1 text-gray-600">
-                  {historyPage} / {totalHistoryPages}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setHistoryPage(prev => Math.min(prev + 1, totalHistoryPages))}
-                  disabled={historyPage === totalHistoryPages}
-                >
-                  <ChevronRight className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
+          <div className="text-sm text-gray-600 py-2 px-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+            Project Milestones
+          </div>
+          <div className="text-sm text-gray-600 py-2 px-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+            Team Collab Insights
+          </div>
+          <div className="text-sm text-gray-600 py-2 px-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+            Weekly Progress Summary
+          </div>
+          <div className="text-sm text-gray-600 py-2 px-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+            Feedback and Adjustments Log
+          </div>
+        </nav>
       </div>
 
       {/* New Chat Button */}
-      <div className="p-4 border-t border-border">
+      <div className="p-6 border-t border-gray-100">
         <Button
           onClick={onNewChat}
-          className="w-full bg-primary hover:bg-primary-dark text-white"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-3 flex items-center justify-center space-x-2"
         >
-          <Plus className="mr-2 h-4 w-4" />
-          New Chat
+          <Plus className="h-4 w-4" />
+          <span>New Chat</span>
         </Button>
       </div>
-
-
     </div>
   );
 }
