@@ -1,8 +1,29 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertChatSessionSchema, type Document, type ChatResponse } from "@shared/schema";
+import { insertChatSessionSchema, insertUserSchema, type Document, type ChatResponse } from "@shared/schema";
 import { z } from "zod";
+import { randomUUID } from "crypto";
+
+// Session middleware
+const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+  const sessionId = req.headers['x-session-id'] as string;
+  
+  if (!sessionId) {
+    return res.status(401).json({ message: 'Session required' });
+  }
+  
+  const session = await storage.getUserSession(sessionId);
+  if (!session) {
+    return res.status(401).json({ message: 'Invalid or expired session' });
+  }
+  
+  const user = await storage.getUser(session.user_id);
+  (req as any).user = user;
+  (req as any).sessionId = sessionId;
+  
+  next();
+};
 
 // Mock response generator for demonstration
 function generateMockChatResponse(userInput: string): ChatResponse {
@@ -73,6 +94,67 @@ I'll search through your documents and provide relevant answers with source refe
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication endpoints
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const loginData = insertUserSchema.parse(req.body);
+      
+      // Find user by username
+      const user = await storage.getUserByUsername(loginData.username);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid username or password" 
+        });
+      }
+      
+      // Check password (in production, use proper password hashing)
+      if (user.password !== loginData.password) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Invalid username or password" 
+        });
+      }
+      
+      // Create session
+      const sessionId = randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour session
+      
+      await storage.createUserSession({
+        user_id: user.id,
+        session_id: sessionId,
+        expires_at: expiresAt
+      });
+      
+      res.json({
+        success: true,
+        message: "Login successful",
+        sessionId,
+        user: {
+          username: user.username
+        }
+      });
+      
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Login failed" 
+      });
+    }
+  });
+
+  app.post("/api/auth/logout", requireAuth, async (req: any, res) => {
+    try {
+      await storage.deleteUserSession(req.sessionId);
+      res.json({ success: true, message: "Logged out successfully" });
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(500).json({ success: false, message: "Logout failed" });
+    }
+  });
+
   // PDF proxy endpoint to handle Google Drive downloads and bypass CORS
   app.get("/api/proxy/pdf/:fileId", async (req, res) => {
     try {
@@ -244,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Try to parse JSON from output if it contains structured data
       try {
-        const jsonMatch = chatResponse.output.match(/```json\n(.*?)\n```/s);
+        const jsonMatch = chatResponse.output.match(/```json\n([\s\S]*?)\n```/);
         if (jsonMatch) {
           const parsedData = JSON.parse(jsonMatch[1]);
           if (parsedData.answer) {
