@@ -416,7 +416,8 @@ Features:
               </div>
               
               {/* PDF Canvas or Fallback Interface */}
-              <div className="flex-1 overflow-auto p-2 flex justify-center">
+              <ScrollArea className="flex-1">
+                <div className="p-2 flex justify-center min-h-full">
                 {renderError ? (
                   <div className="flex items-center justify-center h-full text-center p-4 max-w-md">
                     <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
@@ -457,10 +458,12 @@ Features:
                 ) : (
                   <canvas 
                     ref={canvasRef}
-                    className="border border-gray-300 shadow-sm max-w-full h-auto"
+                    className="border border-gray-300 shadow-sm block"
+                    style={{ maxWidth: 'none' }}
                   />
                 )}
-              </div>
+                </div>
+              </ScrollArea>
               
               {data.from && data.to && !renderError && (
                 <div className="absolute top-12 right-4 bg-yellow-200 border border-yellow-400 rounded px-3 py-2 text-xs text-yellow-800 shadow-sm z-10">
