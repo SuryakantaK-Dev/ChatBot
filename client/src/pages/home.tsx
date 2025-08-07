@@ -73,14 +73,11 @@ export default function Home() {
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       {/* Header with welcome message */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <WissenLogo className="h-8" />
-          <div className="flex items-center gap-2">
-            <User className="h-5 w-5 text-blue-600" />
-            <h1 className="text-lg font-semibold text-gray-900">
-              Welcome {username} to ChatBot
-            </h1>
-          </div>
+        <div className="flex items-center gap-2">
+          <User className="h-5 w-5 text-blue-600" />
+          <h1 className="text-lg font-semibold text-gray-900">
+            Welcome {username} to ChatBot
+          </h1>
         </div>
         <Button
           variant="outline"
