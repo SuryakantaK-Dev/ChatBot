@@ -117,11 +117,7 @@ export default function ChatArea({
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
-    
-    // Auto-resize textarea
-    const textarea = e.target;
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 96) + 'px';
+    // Fixed height - no auto-resize to prevent stretching
   };
 
   const handleDocumentReference = (docRef: any) => {
@@ -247,8 +243,8 @@ export default function ChatArea({
       </div>
 
       {/* Chat Input */}
-      <div className={`bg-white border-t border-border ${isCompact ? 'p-4' : 'p-6'}`}>
-        <div className="flex items-end space-x-4">
+      <div className={`bg-white border-t border-border ${isCompact ? 'p-4' : 'p-6'} flex-shrink-0`}>
+        <div className="flex items-center space-x-4">
           <div className="flex-1">
             <div className="relative">
               <Textarea
@@ -257,12 +253,12 @@ export default function ChatArea({
                 onChange={handleTextareaChange}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your message here..."
-                className="resize-none pr-12 min-h-[44px] max-h-24"
+                className="resize-none pr-12 h-11 overflow-y-auto"
                 rows={1}
               />
               <Button
                 size="sm"
-                className="absolute right-2 bottom-2"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2"
                 onClick={handleSendMessage}
                 disabled={!message.trim() || sendMessageMutation.isPending}
               >
