@@ -147,22 +147,7 @@ export default function Sidebar({
 
   return (
     <div className="w-80 bg-white border-r border-border flex flex-col">
-      {/* Logo/Header */}
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <WissenLogo className="h-10" />
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleMinimize}
-            className="p-2"
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      
 
       {/* Chat History */}
       <div className="flex-1 overflow-hidden">
