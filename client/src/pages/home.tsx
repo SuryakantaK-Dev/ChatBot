@@ -76,12 +76,7 @@ export default function Home() {
         <div className="flex items-center">
           <WissenLogo className="h-8" />
         </div>
-        <div className="flex-1 flex justify-center items-center space-x-4">
-          <h1 className="text-lg font-medium text-gray-900">
-            Client Engagement Overview
-          </h1>
-          <WissenLogo className="h-6" />
-        </div>
+
         <div className="flex items-center gap-2">
           <Button 
             variant="ghost" 
