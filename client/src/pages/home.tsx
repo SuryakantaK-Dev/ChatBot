@@ -79,7 +79,12 @@ export default function Home() {
           </h1>
         </div>
         <div className="absolute right-4 flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            onClick={() => setIsAllDocsModalOpen(true)}
+          >
             View All Documents
           </Button>
           <Button
