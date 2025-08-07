@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack document chatbot application that allows users to interact with AI agents while referencing ingested documents. The system provides a chat interface with document management capabilities, featuring a React frontend with shadcn/ui components and an Express.js backend that integrates with external N8N webhook services for document processing and AI responses.
+This is a full-stack Document RAG + Web Search application that combines document-based retrieval-augmented generation with web search capabilities. Users can interact with AI agents that reference both uploaded documents and real-time web information. The system features a React frontend with shadcn/ui components and an Express.js backend that integrates with external N8N webhook services for document processing and enhanced AI responses.
 
 ## Recent Changes
 
