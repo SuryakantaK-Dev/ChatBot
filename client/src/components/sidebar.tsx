@@ -186,16 +186,7 @@ export default function Sidebar({
             </Button>
           </div>
           
-          {/* Search Bar */}
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search sessions..."
-              value={historySearchQuery}
-              onChange={(e) => setHistorySearchQuery(e.target.value)}
-              className="pl-10 h-8 text-sm"
-            />
-          </div>
+
 
           <ScrollArea className="h-[calc(100vh-280px)]">
             {filteredSessions.length === 0 ? (
