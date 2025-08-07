@@ -139,7 +139,7 @@ export default function Login() {
               <AlertDescription className="text-sm">
                 <strong>Demo Credentials:</strong><br />
                 Username: Suryakanta.Karan<br />
-                Password: Surya@123
+                Password: *********
               </AlertDescription>
             </Alert>
             
