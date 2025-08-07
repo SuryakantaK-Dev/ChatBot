@@ -136,9 +136,9 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <div className="flex flex-col h-full max-h-screen">
       {/* Chat Header */}
-      <div className={`bg-white border-b border-border ${isCompact ? 'px-4 py-3' : 'px-6 py-4'} flex-shrink-0`}>
+      <div className={`bg-white border border-gray-200 rounded-t-lg ${isCompact ? 'px-4 py-3' : 'px-6 py-4'} flex-shrink-0`}>
         <div className="flex items-center justify-between">
           <div>
             <h1 className={`font-semibold text-gray-900 ${isCompact ? 'text-base' : 'text-lg'}`}>
@@ -163,7 +163,7 @@ export default function ChatArea({
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-1 overflow-hidden min-h-0">
+      <div className="flex-1 overflow-hidden bg-white border-l border-r border-gray-200">
         <ScrollArea className={`h-full ${isCompact ? 'p-4' : 'p-6'}`}>
           <div className="space-y-6">
             {messages.map((msg, index) => (
@@ -249,7 +249,7 @@ export default function ChatArea({
       </div>
 
       {/* Chat Input */}
-      <div className={`bg-white border-t border-border ${isCompact ? 'p-3' : 'p-4'} flex-shrink-0`}>
+      <div className={`bg-white border border-gray-200 rounded-b-lg ${isCompact ? 'p-3' : 'p-4'} flex-shrink-0`}>
         <div className="flex items-center space-x-3">
           <div className="flex-1">
             <Textarea
@@ -258,7 +258,7 @@ export default function ChatArea({
               onChange={handleTextareaChange}
               onKeyPress={handleKeyPress}
               placeholder="Type your message here..."
-              className="resize-none h-10 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary"
+              className="resize-none h-10 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg"
               rows={1}
             />
           </div>
@@ -266,7 +266,7 @@ export default function ChatArea({
             size="sm"
             onClick={handleSendMessage}
             disabled={!message.trim() || sendMessageMutation.isPending}
-            className="h-10 px-4"
+            className="h-10 px-4 rounded-lg"
           >
             <Send size={16} />
           </Button>

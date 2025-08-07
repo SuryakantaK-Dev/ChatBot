@@ -122,16 +122,18 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          // Default layout: Chat centered in middle
-          <div className="flex-1 flex items-start justify-center px-4">
-            <div className="w-full max-w-4xl mx-auto">
-              <ChatArea
-                sessionId={currentSessionId}
-                onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-                onViewAllDocs={() => setIsAllDocsModalOpen(true)}
-                onDocumentPreview={handleDocumentPreview}
-                isCompact={false}
-              />
+          // Default layout: Chat centered in middle with input at bottom
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex justify-center px-4 py-6">
+              <div className="w-full max-w-4xl">
+                <ChatArea
+                  sessionId={currentSessionId}
+                  onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                  onViewAllDocs={() => setIsAllDocsModalOpen(true)}
+                  onDocumentPreview={handleDocumentPreview}
+                  isCompact={false}
+                />
+              </div>
             </div>
           </div>
         )}
