@@ -250,6 +250,7 @@ Features:
 
   const handleZoomIn = () => {
     const newZoom = Math.min(zoomLevel + 25, 200);
+    console.log('Zoom in:', zoomLevel, '->', newZoom);
     setZoomLevel(newZoom);
     if (pdfDoc && currentPage) {
       renderPage(pdfDoc, currentPage);
@@ -258,6 +259,7 @@ Features:
 
   const handleZoomOut = () => {
     const newZoom = Math.max(zoomLevel - 25, 50);
+    console.log('Zoom out:', zoomLevel, '->', newZoom);
     setZoomLevel(newZoom);
     if (pdfDoc && currentPage) {
       renderPage(pdfDoc, currentPage);
@@ -328,7 +330,7 @@ Features:
   };
 
   return (
-    <div className="w-[900px] bg-white border-l border-border">
+    <div className="flex-1 bg-white border-l border-border">
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h3 className="text-lg font-semibold text-gray-900">Document Preview</h3>
         <div className="flex items-center space-x-2">

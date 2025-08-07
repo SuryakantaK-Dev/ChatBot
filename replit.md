@@ -7,13 +7,17 @@ This is a full-stack document chatbot application that allows users to interact 
 ## Recent Changes
 
 ### January 8, 2025
+- **Full-Width Document Preview**: Changed document preview from fixed 900px width to flexible full-width layout (`flex-1`)
+- **Enhanced Line Number Display**: Added specific line number references (e.g., "Lines 411-414") in both chat messages and document preview
+- **Improved Highlighting Guidance**: Replaced generic "Highlighted Content" overlay with specific line numbers and navigation instructions
+- **Fixed View Document Buttons**: Restored "Open Full Document" and "Download Document" buttons by reordering conditional rendering logic
+- **PDF.js Zoom Controls**: Implemented working zoom controls (50%-200%) with debug logging for PDF canvas rendering
 - **UI Simplification**: Removed documents section from sidebar, keeping only chat history since "View All Documents" option is available in main chat area
 - **Google Drive Integration**: Updated document preview to properly handle Google Drive links with format `https://drive.google.com/file/d/{fileId}/view`
 - **PDF.js Integration**: Implemented PDF.js library with backend proxy for direct PDF rendering from Google Drive links
 - **Enhanced Document Preview**: Added PDF canvas rendering with zoom controls, page navigation, and visual highlighting overlays
 - **Smart Fallback System**: Created elegant fallback interface when PDF rendering fails, showing document info and highlighting status
 - **Backend PDF Proxy**: Implemented server-side proxy with multiple Google Drive URL strategies to bypass CORS restrictions
-- **Clean Answer Display**: Removed line number references (Lines 411-414) from answer sections, replaced with "Answer highlighted in document"
 - **Improved UX**: Added proper loading states, timeout handling, and clear error messaging with fallback to Google Drive direct links
 
 ### January 7, 2025
