@@ -73,9 +73,12 @@ export default function Home() {
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Top Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-center relative">
-        <h1 className="text-xl font-medium text-gray-900">
-          Client Engagement Overview
-        </h1>
+        <div className="flex items-center gap-3">
+          <WissenLogo className="h-8" />
+          <h1 className="text-xl font-medium text-gray-900">
+            Client Engagement Overview
+          </h1>
+        </div>
         <div className="absolute right-4 flex items-center gap-2">
           <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
             View All Documents
