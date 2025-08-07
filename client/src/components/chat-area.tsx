@@ -71,7 +71,7 @@ export default function ChatArea({
       // Reset to welcome message for new sessions
       setMessages([{
         type: 'ai',
-        content: "Hello! I'm your document assistant. I can help you find information from your uploaded documents. What would you like to know?",
+        content: "Welcome to the Document Extraction Chatbot\n\nAsk me anything about your documents!",
         timestamp: Date.now()
       }]);
     }
@@ -136,17 +136,14 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex flex-col h-full max-h-screen">
+    <div className="flex flex-col h-full max-h-[calc(100vh-200px)]">
       {/* Chat Header */}
       <div className={`bg-white border border-gray-200 rounded-t-lg ${isCompact ? 'px-4 py-3' : 'px-6 py-4'} flex-shrink-0`}>
         <div className="flex items-center justify-between">
           <div>
             <h1 className={`font-semibold text-gray-900 ${isCompact ? 'text-base' : 'text-lg'}`}>
-              {isCompact ? 'Chat' : 'Document RAG + Web Search'}
+              {isCompact ? 'Chat' : 'Client Engagement Overview'}
             </h1>
-            {!isCompact && (
-              <p className="text-sm text-gray-600">Intelligent document analysis with web-enhanced research capabilities</p>
-            )}
           </div>
           <div className={`flex items-center ${isCompact ? 'space-x-2' : 'space-x-3'}`}>
             <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
@@ -163,7 +160,7 @@ export default function ChatArea({
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-1 overflow-hidden bg-white border-l border-r border-gray-200">
+      <div className="flex-1 overflow-hidden bg-white border-l border-r border-gray-200 min-h-0">
         <ScrollArea className={`h-full ${isCompact ? 'p-4' : 'p-6'}`}>
           <div className="space-y-6">
             {messages.map((msg, index) => (
@@ -180,7 +177,7 @@ export default function ChatArea({
                       ? 'bg-primary text-white rounded-tr-sm' 
                       : 'bg-gray-100 text-gray-800 rounded-tl-sm'
                   }`}>
-                    <p>{msg.content}</p>
+                    <p className="whitespace-pre-line">{msg.content}</p>
                     
                     {msg.documentReference && (
                       <div className="bg-white border border-gray-200 rounded-lg p-3 mt-3">
