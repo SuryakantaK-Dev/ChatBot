@@ -186,7 +186,7 @@ export default function Sidebar({
             />
           </div>
 
-          <ScrollArea className="h-[calc(100vh-180px)]">
+          <ScrollArea className="h-[calc(100vh-160px)]">
             {filteredSessions.length === 0 ? (
               <div className="text-center text-gray-500 py-12">
                 <History className="mx-auto h-12 w-12 mb-2 opacity-20" />
