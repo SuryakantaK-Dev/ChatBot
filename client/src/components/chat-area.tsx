@@ -137,8 +137,7 @@ export default function ChatArea({
       <div className="bg-white border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">Document Q&A Assistant</h1>
-            <p className="text-sm text-gray-600">Ask questions about your uploaded documents</p>
+            <h1 className="text-lg font-semibold text-gray-900">Document Q&A Assistant - Ask questions about your uploaded documents</h1>
           </div>
           <div className="flex items-center space-x-3">
             <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
