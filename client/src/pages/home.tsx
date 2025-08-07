@@ -122,9 +122,9 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          // Default layout: Chat centered like ChatGPT
-          <div className="flex-1 flex justify-center bg-gray-50">
-            <div className="w-full max-w-3xl flex flex-col">
+          // Default layout: Chat centered with proper spacing
+          <div className="flex-1 flex justify-center items-start bg-gray-50 py-8">
+            <div className="w-full max-w-4xl mx-auto px-8">
               <ChatArea
                 sessionId={currentSessionId}
                 onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}

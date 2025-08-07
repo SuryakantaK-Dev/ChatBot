@@ -144,8 +144,26 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      {/* Chat Header - Only show when compact */}
+    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-200px)]">
+      {/* Chat Header - Always show for non-compact */}
+      {!isCompact && (
+        <div className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold text-gray-900">Client Engagement Overview</h1>
+            <div className="flex items-center space-x-3">
+              <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
+                <Menu className="h-4 w-4 mr-2" />
+                Menu
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onViewAllDocs}>
+                <FolderOpen className="mr-2 h-4 w-4" />
+                View All Documents
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isCompact && (
         <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -159,98 +177,86 @@ export default function ChatArea({
         </div>
       )}
 
-      {/* Chat Messages - ChatGPT style */}
+      {/* Chat Messages */}
       <div className="flex-1 overflow-hidden min-h-0">
         <ScrollArea className="h-full">
-          <div className="space-y-0">
-            {!isCompact && messages.length === 1 && messages[0].type === 'ai' && (
-              <div className="text-center py-12">
-                <h1 className="text-2xl font-semibold text-gray-900 mb-2">Client Engagement Overview</h1>
-                <div className="flex items-center justify-center space-x-3 mb-4">
-                  <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
-                    <Menu className="h-4 w-4 mr-2" />
-                    Menu
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={onViewAllDocs}>
-                    <FolderOpen className="mr-2 h-4 w-4" />
-                    View All Documents
-                  </Button>
+          <div className="space-y-4 p-6">
+            {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
+              <div className="text-center py-8">
+                <div className="text-gray-500 mb-4">
+                  <Bot className="w-12 h-12 mx-auto mb-2 text-primary" />
                 </div>
+                <p className="text-gray-600">Welcome to the Document Extraction Chatbot</p>
+                <p className="text-sm text-gray-500 mt-1">Ask me anything about your documents!</p>
               </div>
             )}
             
-            {messages.map((msg, index) => (
+            {messages.slice(1).map((msg, index) => (
               <div key={index} className="w-full">
-                <div className={`w-full ${msg.type === 'human' ? 'bg-transparent' : 'bg-gray-50/50'}`}>
-                  <div className="max-w-3xl mx-auto px-4 py-6">
-                    <div className={`flex items-start space-x-4 ${msg.type === 'human' ? 'justify-end' : ''}`}>
-                      {msg.type === 'ai' && (
-                        <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                          <Bot className="text-white" size={16} />
-                        </div>
-                      )}
+                <div className={`flex items-start space-x-3 ${msg.type === 'human' ? 'justify-end' : ''}`}>
+                  {msg.type === 'ai' && (
+                    <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                      <Bot className="text-white" size={16} />
+                    </div>
+                  )}
+                  
+                  <div className={`flex-1 ${msg.type === 'human' ? 'flex justify-end' : ''}`}>
+                    <div className={`max-w-2xl ${
+                      msg.type === 'human' 
+                        ? 'bg-primary text-white rounded-2xl px-4 py-3' 
+                        : 'bg-gray-50 rounded-2xl px-4 py-3'
+                    }`}>
+                      <p className={`whitespace-pre-line ${msg.type === 'human' ? 'text-white' : 'text-gray-800'}`}>{msg.content}</p>
                       
-                      <div className={`flex-1 ${msg.type === 'human' ? 'flex justify-end' : ''}`}>
-                        <div className={`max-w-2xl ${
-                          msg.type === 'human' 
-                            ? 'bg-primary text-white rounded-2xl px-4 py-3' 
-                            : ''
-                        }`}>
-                          <p className={`whitespace-pre-line ${msg.type === 'human' ? 'text-white' : 'text-gray-800'}`}>{msg.content}</p>
-                          
-                          {msg.documentReference && (
-                            <div className="bg-white border border-gray-200 rounded-lg p-3 mt-3">
-                              <div className="flex items-center space-x-2 mb-2">
-                                <FileText className="text-red-500" size={16} />
-                                <span className="text-sm font-medium text-gray-900">
-                                  {msg.documentReference.fileName}
-                                </span>
-                              </div>
-                              {msg.documentReference.from && msg.documentReference.to && (
-                                <div className="mb-2">
-                                  <span className="text-xs text-gray-600">
-                                    Reference: Lines {msg.documentReference.from}-{msg.documentReference.to}
-                                  </span>
-                                </div>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-primary hover:text-primary-dark p-0 h-auto font-medium"
-                                onClick={() => handleDocumentReference(msg.documentReference)}
-                              >
-                                <ExternalLink className="mr-1" size={12} />
-                                View Document Preview
-                              </Button>
+                      {msg.documentReference && (
+                        <div className="bg-white border border-gray-200 rounded-lg p-3 mt-3">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <FileText className="text-red-500" size={16} />
+                            <span className="text-sm font-medium text-gray-900">
+                              {msg.documentReference.fileName}
+                            </span>
+                          </div>
+                          {msg.documentReference.from && msg.documentReference.to && (
+                            <div className="mb-2">
+                              <span className="text-xs text-gray-600">
+                                Reference: Lines {msg.documentReference.from}-{msg.documentReference.to}
+                              </span>
                             </div>
                           )}
-                        </div>
-                      </div>
-                      
-                      {msg.type === 'human' && (
-                        <div className="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                          <User className="text-gray-600" size={16} />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-primary hover:text-primary-dark p-0 h-auto font-medium"
+                            onClick={() => handleDocumentReference(msg.documentReference)}
+                          >
+                            <ExternalLink className="mr-1" size={12} />
+                            View Document Preview
+                          </Button>
                         </div>
                       )}
                     </div>
                   </div>
+                  
+                  {msg.type === 'human' && (
+                    <div className="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                      <User className="text-gray-600" size={16} />
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
             
             {sendMessageMutation.isPending && (
-              <div className="w-full bg-gray-50/50">
-                <div className="max-w-3xl mx-auto px-4 py-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                      <Bot className="text-white" size={16} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      </div>
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                  <Bot className="text-white" size={16} />
+                </div>
+                <div className="flex-1">
+                  <div className="bg-gray-50 rounded-2xl px-4 py-3 max-w-2xl">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
                   </div>
                 </div>
@@ -263,33 +269,31 @@ export default function ChatArea({
       </div>
 
       {/* Chat Input - Fixed at bottom */}
-      <div className="bg-white border-t border-gray-200 p-4 flex-shrink-0">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center space-x-3">
-            <div className="flex-1">
-              <Textarea
-                ref={textareaRef}
-                value={message}
-                onChange={handleTextareaChange}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message here..."
-                className="resize-none h-12 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3"
-                rows={1}
-              />
-            </div>
-            <Button
-              size="sm"
-              onClick={handleSendMessage}
-              disabled={!message.trim() || sendMessageMutation.isPending}
-              className="h-12 w-12 rounded-xl p-0"
-            >
-              <Send size={18} />
-            </Button>
+      <div className="border-t border-gray-200 p-4 flex-shrink-0">
+        <div className="flex items-center space-x-3">
+          <div className="flex-1">
+            <Textarea
+              ref={textareaRef}
+              value={message}
+              onChange={handleTextareaChange}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your message here..."
+              className="resize-none h-12 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3"
+              rows={1}
+            />
           </div>
-          <p className="text-xs text-gray-500 mt-2 text-center">
-            Press Enter to send, Shift+Enter for new line
-          </p>
+          <Button
+            size="sm"
+            onClick={handleSendMessage}
+            disabled={!message.trim() || sendMessageMutation.isPending}
+            className="h-12 w-12 rounded-xl p-0"
+          >
+            <Send size={18} />
+          </Button>
         </div>
+        <p className="text-xs text-gray-500 mt-2 text-center">
+          Press Enter to send, Shift+Enter for new line
+        </p>
       </div>
     </div>
   );
