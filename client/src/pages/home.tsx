@@ -4,7 +4,7 @@ import ChatArea from "@/components/chat-area";
 import DocumentPreview from "@/components/document-preview";
 import DocumentListModal from "@/components/document-list-modal";
 import LoadingTransition from "@/components/loading-transition";
-import WissenLogo from "@/components/wissen-logo";
+
 import { DocumentPreviewData } from "@/types";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
@@ -74,7 +74,6 @@ export default function Home() {
       {/* Top Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-center relative">
         <div className="flex items-center gap-3">
-          <WissenLogo className="h-8" />
           <h1 className="text-xl font-medium text-gray-900">
             Client Engagement Overview
           </h1>
