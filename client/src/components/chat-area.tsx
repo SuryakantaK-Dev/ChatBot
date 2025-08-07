@@ -58,7 +58,7 @@ export default function ChatArea({
   const sendMessageMutation = useMutation({
     mutationFn: async ({ chatInput, sessionId }: { chatInput: string; sessionId: string }) => {
       try {
-        const response = await apiRequest('POST', '/api/chat', { message: chatInput, sessionId });
+        const response = await apiRequest('POST', '/api/chat', { chatInput, sessionId });
         return await response.json();
       } catch (error) {
         console.error('Chat API error:', error);
@@ -191,11 +191,33 @@ export default function ChatArea({
           <div className="space-y-4 p-6">
             {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
               <div className="text-center py-8">
-                <div className="text-gray-500 mb-4">
+                <div className="text-gray-500 mb-6">
                   <Bot className="w-12 h-12 mx-auto mb-2 text-primary" />
                 </div>
-                <p className="text-gray-600">Welcome to the Document Extraction Chatbot</p>
-                <p className="text-sm text-gray-500 mt-1">Ask me anything about your documents!</p>
+                <p className="text-gray-600 mb-4">Welcome to the Document Extraction Chatbot</p>
+                <p className="text-sm text-gray-500 mb-6">Ask me anything about your documents!</p>
+                
+                <div className="space-y-3 max-w-md mx-auto">
+                  <p className="text-sm font-medium text-gray-700 mb-3">Try these sample questions:</p>
+                  <button
+                    onClick={() => setMessage("What is the rate of interest for the Company XYZ?")}
+                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                  >
+                    💰 "What is the rate of interest for the Company XYZ?"
+                  </button>
+                  <button
+                    onClick={() => setMessage("Show me the ROI of Company XYZ")}
+                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                  >
+                    📊 "Show me the ROI of Company XYZ"
+                  </button>
+                  <button
+                    onClick={() => setMessage("Can you summarize the key financial metrics?")}
+                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                  >
+                    📋 "Can you summarize the key financial metrics?"
+                  </button>
+                </div>
               </div>
             )}
             
