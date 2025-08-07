@@ -328,7 +328,7 @@ Features:
   };
 
   return (
-    <div className="w-[500px] bg-white border-l border-border">
+    <div className="w-[700px] bg-white border-l border-border">
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h3 className="text-lg font-semibold text-gray-900">Document Preview</h3>
         <div className="flex items-center space-x-2">
@@ -375,7 +375,7 @@ Features:
               </div>
             </div>
           ) : isGoogleDriveDocument(data.fileLink) ? (
-            <div className="h-96 relative bg-white">
+            <div className="h-[600px] relative bg-white">
               <iframe
                 src={getEmbedUrl(data.fileLink)}
                 className="w-full h-full border-0"
@@ -422,7 +422,7 @@ Features:
               )}
             </div>
           ) : isPdf && isGoogleDriveDocument(data.fileLink) && pdfDoc ? (
-            <div className="h-96 relative bg-gray-50 flex flex-col">
+            <div className="h-[600px] relative bg-gray-50 flex flex-col">
               {/* PDF Navigation Header */}
               <div className="flex items-center justify-between bg-gray-100 px-3 py-2 border-b">
                 <div className="flex items-center space-x-2">
@@ -508,7 +508,7 @@ Features:
               </div>
             </div>
           ) : isPdf ? (
-            <div className="h-96 relative">
+            <div className="h-[600px] relative">
               <iframe
                 src={`${data.fileLink}#view=FitH&zoom=${zoomLevel}`}
                 className="w-full h-full"
@@ -518,7 +518,7 @@ Features:
               />
             </div>
           ) : (
-            <ScrollArea className="h-96">
+            <ScrollArea className="h-[600px]">
               <div 
                 className="font-sans text-sm"
                 style={{ fontSize: `${zoomLevel}%` }}
