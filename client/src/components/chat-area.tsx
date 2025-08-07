@@ -80,7 +80,7 @@ export default function ChatArea({
   });
 
   useEffect(() => {
-    if (chatHistory) {
+    if (chatHistory && Array.isArray(chatHistory)) {
       const historyMessages = chatHistory.map((session: any) => session.message);
       setMessages(historyMessages);
     } else {
@@ -299,29 +299,31 @@ export default function ChatArea({
       </div>
 
       {/* Chat Input - Always fixed at bottom */}
-      <div className="border-t border-gray-200 p-4 flex-shrink-0 bg-white sticky bottom-0">
-        <div className="flex items-center space-x-3 max-w-4xl mx-auto">
+      <div className="border-t border-gray-200 p-3 flex-shrink-0 bg-white sticky bottom-0">
+        <div className={`flex items-center space-x-2 ${isCompact ? 'max-w-none' : 'max-w-4xl mx-auto'}`}>
           <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
               value={message}
               onChange={handleTextareaChange}
               onKeyPress={handleKeyPress}
-              placeholder="Type your message here..."
-              className="resize-none h-12 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3 pr-40 min-h-12 max-h-12"
+              placeholder={isCompact ? "Type here..." : "Type your message here..."}
+              className={`resize-none h-10 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg px-3 py-2 min-h-10 max-h-10 ${isCompact ? 'pr-3 text-sm' : 'pr-32'}`}
               rows={1}
             />
-            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap">
-              Press Enter to send, Shift+Enter for new line
-            </span>
+            {!isCompact && (
+              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap">
+                Press Enter to send
+              </span>
+            )}
           </div>
           <Button
             size="sm"
             onClick={handleSendMessage}
             disabled={!message.trim() || sendMessageMutation.isPending}
-            className="h-12 w-12 rounded-xl p-0 flex-shrink-0"
+            className={`rounded-lg p-0 flex-shrink-0 ${isCompact ? 'h-10 w-10' : 'h-10 w-12'}`}
           >
-            <Send size={18} />
+            <Send size={isCompact ? 16 : 18} />
           </Button>
         </div>
       </div>
