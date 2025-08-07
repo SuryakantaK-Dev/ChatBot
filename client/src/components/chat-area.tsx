@@ -80,7 +80,7 @@ export default function ChatArea({
   });
 
   useEffect(() => {
-    if (chatHistory && Array.isArray(chatHistory)) {
+    if (chatHistory) {
       const historyMessages = chatHistory.map((session: any) => session.message);
       setMessages(historyMessages);
     } else {
@@ -152,10 +152,28 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex flex-col bg-white h-[calc(100vh-200px)]">
-      {/* Only show header in compact mode */}
+    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-200px)]">
+      {/* Chat Header - Always show for non-compact */}
+      {!isCompact && (
+        <div className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold text-gray-900">Client Engagement Overview</h1>
+            <div className="flex items-center space-x-3">
+              <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
+                <Menu className="h-4 w-4 mr-2" />
+                Menu
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onViewAllDocs}>
+                <FolderOpen className="mr-2 h-4 w-4" />
+                View All Documents
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isCompact && (
-        <div className="bg-white px-4 py-3 flex-shrink-0">
+        <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
           <div className="flex items-center justify-between">
             <h1 className="text-base font-semibold text-gray-900">Chat</h1>
             <div className="flex items-center space-x-2">
@@ -170,60 +188,61 @@ export default function ChatArea({
       {/* Chat Messages */}
       <div className="flex-1 overflow-hidden min-h-0">
         <ScrollArea className="h-full">
+          <div className="space-y-4 p-6">
             {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
-              <div className="flex flex-col items-center justify-center h-full py-16 px-4">
-                <div className="mb-8">
-                  <div className="w-16 h-16 mx-auto mb-6 bg-blue-600 rounded-full flex items-center justify-center">
-                    <Bot className="w-8 h-8 text-white" />
-                  </div>
+              <div className="text-center py-8">
+                <div className="text-gray-500 mb-6">
+                  <Bot className="w-12 h-12 mx-auto mb-2 text-primary" />
                 </div>
-                <h2 className="text-xl text-gray-700 mb-8 font-medium">Hi there, what can I help you with today?</h2>
+                <p className="text-gray-600 mb-4">Welcome to the Document Extraction Chatbot</p>
+                <p className="text-sm text-gray-500 mb-6">Ask me anything about your documents!</p>
                 
-                <div className="space-y-3 max-w-lg w-full">
+                <div className="space-y-3 max-w-md mx-auto">
+                  <p className="text-sm font-medium text-gray-700 mb-3">Try these sample questions:</p>
                   <button
-                    onClick={() => setMessage("What's the start date?")}
-                    className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
+                    onClick={() => setMessage("What is the rate of interest for the Company XYZ?")}
+                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
                   >
-                    What's the start date?
+                    💰 "What is the rate of interest for the Company XYZ?"
                   </button>
                   <button
-                    onClick={() => setMessage("Summarize the document")}
-                    className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
+                    onClick={() => setMessage("Show me the ROI of Company XYZ")}
+                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
                   >
-                    Summarize the document
+                    📊 "Show me the ROI of Company XYZ"
                   </button>
                   <button
-                    onClick={() => setMessage("Who of are the service providers?")}
-                    className="w-full text-center p-4 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700"
+                    onClick={() => setMessage("Can you summarize the key financial metrics?")}
+                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
                   >
-                    Who of are the service providers?
+                    📋 "Can you summarize the key financial metrics?"
                   </button>
                 </div>
               </div>
             )}
             
             {messages.slice(1).map((msg, index) => (
-              <div key={index} className="flex-shrink-0 w-full mb-3 px-4">
-                <div className={`flex items-start gap-3 ${msg.type === 'human' ? 'justify-end' : 'justify-start'}`}>
+              <div key={index} className="w-full">
+                <div className={`flex items-start space-x-3 ${msg.type === 'human' ? 'justify-end' : ''}`}>
                   {msg.type === 'ai' && (
                     <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                       <Bot className="text-white" size={16} />
                     </div>
                   )}
                   
-                  <div className={`${msg.type === 'human' ? 'max-w-[70%]' : 'max-w-[80%]'}`}>
-                    <div className={`${
+                  <div className={`flex-1 ${msg.type === 'human' ? 'flex justify-end' : ''}`}>
+                    <div className={`max-w-2xl ${
                       msg.type === 'human' 
                         ? 'bg-primary text-white rounded-2xl px-4 py-3' 
                         : 'bg-gray-50 rounded-2xl px-4 py-3'
                     }`}>
-                      <p className={`text-sm whitespace-pre-line break-words ${msg.type === 'human' ? 'text-white' : 'text-gray-800'}`}>{msg.content}</p>
+                      <p className={`whitespace-pre-line ${msg.type === 'human' ? 'text-white' : 'text-gray-800'}`}>{msg.content}</p>
                       
                       {msg.documentReference && (
                         <div className="bg-white border border-gray-200 rounded-lg p-3 mt-3">
-                          <div className="flex items-center gap-2 mb-2">
-                            <FileText className="text-red-500 flex-shrink-0" size={16} />
-                            <span className="text-sm font-medium text-gray-900 break-words">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <FileText className="text-red-500" size={16} />
+                            <span className="text-sm font-medium text-gray-900">
                               {msg.documentReference.fileName}
                             </span>
                           </div>
@@ -258,7 +277,7 @@ export default function ChatArea({
             ))}
             
             {sendMessageMutation.isPending && (
-              <div className="flex items-start space-x-3 px-4">
+              <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                   <Bot className="text-white" size={16} />
                 </div>
@@ -275,30 +294,34 @@ export default function ChatArea({
             )}
             
             <div ref={messagesEndRef} />
+          </div>
         </ScrollArea>
       </div>
 
       {/* Chat Input - Always fixed at bottom */}
-      <div className="p-6 flex-shrink-0 bg-white sticky bottom-0">
-        <div className={`flex items-center space-x-3 ${isCompact ? 'max-w-none' : 'max-w-4xl mx-auto'}`}>
+      <div className="border-t border-gray-200 p-4 flex-shrink-0 bg-white sticky bottom-0">
+        <div className="flex items-center space-x-3 max-w-4xl mx-auto">
           <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
               value={message}
               onChange={handleTextareaChange}
               onKeyPress={handleKeyPress}
-              placeholder="Type your message here"
-              className="resize-none h-12 overflow-y-auto border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 min-h-12 max-h-12 text-sm shadow-sm"
+              placeholder="Type your message here..."
+              className="resize-none h-12 overflow-y-auto border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-3 pr-40 min-h-12 max-h-12"
               rows={1}
             />
+            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap">
+              Press Enter to send, Shift+Enter for new line
+            </span>
           </div>
           <Button
             size="sm"
             onClick={handleSendMessage}
             disabled={!message.trim() || sendMessageMutation.isPending}
-            className="rounded-full p-0 flex-shrink-0 h-12 w-12 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300"
+            className="h-12 w-12 rounded-xl p-0 flex-shrink-0"
           >
-            <Send size={20} />
+            <Send size={18} />
           </Button>
         </div>
       </div>
