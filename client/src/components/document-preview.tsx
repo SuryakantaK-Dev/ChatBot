@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DocumentPreviewData } from "@/types";
-import { X, ExternalLink, Download, FileText, ZoomIn, ZoomOut } from "lucide-react";
+import { X, ExternalLink, Download, FileText, ZoomIn, ZoomOut, AlertTriangle } from "lucide-react";
+import * as pdfjsLib from 'pdfjs-dist';
 
 interface DocumentPreviewProps {
   data: DocumentPreviewData;
@@ -13,6 +14,11 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
   const [isLoading, setIsLoading] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [documentContent, setDocumentContent] = useState<string>("");
+  const [pdfDoc, setPdfDoc] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [renderError, setRenderError] = useState<string>("");
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const getFileExtension = (fileName: string) => {
     return fileName.split('.').pop()?.toLowerCase() || '';
@@ -23,22 +29,123 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
   const isSpreadsheet = ['xlsx', 'xls', 'csv'].includes(getFileExtension(data.fileName));
 
   useEffect(() => {
-    // Generate sample content for demonstration
-    if (!isPdf && !isGoogleDriveDocument(data.fileLink)) {
-      generateSampleContent();
-    }
+    // Configure PDF.js worker to match package version (5.4.54)
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
     
-    // Reset loading state when document changes
+    // Reset states
     setIsLoading(true);
+    setRenderError("");
+    setPdfDoc(null);
+    setCurrentPage(1);
     
-    // Auto-hide loading for Google Drive after timeout
-    if (isGoogleDriveDocument(data.fileLink)) {
+    // Handle different document types
+    if (isPdf && isGoogleDriveDocument(data.fileLink)) {
+      loadGoogleDrivePDF();
+    } else if (!isPdf && !isGoogleDriveDocument(data.fileLink)) {
+      generateSampleContent();
+    } else {
+      // Auto-hide loading for other documents after timeout
       const timeout = setTimeout(() => {
         setIsLoading(false);
       }, 3000);
       return () => clearTimeout(timeout);
     }
   }, [data.fileName, data.fileLink]);
+
+  // Load and render Google Drive PDF using PDF.js
+  const loadGoogleDrivePDF = async () => {
+    try {
+      const fileId = data.fileLink.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1];
+      if (!fileId) {
+        throw new Error("Invalid Google Drive URL");
+      }
+
+      // Use Google Drive export URL for PDF download
+      const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+      
+      setRenderError("Downloading PDF from Google Drive...");
+      
+      // Load PDF document
+      const loadingTask = pdfjsLib.getDocument({
+        url: downloadUrl,
+        httpHeaders: {
+          'Accept': 'application/pdf'
+        }
+      });
+
+      const pdf = await loadingTask.promise;
+      setPdfDoc(pdf);
+      setTotalPages(pdf.numPages);
+      setRenderError("");
+      
+      // Render first page
+      await renderPage(pdf, 1);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("PDF loading error:", error);
+      setRenderError("Unable to load PDF. This may be due to Google Drive permissions. Please use 'Open Full Document' to view in Google Drive.");
+      setIsLoading(false);
+    }
+  };
+
+  // Render a specific page of the PDF
+  const renderPage = async (pdf: any, pageNum: number) => {
+    if (!canvasRef.current) return;
+
+    try {
+      const page = await pdf.getPage(pageNum);
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      
+      if (!context) return;
+
+      const viewport = page.getViewport({ scale: zoomLevel / 100 });
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      const renderContext = {
+        canvasContext: context,
+        viewport: viewport,
+      };
+
+      await page.render(renderContext).promise;
+
+      // Add highlighting overlay if this document has highlighted sections
+      if (data.from && data.to) {
+        addHighlightOverlay(context, viewport, canvas);
+      }
+    } catch (error) {
+      console.error("Page rendering error:", error);
+    }
+  };
+
+  // Add highlight overlay to the rendered PDF page
+  const addHighlightOverlay = (context: CanvasRenderingContext2D, viewport: any, canvas: HTMLCanvasElement) => {
+    // This is a simplified highlighting - in a real implementation, you'd need to:
+    // 1. Extract text content from the PDF page
+    // 2. Find the specific lines mentioned in data.from/data.to
+    // 3. Calculate their positions and add precise highlights
+    // For now, we'll add a general highlight indicator
+    
+    context.save();
+    context.fillStyle = 'rgba(255, 235, 59, 0.3)'; // Yellow highlight
+    context.strokeStyle = '#FFC107';
+    context.lineWidth = 2;
+    
+    // Add a highlight box in the middle area (approximate)
+    const highlightHeight = canvas.height * 0.1;
+    const highlightY = canvas.height * 0.4;
+    
+    context.fillRect(0, highlightY, canvas.width, highlightHeight);
+    context.strokeRect(0, highlightY, canvas.width, highlightHeight);
+    
+    // Add highlight label
+    context.fillStyle = '#FF6F00';
+    context.font = '14px Arial';
+    context.fillText('Highlighted Content', 10, highlightY - 5);
+    
+    context.restore();
+  };
 
   const generateSampleContent = () => {
     if (data.fileName.includes('Contract') || data.fileName.includes('TERMS')) {
@@ -137,8 +244,28 @@ Features:
     setIsLoading(false);
   };
 
-  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 25, 200));
-  const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 25, 50));
+  const handleZoomIn = () => {
+    const newZoom = Math.min(zoomLevel + 25, 200);
+    setZoomLevel(newZoom);
+    if (pdfDoc && currentPage) {
+      renderPage(pdfDoc, currentPage);
+    }
+  };
+
+  const handleZoomOut = () => {
+    const newZoom = Math.max(zoomLevel - 25, 50);
+    setZoomLevel(newZoom);
+    if (pdfDoc && currentPage) {
+      renderPage(pdfDoc, currentPage);
+    }
+  };
+
+  const handlePageChange = async (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages && pdfDoc) {
+      setCurrentPage(newPage);
+      await renderPage(pdfDoc, newPage);
+    }
+  };
 
   const handleDownload = () => {
     // Convert Google Drive view link to download link
@@ -201,7 +328,7 @@ Features:
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h3 className="text-lg font-semibold text-gray-900">Document Preview</h3>
         <div className="flex items-center space-x-2">
-          {!isPdf && (
+          {(!isPdf || (isPdf && !pdfDoc)) && (
             <>
               <Button variant="ghost" size="sm" onClick={handleZoomOut} disabled={zoomLevel <= 50}>
                 <ZoomOut className="h-4 w-4" />
@@ -289,6 +416,70 @@ Features:
                   Highlighted Content
                 </div>
               )}
+            </div>
+          ) : isPdf && isGoogleDriveDocument(data.fileLink) && pdfDoc ? (
+            <div className="h-96 relative bg-gray-50 flex flex-col">
+              {/* PDF Navigation Header */}
+              <div className="flex items-center justify-between bg-gray-100 px-3 py-2 border-b">
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    onClick={() => handlePageChange(currentPage - 1)} 
+                    size="sm" 
+                    variant="outline" 
+                    disabled={currentPage <= 1}
+                    className="px-2 h-7"
+                  >
+                    ←
+                  </Button>
+                  <span className="text-xs text-gray-600">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button 
+                    onClick={() => handlePageChange(currentPage + 1)} 
+                    size="sm" 
+                    variant="outline" 
+                    disabled={currentPage >= totalPages}
+                    className="px-2 h-7"
+                  >
+                    →
+                  </Button>
+                </div>
+                
+                <div className="flex items-center space-x-1">
+                  <Button onClick={handleZoomOut} size="sm" variant="outline" disabled={zoomLevel <= 50} className="px-2 h-7">
+                    <ZoomOut size={12} />
+                  </Button>
+                  <span className="text-xs text-gray-600 min-w-[40px] text-center">{zoomLevel}%</span>
+                  <Button onClick={handleZoomIn} size="sm" variant="outline" disabled={zoomLevel >= 200} className="px-2 h-7">
+                    <ZoomIn size={12} />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* PDF Canvas */}
+              <div className="flex-1 overflow-auto p-2 flex justify-center">
+                {renderError ? (
+                  <div className="flex items-center justify-center h-full text-center p-4">
+                    <div>
+                      <AlertTriangle className="mx-auto mb-2 text-orange-500" size={32} />
+                      <p className="text-sm text-gray-600 mb-2">{renderError}</p>
+                      <Button 
+                        onClick={() => window.open(data.fileLink, '_blank')} 
+                        size="sm" 
+                        variant="outline"
+                      >
+                        <ExternalLink size={14} className="mr-1" />
+                        Open in Google Drive
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <canvas 
+                    ref={canvasRef}
+                    className="border border-gray-300 shadow-sm max-w-full h-auto"
+                  />
+                )}
+              </div>
             </div>
           ) : isPdf ? (
             <div className="h-96 relative">
