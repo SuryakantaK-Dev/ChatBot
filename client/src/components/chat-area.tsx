@@ -152,20 +152,28 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-80px)]">
+    <div className="flex flex-col bg-white h-[calc(100vh-60px)]">
       {/* Chat Header - Always show for non-compact */}
       {!isCompact && (
-        <div className="border-b border-gray-200 px-6 py-2 flex-shrink-0">
+        <div className="border-b border-gray-100 px-6 py-4 flex-shrink-0 bg-white">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900">Client Engagement Overview</h1>
-            <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
-                <Menu className="h-4 w-4 mr-2" />
-                Menu
-              </Button>
-              <Button variant="ghost" size="sm" onClick={onViewAllDocs}>
-                <FolderOpen className="mr-2 h-4 w-4" />
+            <h1 className="text-lg font-semibold text-gray-900">Client Engagement Overview</h1>
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onViewAllDocs}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
                 View All Documents
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onToggleSidebar}
+                className="text-gray-500"
+              >
+                <Menu className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -188,7 +196,7 @@ export default function ChatArea({
       {/* Chat Messages */}
       <div className="flex-1 overflow-hidden min-h-0">
         <ScrollArea className="h-full">
-          <div className="space-y-4 p-6">
+          <div className="space-y-6 p-6">
             {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
               <div className="text-center py-8">
                 <div className="text-gray-500 mb-6">
@@ -299,7 +307,7 @@ export default function ChatArea({
       </div>
 
       {/* Chat Input - Below messages with same width */}
-      <div className="border-t border-gray-200 px-6 py-2 flex-shrink-0 bg-white">
+      <div className="border-t border-gray-100 px-6 py-4 flex-shrink-0 bg-white">
         <div className="flex items-center space-x-3">
           <div className="flex-1 relative">
             <Textarea
@@ -308,11 +316,11 @@ export default function ChatArea({
               onChange={handleTextareaChange}
               onKeyPress={handleKeyPress}
               placeholder="Type your message here..."
-              className="resize-none border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-2 pr-40 overflow-hidden"
-              style={{ height: '40px', minHeight: '40px', maxHeight: '40px', lineHeight: '18px' }}
+              className="resize-none border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg px-4 py-3 pr-44 overflow-hidden shadow-sm"
+              style={{ height: '48px', minHeight: '48px', maxHeight: '48px', lineHeight: '20px' }}
               rows={1}
             />
-            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap select-none">
+            <span className="absolute right-16 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap select-none">
               Press Enter to send, Shift+Enter for new line
             </span>
           </div>
@@ -320,10 +328,10 @@ export default function ChatArea({
             size="sm"
             onClick={handleSendMessage}
             disabled={!message.trim() || sendMessageMutation.isPending}
-            className="rounded-xl p-0 flex-shrink-0"
-            style={{ height: '40px', width: '40px', minHeight: '40px', minWidth: '40px' }}
+            className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white p-0 flex-shrink-0 shadow-sm"
+            style={{ height: '48px', width: '48px', minHeight: '48px', minWidth: '48px' }}
           >
-            <Send size={16} />
+            <Send size={18} />
           </Button>
         </div>
       </div>
