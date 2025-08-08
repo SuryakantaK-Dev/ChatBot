@@ -73,11 +73,11 @@ export default function Home() {
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       {/* Header with welcome message */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <WissenLogo className="h-6 w-auto" />
-          <h1 className="text-lg font-semibold text-gray-900">
-            WISSEN
-          </h1>
+          <span className="text-sm text-gray-500">
+            Welcome, Suryakanta Karan
+          </span>
         </div>
         <Button
           variant="outline"
