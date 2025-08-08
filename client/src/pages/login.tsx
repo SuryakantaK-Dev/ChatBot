@@ -184,7 +184,7 @@ export default function Login() {
             <h3 className="text-sm font-semibold text-gray-900 mb-2">Demo Credentials:</h3>
             <div className="text-sm text-gray-700 space-y-1">
               <div><span className="font-medium">Username:</span> Suryakanta.Karan</div>
-              <div><span className="font-medium">Password:</span> Surya@123</div>
+              <div><span className="font-medium">Password:</span> ••••••••</div>
             </div>
           </div>
         </CardContent>

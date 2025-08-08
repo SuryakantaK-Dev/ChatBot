@@ -159,7 +159,8 @@ export default function ChatArea({
       <div className="flex-1 overflow-hidden min-h-0">
         <ScrollArea className="h-full">
           <div className="space-y-6 p-6">
-            {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
+            {/* Welcome Screen - Only shown when there's exactly one welcome message and not in compact mode */}
+            {messages.length === 1 && messages[0].type === 'ai' && messages[0].content.includes('Welcome to the Document Extraction Chatbot') && !isCompact && (
               <div className="text-center py-8">
                 <div className="text-gray-500 mb-6">
                   <Bot className="w-12 h-12 mx-auto mb-2 text-primary" />
@@ -191,7 +192,10 @@ export default function ChatArea({
               </div>
             )}
             
-            {messages.slice(1).map((msg, index) => (
+            {/* Regular Messages - Show all messages except the initial welcome message when in welcome mode */}
+            {(messages.length > 1 || (messages.length === 1 && !messages[0].content.includes('Welcome to the Document Extraction Chatbot'))) &&
+              messages.filter(msg => !(msg.type === 'ai' && msg.content.includes('Welcome to the Document Extraction Chatbot') && messages.length > 1))
+                .map((msg, index) => (
               <div key={index} className="w-full">
                 <div className={`flex items-start space-x-3 ${msg.type === 'human' ? 'justify-end' : ''}`}>
                   {msg.type === 'ai' && (
@@ -268,8 +272,8 @@ export default function ChatArea({
         </ScrollArea>
       </div>
 
-      {/* Chat Input - Below messages with same width */}
-      <div className="border-t border-gray-100 px-6 py-4 flex-shrink-0 bg-white">
+      {/* Chat Input - Fixed position at bottom */}
+      <div className="border-t border-gray-100 px-6 py-4 flex-shrink-0 bg-white sticky bottom-0">
         <div className="flex items-center space-x-3">
           <div className="flex-1 relative">
             <Textarea
