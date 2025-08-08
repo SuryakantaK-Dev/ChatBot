@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -44,7 +45,7 @@ export default function ChatArea({
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
 
   // Load chat history when session changes
@@ -117,9 +118,9 @@ export default function ChatArea({
     setMessages(prev => [...prev, userMessage]);
     setMessage("");
     
-    // Focus back to input and scroll to bottom
-    if (inputRef.current) {
-      inputRef.current.focus();
+    // Focus back to textarea and scroll to bottom
+    if (textareaRef.current) {
+      textareaRef.current.focus();
     }
     scrollToBottom();
 
@@ -136,7 +137,7 @@ export default function ChatArea({
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
     // Fixed height - no auto-resize to prevent stretching
   };
@@ -151,12 +152,44 @@ export default function ChatArea({
   };
 
   return (
-    <div className="bg-white h-full relative">
-      {/* Chat Messages - Fixed height with enhanced visible scrollbar */}
-      <div className="overflow-y-scroll overflow-x-hidden chat-scrollbar border-r border-gray-200" style={{ height: 'calc(100% - 100px)' }}>
-        <div className="space-y-6 p-6 pb-24">
-            {/* Welcome Screen - Only shown when there's exactly one welcome message and not in compact mode */}
-            {messages.length === 1 && messages[0].type === 'ai' && messages[0].content.includes('Welcome to the Document Extraction Chatbot') && !isCompact && (
+    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-80px)]">
+      {/* Chat Header - Always show for non-compact */}
+      {!isCompact && (
+        <div className="border-b border-gray-200 px-6 py-2 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold text-gray-900">Client Engagement Overview</h1>
+            <div className="flex items-center space-x-3">
+              <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
+                <Menu className="h-4 w-4 mr-2" />
+                Menu
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onViewAllDocs}>
+                <FolderOpen className="mr-2 h-4 w-4" />
+                View All Documents
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isCompact && (
+        <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <h1 className="text-base font-semibold text-gray-900">Chat</h1>
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
+                <Menu className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chat Messages */}
+      <div className="flex-1 overflow-hidden min-h-0">
+        <ScrollArea className="h-full">
+          <div className="space-y-4 p-6">
+            {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
               <div className="text-center py-8">
                 <div className="text-gray-500 mb-6">
                   <Bot className="w-12 h-12 mx-auto mb-2 text-primary" />
@@ -188,10 +221,7 @@ export default function ChatArea({
               </div>
             )}
             
-            {/* Regular Messages - Show all messages except the initial welcome message when in welcome mode */}
-            {(messages.length > 1 || (messages.length === 1 && !messages[0].content.includes('Welcome to the Document Extraction Chatbot'))) &&
-              messages.filter(msg => !(msg.type === 'ai' && msg.content.includes('Welcome to the Document Extraction Chatbot') && messages.length > 1))
-                .map((msg, index) => (
+            {messages.slice(1).map((msg, index) => (
               <div key={index} className="w-full">
                 <div className={`flex items-start space-x-3 ${msg.type === 'human' ? 'justify-end' : ''}`}>
                   {msg.type === 'ai' && (
@@ -265,39 +295,36 @@ export default function ChatArea({
             
             <div ref={messagesEndRef} />
           </div>
+        </ScrollArea>
       </div>
 
-      {/* Chat Input - Absolutely fixed at bottom to prevent any movement */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 px-6 py-4 z-10" style={{ height: '100px' }}>
-        <div className="max-w-4xl mx-auto h-full flex flex-col justify-center">
-          <div className="flex items-center space-x-3">
-            <div className="flex-1 relative">
-              <input
-                ref={inputRef}
-                type="text"
-                value={message}
-                onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message here..."
-                className="w-full resize-none border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-full px-4 py-3 pr-16 bg-white shadow-sm outline-none transition-all duration-200"
-                style={{ height: '48px', minHeight: '48px', maxHeight: '48px', lineHeight: '20px' }}
-              />
-            </div>
-            <Button
-              size="sm"
-              onClick={handleSendMessage}
-              disabled={!message.trim() || sendMessageMutation.isPending}
-              className="rounded-full bg-blue-600 hover:bg-blue-700 text-white p-0 flex-shrink-0 shadow-md hover:shadow-lg transition-all duration-200"
-              style={{ height: '48px', width: '48px', minHeight: '48px', minWidth: '48px' }}
-            >
-              <Send size={18} />
-            </Button>
-          </div>
-          <div className="mt-2 text-center">
-            <span className="text-xs text-gray-500">
+      {/* Chat Input - Below messages with same width */}
+      <div className="border-t border-gray-200 px-6 py-2 flex-shrink-0 bg-white">
+        <div className="flex items-center space-x-3">
+          <div className="flex-1 relative">
+            <Textarea
+              ref={textareaRef}
+              value={message}
+              onChange={handleTextareaChange}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your message here..."
+              className="resize-none border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-2 pr-40 overflow-hidden"
+              style={{ height: '40px', minHeight: '40px', maxHeight: '40px', lineHeight: '18px' }}
+              rows={1}
+            />
+            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap select-none">
               Press Enter to send, Shift+Enter for new line
             </span>
           </div>
+          <Button
+            size="sm"
+            onClick={handleSendMessage}
+            disabled={!message.trim() || sendMessageMutation.isPending}
+            className="rounded-xl p-0 flex-shrink-0"
+            style={{ height: '40px', width: '40px', minHeight: '40px', minWidth: '40px' }}
+          >
+            <Send size={16} />
+          </Button>
         </div>
       </div>
 

@@ -43,38 +43,6 @@
   --radius: 0.75rem;
 }
 
-/* Enhanced Chat Scrollbar Styles - Always Visible */
-.chat-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #9ca3af #f3f4f6;
-}
-
-.chat-scrollbar::-webkit-scrollbar {
-  width: 12px;
-  background: #f9fafb;
-}
-
-.chat-scrollbar::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
-}
-
-.chat-scrollbar::-webkit-scrollbar-thumb {
-  background: #9ca3af;
-  border-radius: 6px;
-  border: 2px solid #f3f4f6;
-  min-height: 40px;
-}
-
-.chat-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
-
-.chat-scrollbar::-webkit-scrollbar-corner {
-  background: #f3f4f6;
-}
-
 .dark {
   --background: hsl(0 0% 0%);
   --foreground: hsl(200 6.6667% 91.1765%);
