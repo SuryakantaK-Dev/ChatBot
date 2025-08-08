@@ -7,7 +7,7 @@ import LoadingTransition from "@/components/loading-transition";
 import WissenLogo from "@/components/wissen-logo";
 import { DocumentPreviewData } from "@/types";
 import { Button } from "@/components/ui/button";
-import { LogOut, User } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { clearSession } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -71,23 +71,37 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
-      {/* Header with welcome message */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <User className="h-5 w-5 text-blue-600" />
-          <h1 className="text-lg font-semibold text-gray-900">
-            Welcome {username}
-          </h1>
+      {/* Top Navigation Bar */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center">
+          <WissenLogo className="h-8" />
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleLogout}
-          className="flex items-center gap-2"
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
+        
+        <h1 className="text-lg font-semibold text-gray-900">
+          Client Engagement Overview
+        </h1>
+        
+        <div className="flex items-center space-x-4">
+          <span className="text-sm text-gray-600">
+            Welcome, {username || 'Suryakanta.Karan'}
+          </span>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setIsAllDocsModalOpen(true)}
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            View All Documents
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="text-red-600 hover:text-red-700 font-medium"
+          >
+            Logout
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">

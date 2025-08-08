@@ -152,46 +152,8 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex flex-col bg-white h-[calc(100vh-60px)]">
-      {/* Chat Header - Always show for non-compact */}
-      {!isCompact && (
-        <div className="border-b border-gray-100 px-6 py-4 flex-shrink-0 bg-white">
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-gray-900">Client Engagement Overview</h1>
-            <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onViewAllDocs}
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                View All Documents
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onToggleSidebar}
-                className="text-gray-500"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="flex flex-col bg-white h-full">
 
-      {isCompact && (
-        <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <h1 className="text-base font-semibold text-gray-900">Chat</h1>
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
-                <Menu className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-hidden min-h-0">
