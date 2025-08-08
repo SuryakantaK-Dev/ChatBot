@@ -84,7 +84,7 @@ export default function Sidebar({
 
   if (isMinimized) {
     return (
-      <div className="w-16 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-16 bg-gradient-card border-r border-gray-100 flex flex-col shadow-sm">
         {/* Minimized Header */}
         <div className="p-3 border-b border-gray-200">
           <Tooltip>
@@ -146,7 +146,7 @@ export default function Sidebar({
   }
 
   return (
-    <div className="w-80 bg-white border-r border-border flex flex-col">
+    <div className="w-80 bg-gradient-card border-r border-gray-100 flex flex-col shadow-md">
       {/* Logo/Header */}
       <div className="p-6 border-b border-border">
         <div className="flex items-center justify-between">
@@ -282,7 +282,7 @@ export default function Sidebar({
       </div>
 
       {/* Developer Info Footer - Minimal */}
-      <div className="px-2 py-1 border-t border-gray-200 bg-gray-50">
+      <div className="px-2 py-1 border-t border-gray-100 bg-white/50 backdrop-blur-sm">
         <div className="text-center text-xs text-gray-500">
           <span>Developed By - </span>
           <span className="font-medium text-gray-700">Suryakanta Karan</span>

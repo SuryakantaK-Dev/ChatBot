@@ -5,24 +5,25 @@
 
 :root {
   --background: hsl(0 0% 100%);
-  --foreground: hsl(210 25% 7.8431%);
-  --card: hsl(180 6.6667% 97.0588%);
-  --card-foreground: hsl(210 25% 7.8431%);
+  --foreground: hsl(210 30% 8%);
+  --card: hsl(220 25% 98%);
+  --card-foreground: hsl(210 30% 8%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(210 25% 7.8431%);
+  --popover-foreground: hsl(210 30% 8%);
   --primary: hsl(220 91% 56%);
   --primary-foreground: hsl(0 0% 100%);
+  --primary-light: hsl(220 91% 65%);
   --primary-dark: hsl(220 91% 45%);
-  --secondary: hsl(210 25% 7.8431%);
-  --secondary-foreground: hsl(0 0% 100%);
-  --muted: hsl(240 1.9608% 90%);
-  --muted-foreground: hsl(210 25% 7.8431%);
-  --accent: hsl(211.5789 51.3514% 92.7451%);
+  --secondary: hsl(210 20% 92%);
+  --secondary-foreground: hsl(210 30% 8%);
+  --muted: hsl(220 15% 94%);
+  --muted-foreground: hsl(210 25% 45%);
+  --accent: hsl(220 50% 96%);
   --accent-foreground: hsl(220 91% 56%);
-  --destructive: hsl(356.3033 90.5579% 54.3137%);
+  --destructive: hsl(0 85% 60%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(220 13% 91%);
-  --input: hsl(200 23.0769% 97.4510%);
+  --border: hsl(220 15% 88%);
+  --input: hsl(220 20% 97%);
   --ring: hsl(220 91% 56%);
   --chart-1: hsl(220 91% 56%);
   --chart-2: hsl(159.7826 100% 36.0784%);
@@ -80,8 +81,10 @@
   }
 
   body {
-    @apply font-sans antialiased bg-gray-50 text-foreground;
+    @apply font-sans antialiased text-foreground;
     font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, hsl(220, 20%, 97%) 0%, hsl(210, 30%, 96%) 50%, hsl(200, 25%, 95%) 100%);
+    min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -94,6 +97,10 @@
     background-color: hsl(220 91% 56%);
   }
   
+  .primary-light {
+    background-color: hsl(220 91% 65%);
+  }
+  
   .primary-dark {
     background-color: hsl(220 91% 45%);
   }
@@ -102,11 +109,24 @@
     color: hsl(220 91% 56%);
   }
   
+  .text-primary-light {
+    color: hsl(220 91% 65%);
+  }
+  
   .text-primary-dark {
     color: hsl(220 91% 45%);
   }
   
   .border-border {
-    border-color: hsl(220 13% 91%);
+    border-color: hsl(220 15% 88%);
+  }
+  
+  .bg-gradient-app {
+    background: linear-gradient(135deg, hsl(220, 30%, 98%) 0%, hsl(210, 25%, 97%) 50%, hsl(200, 20%, 96%) 100%);
+  }
+  
+  .bg-gradient-card {
+    background: linear-gradient(145deg, hsl(0, 0%, 100%) 0%, hsl(220, 25%, 99%) 100%);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   }
 }

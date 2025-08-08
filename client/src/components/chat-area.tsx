@@ -152,10 +152,10 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-80px)]">
+    <div className="flex flex-col bg-gradient-card rounded-lg shadow-md border border-gray-100 h-[calc(100vh-80px)]">
       {/* Chat Header - Always show for non-compact */}
       {!isCompact && (
-        <div className="border-b border-gray-200 px-4 py-1.5 flex-shrink-0">
+        <div className="border-b border-gray-100 px-4 py-1.5 flex-shrink-0 bg-white/50 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold text-gray-900">Client Engagement Overview</h1>
             <div className="flex items-center space-x-2">
@@ -173,7 +173,7 @@ export default function ChatArea({
       )}
 
       {isCompact && (
-        <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
+        <div className="bg-white/50 backdrop-blur-sm border-b border-gray-100 px-4 py-3 flex-shrink-0">
           <div className="flex items-center justify-between">
             <h1 className="text-base font-semibold text-gray-900">Chat</h1>
             <div className="flex items-center space-x-2">
@@ -299,7 +299,7 @@ export default function ChatArea({
       </div>
 
       {/* Chat Input - Below messages with same width */}
-      <div className="border-t border-gray-200 px-4 py-1.5 flex-shrink-0 bg-white">
+      <div className="border-t border-gray-100 px-4 py-1.5 flex-shrink-0 bg-white/80 backdrop-blur-sm">
         <div className="flex items-center space-x-3">
           <div className="flex-1 relative">
             <Textarea
