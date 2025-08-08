@@ -52,6 +52,19 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
     }
   }, [data.fileName, data.fileLink]);
 
+  // Effect to render PDF page when both PDF and canvas are ready
+  useEffect(() => {
+    const renderInitialPage = async () => {
+      if (pdfDoc && canvasRef.current && currentPage && !renderError) {
+        console.log('Both PDF and canvas ready, rendering page:', currentPage);
+        await renderPage(pdfDoc, currentPage);
+        console.log('Page rendered successfully!');
+      }
+    };
+    
+    renderInitialPage();
+  }, [pdfDoc, currentPage, zoomLevel, renderError]);
+
   // Load and render Google Drive PDF using PDF.js via backend proxy
   const loadGoogleDrivePDF = async () => {
     try {
@@ -78,10 +91,10 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
       console.log('PDF loaded successfully! Pages:', pdf.numPages);
       setPdfDoc(pdf);
       setTotalPages(pdf.numPages);
+      setCurrentPage(1);
       
-      // Render first page immediately
-      await renderPage(pdf, 1);
-      console.log('PDF first page rendered successfully!');
+      // Don't render immediately - let useEffect handle it when canvas is ready
+      console.log('PDF loaded, waiting for canvas to be ready...');
       setIsLoading(false);
     } catch (error) {
       console.error("PDF loading error:", error);
@@ -95,18 +108,28 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
 
   // Render a specific page of the PDF
   const renderPage = async (pdf: any, pageNum: number) => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current) {
+      console.log('Canvas not ready yet, skipping render');
+      return;
+    }
 
     try {
+      console.log(`Rendering PDF page ${pageNum} at zoom ${zoomLevel}%`);
       const page = await pdf.getPage(pageNum);
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       
-      if (!context) return;
+      if (!context) {
+        console.log('Canvas context not available');
+        return;
+      }
 
       const viewport = page.getViewport({ scale: zoomLevel / 100 });
       canvas.height = viewport.height;
       canvas.width = viewport.width;
+      
+      // Clear canvas first
+      context.clearRect(0, 0, canvas.width, canvas.height);
 
       const renderContext = {
         canvasContext: context,
@@ -114,10 +137,12 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
       };
 
       await page.render(renderContext).promise;
+      console.log(`Page ${pageNum} rendered successfully`);
 
       // Add highlighting overlay if this document has highlighted sections
       if (data.from && data.to) {
         await addHighlightOverlay(context, viewport, canvas, page);
+        console.log(`Highlighting applied for lines ${data.from}-${data.to}`);
       }
     } catch (error) {
       console.error("Page rendering error:", error);
