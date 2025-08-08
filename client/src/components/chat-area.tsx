@@ -155,10 +155,10 @@ export default function ChatArea({
     <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-80px)]">
       {/* Chat Header - Always show for non-compact */}
       {!isCompact && (
-        <div className="border-b border-gray-200 px-6 py-2 flex-shrink-0">
+        <div className="border-b border-gray-200 px-4 py-1.5 flex-shrink-0">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900">Client Engagement Overview</h1>
-            <div className="flex items-center space-x-3">
+            <h1 className="text-lg font-semibold text-gray-900">Client Engagement Overview</h1>
+            <div className="flex items-center space-x-2">
               <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
                 <Menu className="h-4 w-4 mr-2" />
                 Menu
@@ -188,7 +188,7 @@ export default function ChatArea({
       {/* Chat Messages */}
       <div className="flex-1 overflow-hidden min-h-0">
         <ScrollArea className="h-full">
-          <div className="space-y-4 p-6">
+          <div className="space-y-3 p-4">
             {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
               <div className="text-center py-8">
                 <div className="text-gray-500 mb-6">
@@ -231,7 +231,7 @@ export default function ChatArea({
                   )}
                   
                   <div className={`flex-1 ${msg.type === 'human' ? 'flex justify-end' : ''}`}>
-                    <div className={`max-w-2xl ${
+                    <div className={`max-w-lg ${
                       msg.type === 'human' 
                         ? 'bg-primary text-white rounded-2xl px-4 py-3' 
                         : 'bg-gray-50 rounded-2xl px-4 py-3'
@@ -282,7 +282,7 @@ export default function ChatArea({
                   <Bot className="text-white" size={16} />
                 </div>
                 <div className="flex-1">
-                  <div className="bg-gray-50 rounded-2xl px-4 py-3 max-w-2xl">
+                  <div className="bg-gray-50 rounded-2xl px-4 py-3 max-w-lg">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -299,7 +299,7 @@ export default function ChatArea({
       </div>
 
       {/* Chat Input - Below messages with same width */}
-      <div className="border-t border-gray-200 px-6 py-2 flex-shrink-0 bg-white">
+      <div className="border-t border-gray-200 px-4 py-1.5 flex-shrink-0 bg-white">
         <div className="flex items-center space-x-3">
           <div className="flex-1 relative">
             <Textarea
@@ -308,7 +308,7 @@ export default function ChatArea({
               onChange={handleTextareaChange}
               onKeyPress={handleKeyPress}
               placeholder="Type your message here..."
-              className="resize-none border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-4 py-2 pr-40 overflow-hidden"
+              className="resize-none border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-3 py-2 pr-36 overflow-hidden"
               style={{ height: '40px', minHeight: '40px', maxHeight: '40px', lineHeight: '18px' }}
               rows={1}
             />
