@@ -272,6 +272,11 @@ export default function Sidebar({
           <Plus className="mr-2 h-4 w-4" />
           New Chat
         </Button>
+        
+        {/* Developer Credit */}
+        <div className="mt-3 text-center">
+          <p className="text-xs text-gray-400">Developer By Suryakanta Karan</p>
+        </div>
       </div>
 
     </div>
