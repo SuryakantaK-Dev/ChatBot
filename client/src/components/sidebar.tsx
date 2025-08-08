@@ -84,7 +84,7 @@ export default function Sidebar({
 
   if (isMinimized) {
     return (
-      <div className="w-16 bg-gradient-card border-r border-gray-100 flex flex-col shadow-sm">
+      <div className="w-16 bg-gradient-card border-l border-r border-gray-100 flex flex-col shadow-sm">
         {/* Minimized Header */}
         <div className="p-3 border-b border-gray-200">
           <Tooltip>
@@ -146,7 +146,7 @@ export default function Sidebar({
   }
 
   return (
-    <div className="w-80 bg-gradient-card border-r border-gray-100 flex flex-col shadow-md">
+    <div className="w-80 bg-gradient-card border-l border-r border-gray-100 flex flex-col shadow-md">
       {/* Chat Sessions */}
       <div className="flex-1 overflow-hidden">
         <div className="p-4">
