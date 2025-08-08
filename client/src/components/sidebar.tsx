@@ -195,7 +195,17 @@ export default function Sidebar({
           <div className="p-4 space-y-6">
             {/* Chats Section */}
             <div>
-              <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Chats</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Chats</h3>
+                <Button
+                  onClick={onNewChat}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-8 px-3 text-xs"
+                >
+                  <Plus className="mr-1 h-3 w-3" />
+                  New Chat
+                </Button>
+              </div>
               <div className="space-y-1">
                 {documentCategories.map((category) => (
                   <div
@@ -218,23 +228,6 @@ export default function Sidebar({
         </ScrollArea>
       </div>
 
-      {/* New Chat Button */}
-      <div className="p-4 border-t border-border">
-        <Button
-          onClick={onNewChat}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-10"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          New Chat
-        </Button>
-      </div>
-
-      {/* Developer Info Footer - Ultra Minimal */}
-      <div className="px-3 py-2 border-t border-gray-100 bg-gray-50">
-        <div className="text-center text-xs text-gray-400">
-          By Suryakanta Karan
-        </div>
-      </div>
     </div>
   );
 }
