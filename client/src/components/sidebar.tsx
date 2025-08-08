@@ -258,21 +258,21 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Bottom Section - Aligned with Chat Input */}
+      {/* Bottom Section - Perfectly Aligned with Chat Input */}
       <div className="border-t border-gray-100 bg-white/50 backdrop-blur-sm">
         {/* New Chat Button */}
-        <div className="p-4">
+        <div className="px-4 py-2">
           <Button
             onClick={onNewChat}
-            className="w-full bg-primary hover:bg-primary-dark text-white"
+            className="w-full bg-primary hover:bg-primary-dark text-white h-10"
           >
             <Plus className="mr-2 h-4 w-4" />
             New Chat
           </Button>
         </div>
         
-        {/* Developer Info with Logo - Aligned with message input line */}
-        <div className="px-4 py-2 flex items-center justify-between border-t border-gray-100">
+        {/* Developer Info with Logo - Exact same height as chat input (40px) */}
+        <div className="px-4 flex items-center justify-between border-t border-gray-100" style={{ height: '40px' }}>
           <div className="flex items-center space-x-2">
             <WissenLogo className="h-4 w-auto" />
           </div>
