@@ -267,16 +267,11 @@ export default function Sidebar({
       <div className="p-4 border-t border-border">
         <Button
           onClick={onNewChat}
-          className="w-full bg-primary hover:bg-primary-dark text-white mt-2"
+          className="w-full bg-primary hover:bg-primary-dark text-white mt-8"
         >
           <Plus className="mr-2 h-4 w-4" />
           New Chat
         </Button>
-        
-        {/* Developer Credit */}
-        <div className="mt-5 text-center">
-          <p className="text-xs text-gray-400">Developed By - Suryakanta Karan</p>
-        </div>
       </div>
 
     </div>
