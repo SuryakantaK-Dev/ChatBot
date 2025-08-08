@@ -409,28 +409,10 @@ Features:
       </div>
       
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        {/* Document Info - Enhanced for overlay */}
-        <div className="p-6 flex-shrink-0">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-6 border border-blue-100">
-            <div className="flex items-center space-x-3 mb-2">
-              <FileText className="text-red-500" size={18} />
-              <span className="text-base font-semibold text-gray-900">{data.fileName}</span>
-            </div>
-            {data.from && data.to && (
-              <div className="flex items-center space-x-3 mt-3">
-                <div className="w-3 h-3 bg-yellow-400 border-2 border-yellow-600 rounded-full animate-pulse"></div>
-                <p className="text-sm font-medium text-gray-700">
-                  📍 Answer highlighted in Lines {data.from}-{data.to}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Document Content - Scrollable */}
+      <div className="flex-1 overflow-hidden flex flex-col">        
+        {/* Document Content - Scrollable - Now Full Height */}
         <div className="flex-1 overflow-hidden">
-          <div className="mx-4 mb-4 bg-white border border-gray-200 rounded-lg overflow-hidden h-full">
+          <div className="bg-white overflow-hidden h-full">
             {isLoading ? (
               <div className="flex items-center justify-center h-full bg-gray-50">
                 <div className="text-center text-gray-500">
