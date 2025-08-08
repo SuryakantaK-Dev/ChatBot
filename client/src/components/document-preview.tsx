@@ -60,7 +60,7 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
         throw new Error("Invalid Google Drive URL");
       }
 
-      setRenderError("Loading PDF text content...");
+      setRenderError("");
       
       // Try to load the PDF through the proxy
       const proxyUrl = `/api/proxy/pdf/${fileId}`;
@@ -78,11 +78,10 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
       console.log('PDF loaded successfully! Pages:', pdf.numPages);
       setPdfDoc(pdf);
       setTotalPages(pdf.numPages);
-      setRenderError("");
       
-      // Extract text content instead of rendering canvas
-      await extractTextFromPDF(pdf);
-      console.log('PDF text extracted successfully!');
+      // Render first page immediately
+      await renderPage(pdf, 1);
+      console.log('PDF first page rendered successfully!');
       setIsLoading(false);
     } catch (error) {
       console.error("PDF loading error:", error);
@@ -92,32 +91,7 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
     }
   };
 
-  // Extract text content from PDF for better readability
-  const extractTextFromPDF = async (pdf: any) => {
-    try {
-      let fullText = "";
-      
-      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        const page = await pdf.getPage(pageNum);
-        const textContent = await page.getTextContent();
-        
-        const pageText = textContent.items
-          .filter((item: any) => item.str && item.str.trim())
-          .map((item: any) => item.str)
-          .join(' ');
-        
-        if (pageText.trim()) {
-          fullText += `\n\n--- Page ${pageNum} ---\n${pageText}`;
-        }
-      }
-      
-      setDocumentContent(fullText || "No readable text found in this PDF.");
-    } catch (error) {
-      console.error("Text extraction error:", error);
-      // Fallback to canvas rendering if text extraction fails
-      await renderPage(pdf, 1);
-    }
-  };
+  // Function removed - now using visual PDF rendering with pagination
 
   // Render a specific page of the PDF
   const renderPage = async (pdf: any, pageNum: number) => {
@@ -143,39 +117,84 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
 
       // Add highlighting overlay if this document has highlighted sections
       if (data.from && data.to) {
-        addHighlightOverlay(context, viewport, canvas);
+        await addHighlightOverlay(context, viewport, canvas, page);
       }
     } catch (error) {
       console.error("Page rendering error:", error);
     }
   };
 
-  // Add highlight overlay to the rendered PDF page
-  const addHighlightOverlay = (context: CanvasRenderingContext2D, viewport: any, canvas: HTMLCanvasElement) => {
-    // This is a simplified highlighting - in a real implementation, you'd need to:
-    // 1. Extract text content from the PDF page
-    // 2. Find the specific lines mentioned in data.from/data.to
-    // 3. Calculate their positions and add precise highlights
-    // For now, we'll add a general highlight indicator
+  // Add highlight overlay for specific lines from API (e.g., 411-414)
+  const addHighlightOverlay = async (context: CanvasRenderingContext2D, viewport: any, canvas: HTMLCanvasElement, page: any) => {
+    if (!data.from || !data.to) return;
     
-    context.save();
-    context.fillStyle = 'rgba(255, 235, 59, 0.3)'; // Yellow highlight
-    context.strokeStyle = '#FFC107';
-    context.lineWidth = 2;
-    
-    // Add a highlight box in the middle area (approximate)
-    const highlightHeight = canvas.height * 0.1;
-    const highlightY = canvas.height * 0.4;
-    
-    context.fillRect(0, highlightY, canvas.width, highlightHeight);
-    context.strokeRect(0, highlightY, canvas.width, highlightHeight);
-    
-    // Add highlight label
-    context.fillStyle = '#FF6F00';
-    context.font = '14px Arial';
-    context.fillText(`Lines ${data.from}-${data.to}`, 10, highlightY - 5);
-    
-    context.restore();
+    try {
+      // Extract text content to find line positions
+      const textContent = await page.getTextContent();
+      const textItems = textContent.items;
+      
+      // Calculate approximate line positions based on text items
+      const lineHeight = 16; // Approximate line height in PDF units
+      const linesPerPage = Math.floor(viewport.height / lineHeight);
+      
+      // Calculate which lines to highlight (API provides line numbers like 411-414)
+      const startLine = data.from;
+      const endLine = data.to;
+      
+      // Estimate which page these lines might be on
+      const pageStartLine = (currentPage - 1) * linesPerPage + 1;
+      const pageEndLine = currentPage * linesPerPage;
+      
+      // If the highlighted lines are likely on this page
+      if (startLine <= pageEndLine && endLine >= pageStartLine) {
+        context.save();
+        context.fillStyle = 'rgba(255, 235, 59, 0.4)'; // Bright yellow highlight
+        context.strokeStyle = '#FFC107';
+        context.lineWidth = 3;
+        
+        // Calculate highlight position - more prominent highlighting
+        const relativeStartLine = Math.max(1, startLine - pageStartLine + 1);
+        const relativeEndLine = Math.min(linesPerPage, endLine - pageStartLine + 1);
+        
+        const highlightY = Math.max(50, (relativeStartLine - 1) * lineHeight);
+        const highlightHeight = Math.max(40, (relativeEndLine - relativeStartLine + 1) * lineHeight);
+        
+        // Add prominent highlight rectangle
+        context.fillRect(40, highlightY, canvas.width - 80, highlightHeight);
+        context.strokeRect(40, highlightY, canvas.width - 80, highlightHeight);
+        
+        // Add prominent label
+        context.fillStyle = '#FF6F00';
+        context.font = 'bold 14px Arial';
+        context.fillText(`📍 Lines ${startLine}-${endLine}`, 50, Math.max(30, highlightY - 8));
+        
+        context.restore();
+      } else {
+        // Show indicator that highlights are on another page
+        context.save();
+        context.fillStyle = 'rgba(255, 193, 7, 0.2)';
+        context.fillRect(0, 0, canvas.width, 40);
+        context.fillStyle = '#FF6F00';
+        context.font = 'bold 12px Arial';
+        context.fillText(`📍 Lines ${startLine}-${endLine} highlighted on page ${Math.ceil(startLine / linesPerPage)}`, 10, 25);
+        context.restore();
+      }
+    } catch (error) {
+      console.error('Error adding highlight overlay:', error);
+      // Fallback to simple prominent highlight
+      context.save();
+      context.fillStyle = 'rgba(255, 235, 59, 0.4)';
+      context.strokeStyle = '#FFC107';
+      context.lineWidth = 3;
+      const highlightHeight = canvas.height * 0.15;
+      const highlightY = canvas.height * 0.4;
+      context.fillRect(20, highlightY, canvas.width - 40, highlightHeight);
+      context.strokeRect(20, highlightY, canvas.width - 40, highlightHeight);
+      context.fillStyle = '#FF6F00';
+      context.font = 'bold 14px Arial';
+      context.fillText(`📍 Lines ${data.from}-${data.to}`, 30, highlightY - 10);
+      context.restore();
+    }
   };
 
   const generateSampleContent = () => {
@@ -410,30 +429,94 @@ Features:
                 </div>
               </div>
             ) : isPdf && isGoogleDriveDocument(data.fileLink) && pdfDoc ? (
-              <div className="h-full relative bg-white flex flex-col">
-                {/* PDF Text Content */}
-                <ScrollArea className="flex-1">
-                  <div className="p-4">
-                    <div 
-                      className="font-mono text-sm leading-relaxed"
-                      style={{ fontSize: `${Math.max(zoomLevel / 100 * 14, 10)}px` }}
+              <div className="h-full relative bg-gray-50 flex flex-col">
+                {/* PDF Navigation Header */}
+                <div className="flex items-center justify-between bg-gray-100 px-3 py-2 border-b flex-shrink-0">
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      onClick={() => handlePageChange(currentPage - 1)} 
+                      size="sm" 
+                      variant="outline" 
+                      disabled={currentPage <= 1}
+                      className="px-2 h-7"
                     >
-                      {documentContent ? (
-                        highlightContent(documentContent)
-                      ) : (
-                        <div className="text-center text-gray-500 py-12">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                          <p className="text-sm">Extracting text from PDF...</p>
+                      ←
+                    </Button>
+                    <span className="text-xs text-gray-600 font-medium">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button 
+                      onClick={() => handlePageChange(currentPage + 1)} 
+                      size="sm" 
+                      variant="outline" 
+                      disabled={currentPage >= totalPages}
+                      className="px-2 h-7"
+                    >
+                      →
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center space-x-1">
+                    <Button onClick={handleZoomOut} size="sm" variant="outline" disabled={zoomLevel <= 50} className="px-2 h-7">
+                      <ZoomOut size={12} />
+                    </Button>
+                    <span className="text-xs text-gray-600 min-w-[40px] text-center font-medium">{zoomLevel}%</span>
+                    <Button onClick={handleZoomIn} size="sm" variant="outline" disabled={zoomLevel >= 200} className="px-2 h-7">
+                      <ZoomIn size={12} />
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* PDF Canvas Display */}
+                <ScrollArea className="flex-1">
+                  <div className="p-4 flex justify-center">
+                    {renderError ? (
+                      <div className="flex items-center justify-center h-full text-center p-4">
+                        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm max-w-md">
+                          <FileText className="mx-auto mb-4 text-blue-500" size={48} />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">{data.fileName}</h3>
+                          
+                          {data.from && data.to && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                              <div className="flex items-center justify-center space-x-2 mb-2">
+                                <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                <span className="text-sm text-yellow-800 font-medium">
+                                  Lines {data.from}-{data.to} highlighted
+                                </span>
+                              </div>
+                              <p className="text-xs text-yellow-700">
+                                The relevant content would be highlighted when viewing the document.
+                              </p>
+                            </div>
+                          )}
+                          
+                          <p className="text-sm text-gray-600 mb-4">{renderError}</p>
+                          
+                          <Button 
+                            onClick={() => window.open(data.fileLink, '_blank')} 
+                            size="sm" 
+                            className="w-full"
+                          >
+                            <ExternalLink size={14} className="mr-1" />
+                            View in Google Drive
+                          </Button>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <canvas 
+                        ref={canvasRef}
+                        className="border border-gray-300 shadow-lg rounded"
+                        style={{ maxWidth: '100%', height: 'auto' }}
+                      />
+                    )}
                   </div>
                 </ScrollArea>
                 
-                {data.from && data.to && (
-                  <div className="absolute top-2 right-2 bg-yellow-200 border border-yellow-400 rounded px-3 py-2 text-xs text-yellow-800 shadow-sm z-10">
-                    <div className="font-medium">Lines {data.from}-{data.to}</div>
-                    <div className="text-xs opacity-75">Highlighted content shown below</div>
+                {/* Highlight Indicator */}
+                {data.from && data.to && !renderError && (
+                  <div className="absolute top-16 right-4 bg-yellow-200 border border-yellow-400 rounded px-3 py-2 text-xs text-yellow-800 shadow-sm z-10">
+                    <div className="font-medium">📍 Lines {data.from}-{data.to}</div>
+                    <div className="text-xs opacity-75">Highlighted in yellow</div>
                   </div>
                 )}
               </div>
