@@ -153,7 +153,7 @@ export default function ChatArea({
   return (
     <div className="bg-white h-full">
       {/* Chat Messages - Fixed height with visible scrollbar */}
-      <div className="overflow-y-auto overflow-x-hidden border-r border-gray-100 chat-scrollbar" style={{ height: 'calc(100% - 80px)' }}>
+      <div className="overflow-y-auto overflow-x-hidden chat-scrollbar" style={{ height: 'calc(100% - 100px)' }}>
         <div className="space-y-6 p-6 pb-4">
             {/* Welcome Screen - Only shown when there's exactly one welcome message and not in compact mode */}
             {messages.length === 1 && messages[0].type === 'ai' && messages[0].content.includes('Welcome to the Document Extraction Chatbot') && !isCompact && (
@@ -267,33 +267,37 @@ export default function ChatArea({
           </div>
       </div>
 
-      {/* Chat Input - Fixed height at bottom, completely static */}
-      <div className="border-t border-gray-100 px-6 py-4 bg-white" style={{ height: '80px' }}>
-        <div className="flex items-center space-x-3 h-full">
-          <div className="flex-1 relative">
-            <input
-              ref={inputRef}
-              type="text"
-              value={message}
-              onChange={handleInputChange}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message here..."
-              className="w-full resize-none border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg px-4 py-3 pr-44 overflow-hidden shadow-sm outline-none"
-              style={{ height: '48px', minHeight: '48px', maxHeight: '48px', lineHeight: '20px' }}
-            />
-            <span className="absolute right-16 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap select-none">
+      {/* Chat Input - Separate bottom section with distinct styling */}
+      <div className="bg-gray-50 border-t border-gray-200 px-6 py-4" style={{ minHeight: '80px' }}>
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center space-x-3">
+            <div className="flex-1 relative">
+              <input
+                ref={inputRef}
+                type="text"
+                value={message}
+                onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message here..."
+                className="w-full resize-none border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-full px-4 py-3 pr-16 bg-white shadow-sm outline-none transition-all duration-200"
+                style={{ height: '48px', minHeight: '48px', maxHeight: '48px', lineHeight: '20px' }}
+              />
+            </div>
+            <Button
+              size="sm"
+              onClick={handleSendMessage}
+              disabled={!message.trim() || sendMessageMutation.isPending}
+              className="rounded-full bg-blue-600 hover:bg-blue-700 text-white p-0 flex-shrink-0 shadow-md hover:shadow-lg transition-all duration-200"
+              style={{ height: '48px', width: '48px', minHeight: '48px', minWidth: '48px' }}
+            >
+              <Send size={18} />
+            </Button>
+          </div>
+          <div className="mt-2 text-center">
+            <span className="text-xs text-gray-500">
               Press Enter to send, Shift+Enter for new line
             </span>
           </div>
-          <Button
-            size="sm"
-            onClick={handleSendMessage}
-            disabled={!message.trim() || sendMessageMutation.isPending}
-            className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white p-0 flex-shrink-0 shadow-sm"
-            style={{ height: '48px', width: '48px', minHeight: '48px', minWidth: '48px' }}
-          >
-            <Send size={18} />
-          </Button>
         </div>
       </div>
 
