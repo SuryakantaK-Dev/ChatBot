@@ -147,30 +147,25 @@ export default function Sidebar({
 
   return (
     <div className="w-80 bg-gradient-card border-r border-gray-100 flex flex-col shadow-md">
-      {/* Header with welcome message and minimize button */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-400">Welcome, Suryakanta Karan</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleMinimize}
-            className="p-2"
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Chat Sessions - Right below logo */}
+      {/* Chat Sessions */}
       <div className="flex-1 overflow-hidden">
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-900">Chat Sessions</h3>
-            <Button variant="ghost" size="sm">
-              <Trash2 className="mr-1 h-3 w-3" />
-              Clear All
-            </Button>
+            <div className="flex items-center space-x-1">
+              <Button variant="ghost" size="sm">
+                <Trash2 className="mr-1 h-3 w-3" />
+                Clear All
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onToggleMinimize}
+                className="p-2"
+              >
+                <PanelLeftClose className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           
           {/* Search Bar */}
