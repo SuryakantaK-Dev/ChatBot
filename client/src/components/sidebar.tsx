@@ -173,33 +173,6 @@ export default function Sidebar({
     }
   ];
 
-  const workspaceCategories = [
-    {
-      id: 'client-engagement',
-      title: 'Client Engagement Overview',
-      isActive: false
-    },
-    {
-      id: 'project-milestones',
-      title: 'Project Milestones',
-      isActive: false
-    },
-    {
-      id: 'team-insights',
-      title: 'Team Collab Insights',
-      isActive: false
-    },
-    {
-      id: 'progress-summary',
-      title: 'Weekly Progress Summary',
-      isActive: false
-    },
-    {
-      id: 'feedback-log',
-      title: 'Feedback and Adjustments Log',
-      isActive: false
-    }
-  ];
 
   return (
     <div className="w-80 bg-white border-r border-border flex flex-col">
@@ -256,24 +229,6 @@ export default function Sidebar({
               </div>
             </div>
 
-            {/* Workspace Section */}
-            <div>
-              <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Workspace</h3>
-              <div className="space-y-1">
-                {workspaceCategories.map((category) => (
-                  <div
-                    key={category.id}
-                    className={`p-2 rounded-md cursor-pointer transition-colors ${
-                      category.isActive
-                        ? 'bg-gray-100 border-l-2 border-blue-500'
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="text-sm font-medium text-gray-900">{category.title}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </ScrollArea>
       </div>
