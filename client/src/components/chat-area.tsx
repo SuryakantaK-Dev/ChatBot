@@ -152,8 +152,8 @@ export default function ChatArea({
 
   return (
     <div className="bg-white h-full relative">
-      {/* Chat Messages - Fixed height with visible scrollbar */}
-      <div className="overflow-y-auto overflow-x-hidden chat-scrollbar" style={{ height: 'calc(100% - 100px)' }}>
+      {/* Chat Messages - Fixed height with enhanced visible scrollbar */}
+      <div className="overflow-y-scroll overflow-x-hidden chat-scrollbar border-r border-gray-200" style={{ height: 'calc(100% - 100px)' }}>
         <div className="space-y-6 p-6 pb-24">
             {/* Welcome Screen - Only shown when there's exactly one welcome message and not in compact mode */}
             {messages.length === 1 && messages[0].type === 'ai' && messages[0].content.includes('Welcome to the Document Extraction Chatbot') && !isCompact && (
