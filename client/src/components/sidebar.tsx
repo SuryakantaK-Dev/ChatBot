@@ -264,7 +264,7 @@ export default function Sidebar({
       </div>
 
       {/* New Chat Button */}
-      <div className="pt-12 px-4 pb-4 border-t border-border mt-8">
+      <div className="pt-3 px-4 pb-4 border-t border-border mt-8">
         <Button
           onClick={onNewChat}
           className="w-full bg-primary hover:bg-primary-dark text-white"

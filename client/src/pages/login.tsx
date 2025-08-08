@@ -159,6 +159,11 @@ export default function Login() {
             </Button>
           </form>
         </CardContent>
+        
+        {/* Developer Credit */}
+        <div className="px-6 pb-4 text-center">
+          <p className="text-xs text-gray-400">Developed By - Suryakanta Karan</p>
+        </div>
       </Card>
     </div>
   );
