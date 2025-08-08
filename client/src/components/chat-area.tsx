@@ -151,11 +151,11 @@ export default function ChatArea({
   };
 
   return (
-    <div className="relative flex flex-col bg-white h-full">
-      {/* Chat Messages - with bottom padding for fixed input */}
-      <div className="flex-1 overflow-hidden min-h-0">
+    <div className="bg-white h-full">
+      {/* Chat Messages - Fixed height to leave space for input */}
+      <div className="overflow-hidden" style={{ height: 'calc(100% - 80px)' }}>
         <ScrollArea className="h-full">
-          <div className="space-y-6 p-6 pb-20">
+          <div className="space-y-6 p-6 pb-4">
             {/* Welcome Screen - Only shown when there's exactly one welcome message and not in compact mode */}
             {messages.length === 1 && messages[0].type === 'ai' && messages[0].content.includes('Welcome to the Document Extraction Chatbot') && !isCompact && (
               <div className="text-center py-8">
@@ -269,9 +269,9 @@ export default function ChatArea({
         </ScrollArea>
       </div>
 
-      {/* Chat Input - Absolutely fixed at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 border-t border-gray-100 px-6 py-4 bg-white z-10">
-        <div className="flex items-center space-x-3">
+      {/* Chat Input - Fixed height at bottom, completely static */}
+      <div className="border-t border-gray-100 px-6 py-4 bg-white" style={{ height: '80px' }}>
+        <div className="flex items-center space-x-3 h-full">
           <div className="flex-1 relative">
             <input
               ref={inputRef}
