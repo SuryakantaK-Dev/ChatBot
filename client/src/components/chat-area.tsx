@@ -32,6 +32,8 @@ interface ChatAreaProps {
   onViewAllDocs: () => void;
   onDocumentPreview: (data: DocumentPreviewData) => void;
   isCompact: boolean;
+  messages: ChatMessage[];
+  onMessagesUpdate: (messages: ChatMessage[]) => void;
 }
 
 export default function ChatArea({
@@ -39,12 +41,11 @@ export default function ChatArea({
   onToggleSidebar,
   onViewAllDocs,
   onDocumentPreview,
-  isCompact
+  isCompact,
+  messages,
+  onMessagesUpdate
 }: ChatAreaProps) {
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   // Load chat history when session changes
@@ -53,38 +54,14 @@ export default function ChatArea({
     enabled: !!sessionId,
   });
 
-  // Send message mutation
-  const sendMessageMutation = useMutation({
-    mutationFn: async ({ chatInput, sessionId }: { chatInput: string; sessionId: string }) => {
-      try {
-        const response = await apiRequest('POST', '/api/chat', { chatInput, sessionId });
-        return await response.json();
-      } catch (error) {
-        console.error('Chat API error:', error);
-        throw error;
-      }
-    },
-    onSuccess: (aiResponse) => {
-      setMessages(prev => [...prev, aiResponse]);
-      queryClient.invalidateQueries({ queryKey: ['/api/chat', sessionId] });
-    },
-    onError: (error: any) => {
-      console.error('Send message error:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send message",
-        variant: "destructive",
-      });
-    },
-  });
 
   useEffect(() => {
     if (chatHistory && Array.isArray(chatHistory) && chatHistory.length > 0) {
       const historyMessages = chatHistory.map((session: any) => session.message);
-      setMessages(historyMessages);
+      onMessagesUpdate(historyMessages);
     } else {
       // Reset to welcome message for new sessions
-      setMessages([{
+      onMessagesUpdate([{
         type: 'ai',
         content: "Welcome to the Document Extraction Chatbot\n\nAsk me anything about your documents!",
         timestamp: Date.now()
@@ -92,11 +69,11 @@ export default function ChatArea({
     }
     // Ensure scroll to bottom after loading
     setTimeout(scrollToBottom, 200);
-  }, [sessionId, chatHistory]);
+  }, [sessionId, chatHistory, onMessagesUpdate]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, sendMessageMutation.isPending]);
+  }, [messages]);
 
   const scrollToBottom = () => {
     // Use timeout to ensure DOM is updated before scrolling
@@ -105,41 +82,6 @@ export default function ChatArea({
     }, 100);
   };
 
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
-
-    const userMessage: ChatMessage = {
-      type: 'human',
-      content: message,
-      timestamp: Date.now()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setMessage("");
-    
-    // Focus back to input and scroll to bottom
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-    scrollToBottom();
-
-    sendMessageMutation.mutate({
-      chatInput: message,
-      sessionId: sessionId
-    });
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMessage(e.target.value);
-    // Fixed height - no auto-resize to prevent stretching
-  };
 
   const handleDocumentReference = (docRef: any) => {
     onDocumentPreview({
@@ -151,11 +93,10 @@ export default function ChatArea({
   };
 
   return (
-    <div className="relative bg-white h-full">
-      {/* Chat Messages - Full height with bottom padding for fixed input */}
-      <div className="h-full overflow-hidden">
-        <ScrollArea className="h-full">
-          <div className="space-y-6 p-6 pb-24">
+    <div className="bg-white h-full">
+      {/* Chat Messages - Full height with custom scrollbar */}
+      <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <div className="space-y-6 p-6">
             {/* Welcome Screen - Only shown when there's exactly one welcome message and not in compact mode */}
             {messages.length === 1 && messages[0].type === 'ai' && messages[0].content.includes('Welcome to the Document Extraction Chatbot') && !isCompact && (
               <div className="text-center py-8">
@@ -167,24 +108,15 @@ export default function ChatArea({
                 
                 <div className="space-y-3 max-w-md mx-auto">
                   <p className="text-sm font-medium text-gray-700 mb-3">Try these sample questions:</p>
-                  <button
-                    onClick={() => setMessage("What is the rate of interest for the Company XYZ?")}
-                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                  >
+                  <div className="w-full text-left p-3 border border-gray-200 rounded-lg text-sm">
                     💰 "What is the rate of interest for the Company XYZ?"
-                  </button>
-                  <button
-                    onClick={() => setMessage("Show me the ROI of Company XYZ")}
-                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                  >
+                  </div>
+                  <div className="w-full text-left p-3 border border-gray-200 rounded-lg text-sm">
                     📊 "Show me the ROI of Company XYZ"
-                  </button>
-                  <button
-                    onClick={() => setMessage("Can you summarize the key financial metrics?")}
-                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                  >
+                  </div>
+                  <div className="w-full text-left p-3 border border-gray-200 rounded-lg text-sm">
                     📋 "Can you summarize the key financial metrics?"
-                  </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -247,57 +179,9 @@ export default function ChatArea({
               </div>
             ))}
             
-            {sendMessageMutation.isPending && (
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                  <Bot className="text-white" size={16} />
-                </div>
-                <div className="flex-1">
-                  <div className="bg-gray-50 rounded-2xl px-4 py-3 max-w-2xl">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
             <div ref={messagesEndRef} />
           </div>
-        </ScrollArea>
-      </div>
-
-      {/* Chat Input - Absolutely fixed at bottom of container, never scrolls */}
-      <div className="absolute bottom-0 left-0 right-0 border-t border-gray-100 px-6 py-4 bg-white shadow-lg" style={{ zIndex: 1000 }}>
-        <div className="flex items-center space-x-3">
-          <div className="flex-1 relative">
-            <input
-              ref={inputRef}
-              type="text"
-              value={message}
-              onChange={handleInputChange}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message here..."
-              className="w-full resize-none border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg px-4 py-3 pr-44 overflow-hidden shadow-sm outline-none"
-              style={{ height: '48px', minHeight: '48px', maxHeight: '48px', lineHeight: '20px' }}
-            />
-            <span className="absolute right-16 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap select-none">
-              Press Enter to send, Shift+Enter for new line
-            </span>
-          </div>
-          <Button
-            size="sm"
-            onClick={handleSendMessage}
-            disabled={!message.trim() || sendMessageMutation.isPending}
-            className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white p-0 flex-shrink-0 shadow-sm"
-            style={{ height: '48px', width: '48px', minHeight: '48px', minWidth: '48px' }}
-          >
-            <Send size={18} />
-          </Button>
         </div>
-      </div>
 
     </div>
   );

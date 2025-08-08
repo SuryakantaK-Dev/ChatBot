@@ -218,16 +218,6 @@ export default function Sidebar({
         </ScrollArea>
       </div>
 
-      {/* New Chat Button */}
-      <div className="p-4 border-t border-border">
-        <Button
-          onClick={onNewChat}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-10"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          New Chat
-        </Button>
-      </div>
 
     </div>
   );
