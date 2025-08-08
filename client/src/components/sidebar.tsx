@@ -147,35 +147,26 @@ export default function Sidebar({
 
   return (
     <div className="w-80 bg-gradient-card border-r border-gray-100 flex flex-col shadow-md">
-      {/* Chat Sessions Header - Moved to Top */}
+      {/* Minimal Header - Only Search and Minimize */}
       <div className="px-4 pt-4 pb-2 border-b border-gray-100 flex-shrink-0">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-gray-900">Chat Sessions</h3>
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm" className="text-xs px-2 py-1">
-              <Trash2 className="mr-1 h-3 w-3" />
-              Clear All
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onToggleMinimize}
-              className="p-1"
-            >
-              <PanelLeftClose className="h-4 w-4" />
-            </Button>
+        <div className="flex items-center justify-between">
+          <div className="relative flex-1 mr-3">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search sessions..."
+              value={historySearchQuery}
+              onChange={(e) => setHistorySearchQuery(e.target.value)}
+              className="pl-10 h-8 text-sm w-full"
+            />
           </div>
-        </div>
-        
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search sessions..."
-            value={historySearchQuery}
-            onChange={(e) => setHistorySearchQuery(e.target.value)}
-            className="pl-10 h-8 text-sm"
-          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleMinimize}
+            className="p-1 flex-shrink-0"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -183,7 +174,7 @@ export default function Sidebar({
       <div className="flex-1 overflow-hidden">
         <div className="p-4 pt-2">
 
-          <ScrollArea className="h-[calc(100vh-140px)]">
+          <ScrollArea className="h-[calc(100vh-200px)]">
             {filteredSessions.length === 0 ? (
               <div className="text-center text-gray-500 py-12">
                 <History className="mx-auto h-12 w-12 mb-2 opacity-20" />
@@ -267,22 +258,27 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* New Chat Button */}
-      <div className="p-4 border-t border-border">
-        <Button
-          onClick={onNewChat}
-          className="w-full bg-primary hover:bg-primary-dark text-white"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          New Chat
-        </Button>
-      </div>
-
-      {/* Developer Info Footer - Minimal */}
-      <div className="px-2 py-1 border-t border-gray-100 bg-white/50 backdrop-blur-sm">
-        <div className="text-center text-xs text-gray-500">
-          <span>Developed By - </span>
-          <span className="font-medium text-gray-700">Suryakanta Karan</span>
+      {/* Bottom Section - Aligned with Chat Input */}
+      <div className="border-t border-gray-100 bg-white/50 backdrop-blur-sm">
+        {/* New Chat Button */}
+        <div className="p-4">
+          <Button
+            onClick={onNewChat}
+            className="w-full bg-primary hover:bg-primary-dark text-white"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            New Chat
+          </Button>
+        </div>
+        
+        {/* Developer Info with Logo - Aligned with message input line */}
+        <div className="px-4 py-2 flex items-center justify-between border-t border-gray-100">
+          <div className="flex items-center space-x-2">
+            <WissenLogo className="h-4 w-auto" />
+          </div>
+          <p className="text-xs text-gray-500">
+            Developed By - Suryakanta Karan
+          </p>
         </div>
       </div>
     </div>
