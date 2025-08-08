@@ -274,7 +274,7 @@ export default function Sidebar({
         </Button>
         
         {/* Developer Credit */}
-        <div className="mt-4 text-center">
+        <div className="mt-5 text-center">
           <p className="text-xs text-gray-400">Developed By - Suryakanta Karan</p>
         </div>
       </div>
