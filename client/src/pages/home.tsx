@@ -7,7 +7,7 @@ import LoadingTransition from "@/components/loading-transition";
 import WissenLogo from "@/components/wissen-logo";
 import { DocumentPreviewData } from "@/types";
 import { Button } from "@/components/ui/button";
-import { LogOut, User, Search } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { clearSession } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -71,53 +71,23 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
-      {/* Top Header with Logo and Navigation */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-        {/* Left - WISSEN Logo */}
-        <div className="flex items-center">
-          <WissenLogo className="h-8 w-auto" />
+      {/* Header with welcome message */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <User className="h-5 w-5 text-blue-600" />
+          <h1 className="text-lg font-semibold text-gray-900">
+            Welcome {username}
+          </h1>
         </div>
-        
-        {/* Center - Title */}
-        <div className="flex-1 text-center">
-          <h1 className="text-xl font-semibold text-gray-900">Client Engagement Overview</h1>
-        </div>
-        
-        {/* Right - Welcome, View All Documents, Logout */}
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600">
-            Welcome, {username || 'Suryakanta Karan'}
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsAllDocsModalOpen(true)}
-            className="text-blue-600 hover:text-blue-700"
-          >
-            View All Documents
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="text-red-600 hover:text-red-700 flex items-center gap-1"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
-        </div>
-      </div>
-
-      {/* Search Bar - Below Header */}
-      <div className="bg-white border-b border-gray-100 px-6 py-2">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <input
-            type="text"
-            placeholder="Search"
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-          />
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleLogout}
+          className="flex items-center gap-2"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </Button>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
