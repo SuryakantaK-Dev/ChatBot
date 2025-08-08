@@ -4,11 +4,11 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, FileText } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Loader2, User, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import LoadingTransition from "@/components/loading-transition";
+import WissenLogo from "@/components/wissen-logo";
 
 interface LoginResponse {
   success: boolean;
@@ -23,6 +23,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [showTransition, setShowTransition] = useState(false);
   const { toast } = useToast();
 
@@ -94,63 +95,82 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex items-center justify-center mb-4">
-            <div className="bg-primary rounded-full p-3">
-              <FileText className="h-8 w-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-xl border-0">
+        <CardContent className="p-8">
+          {/* Logo Section */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <WissenLogo className="h-12" />
             </div>
+            <h1 className="text-2xl font-semibold text-gray-900 mb-2">Welcome Back</h1>
+            <p className="text-gray-600 text-sm">
+              Sign in to access your document extraction chatbot
+            </p>
           </div>
-          <CardTitle className="text-2xl font-bold">WISSEN Chatbot</CardTitle>
-          <CardDescription>
-            Sign in to access your document assistant
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Username Field */}
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
-                disabled={loginMutation.isPending}
-                required
-              />
+              <Label htmlFor="username" className="text-gray-700 font-medium">
+                Username
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
+                  disabled={loginMutation.isPending}
+                  className="pl-12 h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
             </div>
+
+            {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                disabled={loginMutation.isPending}
-                required
-              />
+              <Label htmlFor="password" className="text-gray-700 font-medium">
+                Password
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  disabled={loginMutation.isPending}
+                  className="pl-12 pr-12 h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
             
-            {/* Demo credentials info */}
-            <Alert>
-              <AlertDescription className="text-sm">
-                <strong>Demo Credentials:</strong><br />
-                Username: Suryakanta.Karan<br />
-                Password: *********
-              </AlertDescription>
-            </Alert>
-            
+            {/* Sign In Button */}
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Signing in...
                 </>
               ) : (
@@ -158,6 +178,15 @@ export default function Login() {
               )}
             </Button>
           </form>
+
+          {/* Demo Credentials Section */}
+          <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Demo Credentials:</h3>
+            <div className="text-sm text-gray-700 space-y-1">
+              <div><span className="font-medium">Username:</span> Suryakanta.Karan</div>
+              <div><span className="font-medium">Password:</span> Surya@123</div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
