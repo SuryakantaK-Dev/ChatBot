@@ -147,46 +147,43 @@ export default function Sidebar({
 
   return (
     <div className="w-80 bg-gradient-card border-r border-gray-100 flex flex-col shadow-md">
-      {/* Logo/Header */}
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <WissenLogo className="h-10" />
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleMinimize}
-            className="p-2"
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Chat History */}
-      <div className="flex-1 overflow-hidden">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-900">Chat Sessions</h3>
-            <Button variant="ghost" size="sm">
+      {/* Chat Sessions Header - Moved to Top */}
+      <div className="px-4 pt-4 pb-2 border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-gray-900">Chat Sessions</h3>
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="sm" className="text-xs px-2 py-1">
               <Trash2 className="mr-1 h-3 w-3" />
               Clear All
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleMinimize}
+              className="p-1"
+            >
+              <PanelLeftClose className="h-4 w-4" />
+            </Button>
           </div>
-          
-          {/* Search Bar */}
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search sessions..."
-              value={historySearchQuery}
-              onChange={(e) => setHistorySearchQuery(e.target.value)}
-              className="pl-10 h-8 text-sm"
-            />
-          </div>
+        </div>
+        
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search sessions..."
+            value={historySearchQuery}
+            onChange={(e) => setHistorySearchQuery(e.target.value)}
+            className="pl-10 h-8 text-sm"
+          />
+        </div>
+      </div>
 
-          <ScrollArea className="h-[calc(100vh-280px)]">
+      {/* Chat History - Full Height */}
+      <div className="flex-1 overflow-hidden">
+        <div className="p-4 pt-2">
+
+          <ScrollArea className="h-[calc(100vh-140px)]">
             {filteredSessions.length === 0 ? (
               <div className="text-center text-gray-500 py-12">
                 <History className="mx-auto h-12 w-12 mb-2 opacity-20" />

@@ -153,34 +153,14 @@ export default function ChatArea({
 
   return (
     <div className="flex flex-col bg-gradient-card rounded-lg shadow-md border border-gray-100 h-[calc(100vh-80px)]">
-      {/* Chat Header - Always show for non-compact */}
-      {!isCompact && (
-        <div className="border-b border-gray-100 px-4 py-1.5 flex-shrink-0 bg-white/50 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-gray-900">Client Engagement Overview</h1>
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
-                <Menu className="h-4 w-4 mr-2" />
-                Menu
-              </Button>
-              <Button variant="ghost" size="sm" onClick={onViewAllDocs}>
-                <FolderOpen className="mr-2 h-4 w-4" />
-                View All Documents
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
+      {/* Simple menu toggle for compact sidebar mode */}
       {isCompact && (
-        <div className="bg-white/50 backdrop-blur-sm border-b border-gray-100 px-4 py-3 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <h1 className="text-base font-semibold text-gray-900">Chat</h1>
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
-                <Menu className="h-4 w-4" />
-              </Button>
-            </div>
+        <div className="bg-white/50 backdrop-blur-sm border-b border-gray-100 px-4 py-2 flex-shrink-0">
+          <div className="flex items-center justify-end">
+            <Button variant="ghost" size="sm" onClick={onToggleSidebar}>
+              <Menu className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       )}
