@@ -147,13 +147,8 @@ export default function Sidebar({
 
   return (
     <div className="w-80 bg-gradient-card border-r border-gray-100 flex flex-col shadow-md">
-      {/* Logo Header */}
+      {/* Header with welcome message and minimize button */}
       <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-center mb-2">
-          <WissenLogo className="h-10" />
-        </div>
-        
-        {/* Welcome message with minimize button */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-400">Welcome, Suryakanta Karan</span>
           <Button
