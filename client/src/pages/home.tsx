@@ -103,20 +103,20 @@ export default function Home() {
         
         {/* Dynamic Layout Based on Document Preview State */}
         {isDocumentPreviewOpen && documentPreviewData ? (
-          // Layout when document is open: Chat on left, Document preview as right sidebar
+          // Layout when document is open: Chat on left (40%), Document preview taking middle-right (60%)
           <div className="flex-1 flex">
-            <div className="flex-1 flex justify-center items-start bg-gray-50 pt-0 pb-0">
-              <div className="w-full max-w-4xl mx-auto px-8">
+            <div className="w-2/5 flex justify-center items-start bg-gray-50 pt-0 pb-0">
+              <div className="w-full max-w-2xl mx-auto px-6">
                 <ChatArea
                   sessionId={currentSessionId}
                   onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
                   onViewAllDocs={() => setIsAllDocsModalOpen(true)}
                   onDocumentPreview={handleDocumentPreview}
-                  isCompact={false}
+                  isCompact={true}
                 />
               </div>
             </div>
-            <div className="w-96 border-l border-gray-200">
+            <div className="flex-1 border-l border-gray-200">
               <DocumentPreview
                 data={documentPreviewData}
                 onClose={handleCloseDocumentPreview}

@@ -60,7 +60,7 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
         throw new Error("Invalid Google Drive URL");
       }
 
-      setRenderError("Attempting to load PDF preview...");
+      setRenderError("Loading PDF text content...");
       
       // Try to load the PDF through the proxy
       const proxyUrl = `/api/proxy/pdf/${fileId}`;
@@ -80,15 +80,42 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
       setTotalPages(pdf.numPages);
       setRenderError("");
       
-      // Render first page
-      await renderPage(pdf, 1);
-      console.log('PDF rendered successfully!');
+      // Extract text content instead of rendering canvas
+      await extractTextFromPDF(pdf);
+      console.log('PDF text extracted successfully!');
       setIsLoading(false);
     } catch (error) {
       console.error("PDF loading error:", error);
       // Show a helpful fallback interface instead of PDF rendering
       setRenderError("PDF preview is not available for this Google Drive document. This is typically due to document privacy settings or authentication requirements.");
       setIsLoading(false);
+    }
+  };
+
+  // Extract text content from PDF for better readability
+  const extractTextFromPDF = async (pdf: any) => {
+    try {
+      let fullText = "";
+      
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        
+        const pageText = textContent.items
+          .filter((item: any) => item.str && item.str.trim())
+          .map((item: any) => item.str)
+          .join(' ');
+        
+        if (pageText.trim()) {
+          fullText += `\n\n--- Page ${pageNum} ---\n${pageText}`;
+        }
+      }
+      
+      setDocumentContent(fullText || "No readable text found in this PDF.");
+    } catch (error) {
+      console.error("Text extraction error:", error);
+      // Fallback to canvas rendering if text extraction fails
+      await renderPage(pdf, 1);
     }
   };
 
@@ -383,98 +410,30 @@ Features:
                 </div>
               </div>
             ) : isPdf && isGoogleDriveDocument(data.fileLink) && pdfDoc ? (
-              <div className="h-full relative bg-gray-50 flex flex-col">
-                {/* PDF Navigation Header */}
-                <div className="flex items-center justify-between bg-gray-100 px-3 py-2 border-b">
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      onClick={() => handlePageChange(currentPage - 1)} 
-                      size="sm" 
-                      variant="outline" 
-                      disabled={currentPage <= 1}
-                      className="px-2 h-7"
-                    >
-                      ←
-                    </Button>
-                    <span className="text-xs text-gray-600">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <Button 
-                      onClick={() => handlePageChange(currentPage + 1)} 
-                      size="sm" 
-                      variant="outline" 
-                      disabled={currentPage >= totalPages}
-                      className="px-2 h-7"
-                    >
-                      →
-                    </Button>
-                  </div>
-                  
-                  <div className="flex items-center space-x-1">
-                    <Button onClick={handleZoomOut} size="sm" variant="outline" disabled={zoomLevel <= 50} className="px-2 h-7">
-                      <ZoomOut size={12} />
-                    </Button>
-                    <span className="text-xs text-gray-600 min-w-[40px] text-center">{zoomLevel}%</span>
-                    <Button onClick={handleZoomIn} size="sm" variant="outline" disabled={zoomLevel >= 200} className="px-2 h-7">
-                      <ZoomIn size={12} />
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* PDF Canvas or Fallback Interface */}
+              <div className="h-full relative bg-white flex flex-col">
+                {/* PDF Text Content */}
                 <ScrollArea className="flex-1">
-                  <div className="p-2 flex justify-center min-h-full">
-                    {renderError ? (
-                      <div className="flex items-center justify-center h-full text-center p-4 max-w-sm">
-                        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-                          <FileText className="mx-auto mb-4 text-blue-500" size={48} />
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">{data.fileName}</h3>
-                          
-                          {data.from && data.to && (
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-                              <div className="flex items-center justify-center space-x-2 mb-2">
-                                <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                                <span className="text-sm text-yellow-800 font-medium">
-                                  Answer highlighted in document
-                                </span>
-                              </div>
-                              <p className="text-xs text-yellow-700">
-                                The relevant content has been identified and would be highlighted when viewing the document.
-                              </p>
-                            </div>
-                          )}
-                          
-                          <p className="text-sm text-gray-600 mb-4">{renderError}</p>
-                          
-                          <div className="space-y-2">
-                            <Button 
-                              onClick={() => window.open(data.fileLink, '_blank')} 
-                              size="sm" 
-                              className="w-full"
-                            >
-                              <ExternalLink size={14} className="mr-1" />
-                              View in Google Drive
-                            </Button>
-                            <p className="text-xs text-gray-500">
-                              The original document with highlighted sections is available in Google Drive
-                            </p>
-                          </div>
+                  <div className="p-4">
+                    <div 
+                      className="font-mono text-sm leading-relaxed"
+                      style={{ fontSize: `${Math.max(zoomLevel / 100 * 14, 10)}px` }}
+                    >
+                      {documentContent ? (
+                        highlightContent(documentContent)
+                      ) : (
+                        <div className="text-center text-gray-500 py-12">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                          <p className="text-sm">Extracting text from PDF...</p>
                         </div>
-                      </div>
-                    ) : (
-                      <canvas 
-                        ref={canvasRef}
-                        className="border border-gray-300 shadow-sm block"
-                        style={{ maxWidth: 'none' }}
-                      />
-                    )}
+                      )}
+                    </div>
                   </div>
                 </ScrollArea>
                 
-                {data.from && data.to && !renderError && (
-                  <div className="absolute top-12 right-4 bg-yellow-200 border border-yellow-400 rounded px-3 py-2 text-xs text-yellow-800 shadow-sm z-10">
+                {data.from && data.to && (
+                  <div className="absolute top-2 right-2 bg-yellow-200 border border-yellow-400 rounded px-3 py-2 text-xs text-yellow-800 shadow-sm z-10">
                     <div className="font-medium">Lines {data.from}-{data.to}</div>
-                    <div className="text-xs opacity-75">Navigate to find highlighted content</div>
+                    <div className="text-xs opacity-75">Highlighted content shown below</div>
                   </div>
                 )}
               </div>
@@ -549,23 +508,25 @@ Features:
         </div>
       </div>
         
-      {/* Action Buttons - Fixed at Bottom */}
-      <div className="p-4 space-y-2 border-t border-gray-200 flex-shrink-0">
-        <Button 
-          onClick={handleOpenFull}
-          className="w-full bg-primary hover:bg-primary-dark text-white"
-        >
-          <ExternalLink className="mr-2 h-4 w-4" />
-          Open Full Document
-        </Button>
-        <Button 
-          onClick={handleDownload}
-          variant="secondary"
-          className="w-full"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Download Document
-        </Button>
+      {/* Action Buttons - Fixed at Bottom - Inline */}
+      <div className="p-4 border-t border-gray-200 flex-shrink-0">
+        <div className="flex space-x-3">
+          <Button 
+            onClick={handleOpenFull}
+            className="flex-1 bg-primary hover:bg-primary-dark text-white"
+          >
+            <ExternalLink className="mr-2 h-4 w-4" />
+            Open Full Document
+          </Button>
+          <Button 
+            onClick={handleDownload}
+            variant="secondary"
+            className="flex-1"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Download Document
+          </Button>
+        </div>
       </div>
     </div>
   );
