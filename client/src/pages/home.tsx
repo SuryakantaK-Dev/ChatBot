@@ -101,42 +101,37 @@ export default function Home() {
           onDocumentPreview={handleDocumentPreview}
         />
         
-        {/* Dynamic Layout Based on Document Preview State */}
-        {isDocumentPreviewOpen && documentPreviewData ? (
-          // Layout when document is open: Chat on left (40%), Document preview taking middle-right (60%)
-          <div className="flex-1 flex">
-            <div className="w-2/5 flex justify-center items-start bg-gray-50 pt-0 pb-0">
-              <div className="w-full max-w-2xl mx-auto px-6">
-                <ChatArea
-                  sessionId={currentSessionId}
-                  onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-                  onViewAllDocs={() => setIsAllDocsModalOpen(true)}
-                  onDocumentPreview={handleDocumentPreview}
-                  isCompact={true}
+        {/* Main Chat Layout - Always Present */}
+        <div className="flex-1 flex justify-center items-start bg-gray-50 pt-0 pb-0 relative">
+          <div className="w-full max-w-4xl mx-auto px-8">
+            <ChatArea
+              sessionId={currentSessionId}
+              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+              onViewAllDocs={() => setIsAllDocsModalOpen(true)}
+              onDocumentPreview={handleDocumentPreview}
+              isCompact={false}
+            />
+          </div>
+          
+          {/* PDF Overlay - 70% width from right */}
+          {isDocumentPreviewOpen && documentPreviewData && (
+            <>
+              {/* Dimmed Backdrop */}
+              <div 
+                className="absolute inset-0 bg-black bg-opacity-40 z-40"
+                onClick={handleCloseDocumentPreview}
+              />
+              
+              {/* PDF Modal - 70% width from right side */}
+              <div className="absolute top-0 right-0 w-[70%] h-full bg-white shadow-2xl z-50 border-l border-gray-300">
+                <DocumentPreview
+                  data={documentPreviewData}
+                  onClose={handleCloseDocumentPreview}
                 />
               </div>
-            </div>
-            <div className="flex-1 border-l border-gray-200">
-              <DocumentPreview
-                data={documentPreviewData}
-                onClose={handleCloseDocumentPreview}
-              />
-            </div>
-          </div>
-        ) : (
-          // Default layout: Chat aligned with sidebar border
-          <div className="flex-1 flex justify-center items-start bg-gray-50 pt-0 pb-0">
-            <div className="w-full max-w-4xl mx-auto px-8">
-              <ChatArea
-                sessionId={currentSessionId}
-                onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-                onViewAllDocs={() => setIsAllDocsModalOpen(true)}
-                onDocumentPreview={handleDocumentPreview}
-                isCompact={false}
-              />
-            </div>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
       <DocumentListModal

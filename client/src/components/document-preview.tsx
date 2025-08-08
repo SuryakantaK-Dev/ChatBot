@@ -376,42 +376,52 @@ Features:
   };
 
   return (
-    <div className="bg-white h-full overflow-hidden flex flex-col">
-      {/* Header with Close Button */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 flex-shrink-0">
-        <h3 className="text-base font-semibold text-gray-900">Document Preview</h3>
+    <div className="bg-white h-full overflow-hidden flex flex-col shadow-2xl">
+      {/* Header with Close Button - Enhanced for overlay */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0 bg-gray-50">
+        <div className="flex items-center space-x-3">
+          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          <h3 className="text-lg font-semibold text-gray-900 ml-4">Document Preview</h3>
+        </div>
         <div className="flex items-center space-x-2">
           {(!isPdf || (isPdf && !pdfDoc)) && (
             <>
-              <Button variant="ghost" size="sm" onClick={handleZoomOut} disabled={zoomLevel <= 50} className="h-8 w-8 p-0">
-                <ZoomOut className="h-4 w-4" />
+              <Button variant="ghost" size="sm" onClick={handleZoomOut} disabled={zoomLevel <= 50} className="h-9 w-9 p-0">
+                <ZoomOut className="h-5 w-5" />
               </Button>
-              <span className="text-xs text-gray-600 min-w-[40px] text-center">{zoomLevel}%</span>
-              <Button variant="ghost" size="sm" onClick={handleZoomIn} disabled={zoomLevel >= 200} className="h-8 w-8 p-0">
-                <ZoomIn className="h-4 w-4" />
+              <span className="text-sm text-gray-600 min-w-[45px] text-center font-medium">{zoomLevel}%</span>
+              <Button variant="ghost" size="sm" onClick={handleZoomIn} disabled={zoomLevel >= 200} className="h-9 w-9 p-0">
+                <ZoomIn className="h-5 w-5" />
               </Button>
             </>
           )}
-          <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600">
-            <X className="h-4 w-4" />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onClose} 
+            className="h-9 w-9 p-0 hover:bg-red-50 hover:text-red-600 ml-2 rounded-full"
+          >
+            <X className="h-5 w-5" />
           </Button>
         </div>
       </div>
       
       {/* Content Area */}
       <div className="flex-1 overflow-hidden flex flex-col">
-        {/* Document Info */}
-        <div className="p-4 flex-shrink-0">
-          <div className="bg-gray-100 rounded-lg p-3 mb-4">
-            <div className="flex items-center space-x-2 mb-1">
-              <FileText className="text-red-500" size={14} />
-              <span className="text-xs font-medium text-gray-900">{data.fileName}</span>
+        {/* Document Info - Enhanced for overlay */}
+        <div className="p-6 flex-shrink-0">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-6 border border-blue-100">
+            <div className="flex items-center space-x-3 mb-2">
+              <FileText className="text-red-500" size={18} />
+              <span className="text-base font-semibold text-gray-900">{data.fileName}</span>
             </div>
             {data.from && data.to && (
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-yellow-200 border border-yellow-500 rounded-sm"></div>
-                <p className="text-xs text-gray-600">
-                  Answer highlighted in Lines {data.from}-{data.to}
+              <div className="flex items-center space-x-3 mt-3">
+                <div className="w-3 h-3 bg-yellow-400 border-2 border-yellow-600 rounded-full animate-pulse"></div>
+                <p className="text-sm font-medium text-gray-700">
+                  📍 Answer highlighted in Lines {data.from}-{data.to}
                 </p>
               </div>
             )}
@@ -430,19 +440,19 @@ Features:
               </div>
             ) : isPdf && isGoogleDriveDocument(data.fileLink) && pdfDoc ? (
               <div className="h-full relative bg-gray-50 flex flex-col">
-                {/* PDF Navigation Header */}
-                <div className="flex items-center justify-between bg-gray-100 px-3 py-2 border-b flex-shrink-0">
-                  <div className="flex items-center space-x-2">
+                {/* PDF Navigation Header - Enhanced */}
+                <div className="flex items-center justify-between bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 border-b flex-shrink-0 shadow-sm">
+                  <div className="flex items-center space-x-3">
                     <Button 
                       onClick={() => handlePageChange(currentPage - 1)} 
                       size="sm" 
                       variant="outline" 
                       disabled={currentPage <= 1}
-                      className="px-2 h-7"
+                      className="px-3 h-8 font-medium"
                     >
-                      ←
+                      ← Prev
                     </Button>
-                    <span className="text-xs text-gray-600 font-medium">
+                    <span className="text-sm text-gray-700 font-semibold bg-white px-3 py-1 rounded border">
                       Page {currentPage} of {totalPages}
                     </span>
                     <Button 
@@ -450,19 +460,19 @@ Features:
                       size="sm" 
                       variant="outline" 
                       disabled={currentPage >= totalPages}
-                      className="px-2 h-7"
+                      className="px-3 h-8 font-medium"
                     >
-                      →
+                      Next →
                     </Button>
                   </div>
                   
-                  <div className="flex items-center space-x-1">
-                    <Button onClick={handleZoomOut} size="sm" variant="outline" disabled={zoomLevel <= 50} className="px-2 h-7">
-                      <ZoomOut size={12} />
+                  <div className="flex items-center space-x-2">
+                    <Button onClick={handleZoomOut} size="sm" variant="outline" disabled={zoomLevel <= 50} className="px-3 h-8">
+                      <ZoomOut size={14} />
                     </Button>
-                    <span className="text-xs text-gray-600 min-w-[40px] text-center font-medium">{zoomLevel}%</span>
-                    <Button onClick={handleZoomIn} size="sm" variant="outline" disabled={zoomLevel >= 200} className="px-2 h-7">
-                      <ZoomIn size={12} />
+                    <span className="text-sm text-gray-700 min-w-[50px] text-center font-semibold bg-white px-2 py-1 rounded border">{zoomLevel}%</span>
+                    <Button onClick={handleZoomIn} size="sm" variant="outline" disabled={zoomLevel >= 200} className="px-3 h-8">
+                      <ZoomIn size={14} />
                     </Button>
                   </div>
                 </div>
@@ -512,11 +522,14 @@ Features:
                   </div>
                 </ScrollArea>
                 
-                {/* Highlight Indicator */}
+                {/* Highlight Indicator - Enhanced */}
                 {data.from && data.to && !renderError && (
-                  <div className="absolute top-16 right-4 bg-yellow-200 border border-yellow-400 rounded px-3 py-2 text-xs text-yellow-800 shadow-sm z-10">
-                    <div className="font-medium">📍 Lines {data.from}-{data.to}</div>
-                    <div className="text-xs opacity-75">Highlighted in yellow</div>
+                  <div className="absolute top-20 right-6 bg-yellow-300 border-2 border-yellow-500 rounded-lg px-4 py-3 text-sm text-yellow-900 shadow-lg z-10 animate-pulse">
+                    <div className="font-bold flex items-center space-x-2">
+                      <span>🎯</span>
+                      <span>Lines {data.from}-{data.to}</span>
+                    </div>
+                    <div className="text-xs opacity-80 mt-1">Highlighted in bright yellow</div>
                   </div>
                 )}
               </div>
@@ -591,22 +604,22 @@ Features:
         </div>
       </div>
         
-      {/* Action Buttons - Fixed at Bottom - Inline */}
-      <div className="p-4 border-t border-gray-200 flex-shrink-0">
-        <div className="flex space-x-3">
+      {/* Action Buttons - Enhanced for overlay */}
+      <div className="p-6 border-t border-gray-200 flex-shrink-0 bg-gray-50">
+        <div className="flex space-x-4">
           <Button 
             onClick={handleOpenFull}
-            className="flex-1 bg-primary hover:bg-primary-dark text-white"
+            className="flex-1 bg-primary hover:bg-primary-dark text-white h-12 text-base font-medium shadow-md"
           >
-            <ExternalLink className="mr-2 h-4 w-4" />
+            <ExternalLink className="mr-3 h-5 w-5" />
             Open Full Document
           </Button>
           <Button 
             onClick={handleDownload}
             variant="secondary"
-            className="flex-1"
+            className="flex-1 h-12 text-base font-medium shadow-md"
           >
-            <Download className="mr-2 h-4 w-4" />
+            <Download className="mr-3 h-5 w-5" />
             Download Document
           </Button>
         </div>
