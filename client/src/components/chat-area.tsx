@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -45,7 +44,7 @@ export default function ChatArea({
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   // Load chat history when session changes
@@ -118,9 +117,9 @@ export default function ChatArea({
     setMessages(prev => [...prev, userMessage]);
     setMessage("");
     
-    // Focus back to textarea and scroll to bottom
-    if (textareaRef.current) {
-      textareaRef.current.focus();
+    // Focus back to input and scroll to bottom
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
     scrollToBottom();
 
@@ -137,7 +136,7 @@ export default function ChatArea({
     }
   };
 
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
     // Fixed height - no auto-resize to prevent stretching
   };
@@ -152,13 +151,11 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex flex-col bg-white h-full">
-
-
-      {/* Chat Messages */}
+    <div className="relative flex flex-col bg-white h-full">
+      {/* Chat Messages - with bottom padding for fixed input */}
       <div className="flex-1 overflow-hidden min-h-0">
         <ScrollArea className="h-full">
-          <div className="space-y-6 p-6">
+          <div className="space-y-6 p-6 pb-20">
             {/* Welcome Screen - Only shown when there's exactly one welcome message and not in compact mode */}
             {messages.length === 1 && messages[0].type === 'ai' && messages[0].content.includes('Welcome to the Document Extraction Chatbot') && !isCompact && (
               <div className="text-center py-8">
@@ -272,19 +269,19 @@ export default function ChatArea({
         </ScrollArea>
       </div>
 
-      {/* Chat Input - Fixed position at bottom */}
-      <div className="border-t border-gray-100 px-6 py-4 flex-shrink-0 bg-white sticky bottom-0">
+      {/* Chat Input - Absolutely fixed at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 border-t border-gray-100 px-6 py-4 bg-white z-10">
         <div className="flex items-center space-x-3">
           <div className="flex-1 relative">
-            <Textarea
-              ref={textareaRef}
+            <input
+              ref={inputRef}
+              type="text"
               value={message}
-              onChange={handleTextareaChange}
+              onChange={handleInputChange}
               onKeyPress={handleKeyPress}
               placeholder="Type your message here..."
-              className="resize-none border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg px-4 py-3 pr-44 overflow-hidden shadow-sm"
+              className="w-full resize-none border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg px-4 py-3 pr-44 overflow-hidden shadow-sm outline-none"
               style={{ height: '48px', minHeight: '48px', maxHeight: '48px', lineHeight: '20px' }}
-              rows={1}
             />
             <span className="absolute right-16 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 pointer-events-none whitespace-nowrap select-none">
               Press Enter to send, Shift+Enter for new line
