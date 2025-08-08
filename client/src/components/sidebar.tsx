@@ -148,6 +148,12 @@ export default function Sidebar({
   // Document categories for organized display
   const documentCategories = [
     {
+      id: 'current-session',
+      title: 'Current Session',
+      subtitle: 'Active chat session',
+      isActive: true
+    },
+    {
       id: 'capital-questions',
       title: 'Capital Questions',
       subtitle: 'What is the capital of France?',
@@ -164,12 +170,6 @@ export default function Sidebar({
       title: 'Tata Industries Board',
       subtitle: 'Key directors in Tata board',
       isActive: false
-    },
-    {
-      id: 'current-session',
-      title: 'Current Session',
-      subtitle: 'Active chat session',
-      isActive: true
     }
   ];
 
