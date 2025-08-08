@@ -74,9 +74,9 @@ export default function Home() {
       {/* Header with welcome message */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <User className="h-5 w-5 text-blue-600" />
+          <WissenLogo className="h-6 w-auto" />
           <h1 className="text-lg font-semibold text-gray-900">
-            Welcome {username}
+            WISSEN
           </h1>
         </div>
         <Button
