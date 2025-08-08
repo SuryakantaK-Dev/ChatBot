@@ -147,12 +147,15 @@ export default function Sidebar({
 
   return (
     <div className="w-80 bg-gradient-card border-r border-gray-100 flex flex-col shadow-md">
-      {/* Logo/Header */}
-      <div className="p-6 border-b border-border">
+      {/* Logo Header */}
+      <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-center mb-2">
+          <WissenLogo className="h-10" />
+        </div>
+        
+        {/* Welcome message with minimize button */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <WissenLogo className="h-10" />
-          </div>
+          <span className="text-sm text-gray-400">Welcome, Suryakanta Karan</span>
           <Button
             variant="ghost"
             size="sm"
@@ -164,7 +167,7 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Chat History */}
+      {/* Chat Sessions - Right below logo */}
       <div className="flex-1 overflow-hidden">
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
@@ -281,13 +284,6 @@ export default function Sidebar({
         </Button>
       </div>
 
-      {/* Developer Info Footer - Minimal */}
-      <div className="px-2 py-1 border-t border-gray-100 bg-white/50 backdrop-blur-sm">
-        <div className="text-center text-xs text-gray-500">
-          <span>Developed By - </span>
-          <span className="font-medium text-gray-700">Suryakanta Karan</span>
-        </div>
-      </div>
     </div>
   );
 }
