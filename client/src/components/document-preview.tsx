@@ -146,7 +146,7 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
     // Add highlight label
     context.fillStyle = '#FF6F00';
     context.font = '14px Arial';
-    context.fillText('Highlighted Content', 10, highlightY - 5);
+    context.fillText(`Lines ${data.from}-${data.to}`, 10, highlightY - 5);
     
     context.restore();
   };
@@ -330,234 +330,242 @@ Features:
   };
 
   return (
-    <div className="flex-1 bg-white border-l border-border">
-      <div className="flex items-center justify-between p-3 border-b border-border">
-        <h3 className="text-sm font-semibold text-gray-900">Document Preview</h3>
-        <div className="flex items-center space-x-1">
+    <div className="bg-white h-full overflow-hidden flex flex-col">
+      {/* Header with Close Button */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 flex-shrink-0">
+        <h3 className="text-base font-semibold text-gray-900">Document Preview</h3>
+        <div className="flex items-center space-x-2">
           {(!isPdf || (isPdf && !pdfDoc)) && (
             <>
-              <Button variant="ghost" size="sm" onClick={handleZoomOut} disabled={zoomLevel <= 50} className="h-7 w-7 p-0">
-                <ZoomOut className="h-3 w-3" />
+              <Button variant="ghost" size="sm" onClick={handleZoomOut} disabled={zoomLevel <= 50} className="h-8 w-8 p-0">
+                <ZoomOut className="h-4 w-4" />
               </Button>
-              <span className="text-xs text-gray-600 min-w-[35px] text-center">{zoomLevel}%</span>
-              <Button variant="ghost" size="sm" onClick={handleZoomIn} disabled={zoomLevel >= 200} className="h-7 w-7 p-0">
-                <ZoomIn className="h-3 w-3" />
+              <span className="text-xs text-gray-600 min-w-[40px] text-center">{zoomLevel}%</span>
+              <Button variant="ghost" size="sm" onClick={handleZoomIn} disabled={zoomLevel >= 200} className="h-8 w-8 p-0">
+                <ZoomIn className="h-4 w-4" />
               </Button>
             </>
           )}
-          <Button variant="ghost" size="sm" onClick={onClose} className="h-7 w-7 p-0">
-            <X className="h-3 w-3" />
+          <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600">
+            <X className="h-4 w-4" />
           </Button>
         </div>
       </div>
       
-      <div className="p-3">
-        <div className="bg-gray-100 rounded-lg p-2 mb-3">
-          <div className="flex items-center space-x-2 mb-1">
-            <FileText className="text-red-500" size={14} />
-            <span className="text-xs font-medium text-gray-900">{data.fileName}</span>
-          </div>
-          {data.from && data.to && (
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-yellow-200 border border-yellow-500 rounded-sm"></div>
-              <p className="text-xs text-gray-600">
-                Lines {data.from}-{data.to}
-              </p>
+      {/* Content Area */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {/* Document Info */}
+        <div className="p-4 flex-shrink-0">
+          <div className="bg-gray-100 rounded-lg p-3 mb-4">
+            <div className="flex items-center space-x-2 mb-1">
+              <FileText className="text-red-500" size={14} />
+              <span className="text-xs font-medium text-gray-900">{data.fileName}</span>
             </div>
-          )}
+            {data.from && data.to && (
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-yellow-200 border border-yellow-500 rounded-sm"></div>
+                <p className="text-xs text-gray-600">
+                  Answer highlighted in Lines {data.from}-{data.to}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
         
-        {/* Document Content */}
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-96 bg-gray-50">
-              <div className="text-center text-gray-500">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                <p className="text-sm">Loading document...</p>
+        {/* Document Content - Scrollable */}
+        <div className="flex-1 overflow-hidden">
+          <div className="mx-4 mb-4 bg-white border border-gray-200 rounded-lg overflow-hidden h-full">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-full bg-gray-50">
+                <div className="text-center text-gray-500">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                  <p className="text-sm">Loading document...</p>
+                </div>
               </div>
-            </div>
-          ) : isPdf && isGoogleDriveDocument(data.fileLink) && pdfDoc ? (
-            <div className="h-[400px] relative bg-gray-50 flex flex-col">
-              {/* PDF Navigation Header */}
-              <div className="flex items-center justify-between bg-gray-100 px-3 py-2 border-b">
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    onClick={() => handlePageChange(currentPage - 1)} 
-                    size="sm" 
-                    variant="outline" 
-                    disabled={currentPage <= 1}
-                    className="px-2 h-7"
-                  >
-                    ←
-                  </Button>
-                  <span className="text-xs text-gray-600">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <Button 
-                    onClick={() => handlePageChange(currentPage + 1)} 
-                    size="sm" 
-                    variant="outline" 
-                    disabled={currentPage >= totalPages}
-                    className="px-2 h-7"
-                  >
-                    →
-                  </Button>
+            ) : isPdf && isGoogleDriveDocument(data.fileLink) && pdfDoc ? (
+              <div className="h-full relative bg-gray-50 flex flex-col">
+                {/* PDF Navigation Header */}
+                <div className="flex items-center justify-between bg-gray-100 px-3 py-2 border-b">
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      onClick={() => handlePageChange(currentPage - 1)} 
+                      size="sm" 
+                      variant="outline" 
+                      disabled={currentPage <= 1}
+                      className="px-2 h-7"
+                    >
+                      ←
+                    </Button>
+                    <span className="text-xs text-gray-600">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button 
+                      onClick={() => handlePageChange(currentPage + 1)} 
+                      size="sm" 
+                      variant="outline" 
+                      disabled={currentPage >= totalPages}
+                      className="px-2 h-7"
+                    >
+                      →
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center space-x-1">
+                    <Button onClick={handleZoomOut} size="sm" variant="outline" disabled={zoomLevel <= 50} className="px-2 h-7">
+                      <ZoomOut size={12} />
+                    </Button>
+                    <span className="text-xs text-gray-600 min-w-[40px] text-center">{zoomLevel}%</span>
+                    <Button onClick={handleZoomIn} size="sm" variant="outline" disabled={zoomLevel >= 200} className="px-2 h-7">
+                      <ZoomIn size={12} />
+                    </Button>
+                  </div>
                 </div>
                 
-                <div className="flex items-center space-x-1">
-                  <Button onClick={handleZoomOut} size="sm" variant="outline" disabled={zoomLevel <= 50} className="px-2 h-7">
-                    <ZoomOut size={12} />
-                  </Button>
-                  <span className="text-xs text-gray-600 min-w-[40px] text-center">{zoomLevel}%</span>
-                  <Button onClick={handleZoomIn} size="sm" variant="outline" disabled={zoomLevel >= 200} className="px-2 h-7">
-                    <ZoomIn size={12} />
-                  </Button>
-                </div>
+                {/* PDF Canvas or Fallback Interface */}
+                <ScrollArea className="flex-1">
+                  <div className="p-2 flex justify-center min-h-full">
+                    {renderError ? (
+                      <div className="flex items-center justify-center h-full text-center p-4 max-w-sm">
+                        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                          <FileText className="mx-auto mb-4 text-blue-500" size={48} />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">{data.fileName}</h3>
+                          
+                          {data.from && data.to && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                              <div className="flex items-center justify-center space-x-2 mb-2">
+                                <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                <span className="text-sm text-yellow-800 font-medium">
+                                  Answer highlighted in document
+                                </span>
+                              </div>
+                              <p className="text-xs text-yellow-700">
+                                The relevant content has been identified and would be highlighted when viewing the document.
+                              </p>
+                            </div>
+                          )}
+                          
+                          <p className="text-sm text-gray-600 mb-4">{renderError}</p>
+                          
+                          <div className="space-y-2">
+                            <Button 
+                              onClick={() => window.open(data.fileLink, '_blank')} 
+                              size="sm" 
+                              className="w-full"
+                            >
+                              <ExternalLink size={14} className="mr-1" />
+                              View in Google Drive
+                            </Button>
+                            <p className="text-xs text-gray-500">
+                              The original document with highlighted sections is available in Google Drive
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <canvas 
+                        ref={canvasRef}
+                        className="border border-gray-300 shadow-sm block"
+                        style={{ maxWidth: 'none' }}
+                      />
+                    )}
+                  </div>
+                </ScrollArea>
+                
+                {data.from && data.to && !renderError && (
+                  <div className="absolute top-12 right-4 bg-yellow-200 border border-yellow-400 rounded px-3 py-2 text-xs text-yellow-800 shadow-sm z-10">
+                    <div className="font-medium">Lines {data.from}-{data.to}</div>
+                    <div className="text-xs opacity-75">Navigate to find highlighted content</div>
+                  </div>
+                )}
               </div>
-              
-              {/* PDF Canvas or Fallback Interface */}
-              <ScrollArea className="flex-1">
-                <div className="p-2 flex justify-center min-h-full">
-                {renderError ? (
-                  <div className="flex items-center justify-center h-full text-center p-4 max-w-md">
-                    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+            ) : isGoogleDriveDocument(data.fileLink) ? (
+              <div className="h-full relative bg-white">
+                <iframe
+                  src={getEmbedUrl(data.fileLink)}
+                  className="w-full h-full border-0"
+                  title={data.fileName}
+                  onLoad={() => setIsLoading(false)}
+                  onError={() => setIsLoading(false)}
+                  allow="autoplay"
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                />
+                
+                {/* Overlay with document info */}
+                {!isLoading && (
+                  <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center">
+                    <div className="text-center text-gray-500 max-w-sm mx-auto p-6">
                       <FileText className="mx-auto mb-4 text-blue-500" size={48} />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">{data.fileName}</h3>
-                      
+                      <p className="text-sm text-gray-600 mb-4">
+                        Google Drive Document
+                      </p>
                       {data.from && data.to && (
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-                          <div className="flex items-center justify-center space-x-2 mb-2">
+                        <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4">
+                          <div className="flex items-center justify-center space-x-2">
                             <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                             <span className="text-sm text-yellow-800 font-medium">
                               Answer highlighted in document
                             </span>
                           </div>
-                          <p className="text-xs text-yellow-700">
-                            The relevant content has been identified and would be highlighted when viewing the document.
-                          </p>
                         </div>
                       )}
-                      
-                      <p className="text-sm text-gray-600 mb-4">{renderError}</p>
-                      
-                      <div className="space-y-2">
-                        <Button 
-                          onClick={() => window.open(data.fileLink, '_blank')} 
-                          size="sm" 
-                          className="w-full"
-                        >
-                          <ExternalLink size={14} className="mr-1" />
-                          View in Google Drive
-                        </Button>
-                        <p className="text-xs text-gray-500">
-                          The original document with highlighted sections is available in Google Drive
-                        </p>
+                      <p className="text-xs text-gray-500 mb-4">
+                        Due to Google Drive security settings, preview may not be available for all documents.
+                      </p>
+                      <div className="text-xs text-blue-600 font-medium">
+                        Use "Open Full Document" to view in Google Drive
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <canvas 
-                    ref={canvasRef}
-                    className="border border-gray-300 shadow-sm block"
-                    style={{ maxWidth: 'none' }}
-                  />
                 )}
+                
+                {data.from && data.to && (
+                  <div className="absolute top-2 right-2 bg-yellow-200 border border-yellow-400 rounded px-2 py-1 text-xs text-yellow-800 shadow-sm z-10">
+                    Highlighted Content
+                  </div>
+                )}
+              </div>
+            ) : isPdf ? (
+              <div className="h-full relative">
+                <iframe
+                  src={`${data.fileLink}#view=FitH&zoom=${zoomLevel}`}
+                  className="w-full h-full"
+                  title={data.fileName}
+                  onLoad={() => setIsLoading(false)}
+                  onError={() => setIsLoading(false)}
+                />
+              </div>
+            ) : (
+              <ScrollArea className="h-full">
+                <div 
+                  className="font-sans text-sm"
+                  style={{ fontSize: `${zoomLevel}%` }}
+                >
+                  {highlightContent(documentContent)}
                 </div>
               </ScrollArea>
-              
-              {data.from && data.to && !renderError && (
-                <div className="absolute top-12 right-4 bg-yellow-200 border border-yellow-400 rounded px-3 py-2 text-xs text-yellow-800 shadow-sm z-10">
-                  <div className="font-medium">Lines {data.from}-{data.to}</div>
-                  <div className="text-xs opacity-75">Navigate to find highlighted content</div>
-                </div>
-              )}
-            </div>
-          ) : isGoogleDriveDocument(data.fileLink) ? (
-            <div className="h-[600px] relative bg-white">
-              <iframe
-                src={getEmbedUrl(data.fileLink)}
-                className="w-full h-full border-0"
-                title={data.fileName}
-                onLoad={() => setIsLoading(false)}
-                onError={() => setIsLoading(false)}
-                allow="autoplay"
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-              />
-              
-              {/* Overlay with document info */}
-              {!isLoading && (
-                <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center">
-                  <div className="text-center text-gray-500 max-w-sm mx-auto p-6">
-                    <FileText className="mx-auto mb-4 text-blue-500" size={48} />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">{data.fileName}</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Google Drive Document
-                    </p>
-                    {data.from && data.to && (
-                      <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4">
-                        <div className="flex items-center justify-center space-x-2">
-                          <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                          <span className="text-sm text-yellow-800 font-medium">
-                            Answer highlighted in document
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    <p className="text-xs text-gray-500 mb-4">
-                      Due to Google Drive security settings, preview may not be available for all documents.
-                    </p>
-                    <div className="text-xs text-blue-600 font-medium">
-                      Use "Open Full Document" to view in Google Drive
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {data.from && data.to && (
-                <div className="absolute top-2 right-2 bg-yellow-200 border border-yellow-400 rounded px-2 py-1 text-xs text-yellow-800 shadow-sm z-10">
-                  Highlighted Content
-                </div>
-              )}
-            </div>
-          ) : isPdf ? (
-            <div className="h-[600px] relative">
-              <iframe
-                src={`${data.fileLink}#view=FitH&zoom=${zoomLevel}`}
-                className="w-full h-full"
-                title={data.fileName}
-                onLoad={() => setIsLoading(false)}
-                onError={() => setIsLoading(false)}
-              />
-            </div>
-          ) : (
-            <ScrollArea className="h-[600px]">
-              <div 
-                className="font-sans text-sm"
-                style={{ fontSize: `${zoomLevel}%` }}
-              >
-                {highlightContent(documentContent)}
-              </div>
-            </ScrollArea>
-          )}
+            )}
+          </div>
         </div>
+      </div>
         
-        <div className="mt-4 space-y-2">
-          <Button 
-            onClick={handleOpenFull}
-            className="w-full bg-primary hover:bg-primary-dark text-white"
-          >
-            <ExternalLink className="mr-2 h-4 w-4" />
-            Open Full Document
-          </Button>
-          <Button 
-            onClick={handleDownload}
-            variant="secondary"
-            className="w-full"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Download Document
-          </Button>
-        </div>
+      {/* Action Buttons - Fixed at Bottom */}
+      <div className="p-4 space-y-2 border-t border-gray-200 flex-shrink-0">
+        <Button 
+          onClick={handleOpenFull}
+          className="w-full bg-primary hover:bg-primary-dark text-white"
+        >
+          <ExternalLink className="mr-2 h-4 w-4" />
+          Open Full Document
+        </Button>
+        <Button 
+          onClick={handleDownload}
+          variant="secondary"
+          className="w-full"
+        >
+          <Download className="mr-2 h-4 w-4" />
+          Download Document
+        </Button>
       </div>
     </div>
   );
