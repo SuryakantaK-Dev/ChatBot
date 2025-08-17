@@ -28,6 +28,8 @@ interface SidebarProps {
   onNewChat: () => void;
   onToggleMinimize: () => void;
   onDocumentPreview: (data: any) => void;
+  sessionPreviews: { [sessionId: string]: string };
+  sessions: string[];
 }
 
 export default function Sidebar({ 
@@ -36,17 +38,14 @@ export default function Sidebar({
   currentSessionId, 
   onSessionChange, 
   onNewChat,
-  onToggleMinimize
+  onToggleMinimize,
+  onDocumentPreview,
+  sessionPreviews,
+  sessions
 }: SidebarProps) {
   const [historySearchQuery, setHistorySearchQuery] = useState("");
   const [historyPage, setHistoryPage] = useState(1);
   const itemsPerPage = 5;
-
-  // Fetch chat sessions
-  const { data: sessions = [] } = useQuery({
-    queryKey: ['/api/sessions'],
-    queryFn: sessionsApi.getAll,
-  });
 
   // Delete session mutation
   const deleteSessionMutation = useMutation({
@@ -65,10 +64,11 @@ export default function Sidebar({
     return date.toLocaleString();
   };
 
-  // Filter and paginate sessions
-  const filteredSessions = sessions.filter(sessionId =>
-    sessionId.toLowerCase().includes(historySearchQuery.toLowerCase())
-  );
+  // Filter and paginate sessions by preview text
+  const filteredSessions = sessions.filter(sessionId => {
+    const preview = sessionPreviews[sessionId] || '';
+    return preview.toLowerCase().startsWith(historySearchQuery.toLowerCase());
+  });
   const totalHistoryPages = Math.ceil(filteredSessions.length / itemsPerPage);
   const paginatedSessions = filteredSessions.slice(
     (historyPage - 1) * itemsPerPage,
@@ -202,7 +202,9 @@ export default function Sidebar({
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          Session {sessionId.split('_')[2]?.slice(0, 6) || 'Unknown'}
+                          {sessionPreviews[sessionId]
+                            ? sessionPreviews[sessionId].slice(0, 30) + (sessionPreviews[sessionId].length > 30 ? '...' : '')
+                            : 'No preview'}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                           {formatSessionTime(sessionId)}

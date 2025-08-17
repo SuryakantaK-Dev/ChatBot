@@ -81,15 +81,66 @@ function generateMockChatResponse(userInput: string): ChatResponse {
     };
   }
   
-  // Default response for general questions
+  // Handle greetings and general questions
+  if (input.includes("hello") || input.includes("hi") || input.includes("hey") || input.includes("good morning") || input.includes("good afternoon") || input.includes("good evening")) {
+    return {
+      output: `\`\`\`json
+{
+  "answer": "Hello! I'm your AI document assistant. I can help you search through your uploaded documents and answer questions about contracts, financial reports, project proposals, and more. What would you like to know?",
+  "FileID": null,
+  "FileName": null,
+  "FileLink": null,
+  "From": null,
+  "To": null
+}
+\`\`\``
+    };
+  }
+  
+  // Handle help requests
+  if (input.includes("help") || input.includes("what can you do") || input.includes("how do you work")) {
+    return {
+      output: `\`\`\`json
+{
+  "answer": "I can help you find information from your uploaded documents. Try asking specific questions like: 'What are the contract terms for late delivery?', 'What's our Q3 budget status?', 'What's the project timeline?', or 'Show me the financial report details.' I'll search through your documents and provide relevant answers with source references.",
+  "FileID": null,
+  "FileName": null,
+  "FileLink": null,
+  "From": null,
+  "To": null
+}
+\`\`\``
+    };
+  }
+  
+  // Handle Tata Industries specific questions
+  if (input.includes("tata") || input.includes("director") || input.includes("board")) {
+    return {
+      output: `\`\`\`json
+{
+  "answer": "Based on the Tata Industries board documentation, the key directors include Mr. Ratan Tata (Chairman), Mr. Natarajan Chandrasekaran (CEO), and Ms. Aarthi Sivanandh (CFO). The board structure includes 12 members with diverse expertise in technology, finance, and operations.",
+  "FileID": "TATA_BOARD_2024",
+  "FileName": "Tata_Industries_Board_Structure.pdf",
+  "FileLink": "https://drive.google.com/file/d/TATA_BOARD_2024/view",
+  "From": 15,
+  "To": 28
+}
+\`\`\``
+    };
+  }
+  
+  // Default response for general questions - always return JSON format
   return {
-    output: `I can help you find information from your uploaded documents. Try asking questions about contracts, financial reports, project proposals, or any specific topics mentioned in your documents. For example:
-
-- "What are the contract terms for late delivery?"
-- "What's our Q3 budget status?"
-- "What's the project timeline?"
-
-I'll search through your documents and provide relevant answers with source references.`
+    output: `\`\`\`json
+{
+  "answer": "Hello! I'm your document assistant. I can help you find information from your uploaded documents. Try asking specific questions about contracts, financial reports, project proposals, or any topics mentioned in your documents. For example: 'What are the contract terms for late delivery?' or 'What's our Q3 budget status?'",
+  "FileID": null,
+  "FileName": null,
+  "FileLink": null,
+  "From": null,
+  "To": null
+}
+\`\`\``
   };
 }
 
@@ -297,21 +348,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const apiUrl = `http://localhost:5678/webhook/chatbot-api?chatInput=${encodeURIComponent(chatInput)}&sessionId=${encodeURIComponent(sessionId)}`;
         
+        console.log(`[DEBUG] Attempting to call external API: ${apiUrl}`);
+        console.log(`[DEBUG] Request payload:`, { chatInput, sessionId });
+        
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          signal: AbortSignal.timeout(3000) // 3 second timeout
+          signal: AbortSignal.timeout(30000) // 30 second timeout for N8N service
         });
 
+        console.log(`[DEBUG] Response status: ${response.status} ${response.statusText}`);
+        console.log(`[DEBUG] Response headers:`, Object.fromEntries(response.headers.entries()));
+
         if (response.ok) {
-          chatResponse = await response.json();
+          const responseText = await response.text();
+          console.log(`[DEBUG] Response body:`, responseText);
+          
+          try {
+            chatResponse = JSON.parse(responseText);
+            console.log(`[DEBUG] Parsed response:`, chatResponse);
+          } catch (parseError) {
+            console.error(`[ERROR] Failed to parse JSON response:`, parseError);
+            throw new Error(`Invalid JSON response from chatbot API`);
+          }
         } else {
-          throw new Error(`Chatbot API error: ${response.statusText}`);
+          const errorText = await response.text();
+          console.error(`[ERROR] Chatbot API error: ${response.status} ${response.statusText}`);
+          console.error(`[ERROR] Error response body:`, errorText);
+          throw new Error(`Chatbot API error: ${response.status} ${response.statusText}`);
         }
       } catch (fetchError) {
-        console.warn("External chatbot service unavailable, using mock response");
+        console.error(`[ERROR] Failed to call external chatbot service:`, fetchError);
+        console.warn("[WARN] External chatbot service unavailable, using mock response");
         
         // Generate mock responses based on user input
         chatResponse = generateMockChatResponse(chatInput);
@@ -326,23 +396,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Try to parse JSON from output if it contains structured data
       try {
-        const jsonMatch = chatResponse.output.match(/```json\n([\s\S]*?)\n```/);
-        if (jsonMatch) {
-          const parsedData = JSON.parse(jsonMatch[1]);
-          if (parsedData.answer) {
-            aiMessage = {
-              type: 'ai',
-              content: parsedData.answer,
-              timestamp: Date.now(),
-              documentReference: parsedData.FileID ? {
-                fileId: parsedData.FileID,
-                fileName: parsedData.FileName,
-                fileLink: parsedData.FileLink,
-                from: parsedData.From,
-                to: parsedData.To
-              } : undefined
-            };
+        let parsedData = null;
+        
+        // First, try to parse the response as direct JSON
+        try {
+          parsedData = JSON.parse(chatResponse.output);
+        } catch (directParseError) {
+          // If direct parsing fails, try to extract JSON from markdown code blocks
+          const jsonMatch = chatResponse.output.match(/```json\n([\s\S]*?)\n```/);
+          if (jsonMatch) {
+            parsedData = JSON.parse(jsonMatch[1]);
           }
+        }
+        
+        if (parsedData && parsedData.answer) {
+          // Clean up markdown formatting for better display but preserve important bold values
+          let cleanAnswer = parsedData.answer
+            .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+            .replace(/```(.*?)```/g, '$1') // Remove code blocks  
+            .replace(/`(.*?)`/g, '$1'); // Remove inline code
+          // Note: We keep **bold** formatting intact for values like **$60,000** and section headers
+          
+          aiMessage = {
+            type: 'ai',
+            content: cleanAnswer,
+            timestamp: Date.now(),
+            documentReference: parsedData.FileID && parsedData.FileID !== "Not Applicable" ? {
+              fileId: parsedData.FileID,
+              fileName: parsedData.FileName,
+              fileLink: parsedData.FileLink,
+              from: parsedData.From,
+              to: parsedData.To
+            } : undefined
+          };
         }
       } catch (parseError) {
         console.warn("Could not parse structured response:", parseError);
@@ -375,6 +461,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         error: "Failed to fetch chat history",
         message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Test endpoint to check if external chatbot service is reachable
+  app.get("/api/test-chatbot-service", async (req, res) => {
+    try {
+      console.log("[DEBUG] Testing connection to external chatbot service...");
+      
+      const testUrl = "http://localhost:5678/webhook/chatbot-api";
+      const response = await fetch(testUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chatInput: "test",
+          sessionId: "test-session"
+        }),
+        signal: AbortSignal.timeout(5000) // 5 second timeout for testing
+      });
+
+      console.log(`[DEBUG] Test response status: ${response.status} ${response.statusText}`);
+      
+      if (response.ok) {
+        const responseText = await response.text();
+        console.log(`[DEBUG] Test response body:`, responseText);
+        
+        res.json({
+          status: "success",
+          message: "External chatbot service is reachable",
+          responseStatus: response.status,
+          responseBody: responseText
+        });
+      } else {
+        const errorText = await response.text();
+        res.status(502).json({
+          status: "error",
+          message: "External chatbot service returned error",
+          responseStatus: response.status,
+          responseStatusText: response.statusText,
+          errorBody: errorText
+        });
+      }
+    } catch (error) {
+      console.error("[ERROR] Test failed:", error);
+      res.status(503).json({
+        status: "error",
+        message: "External chatbot service is not reachable",
+        error: error instanceof Error ? error.message : "Unknown error"
       });
     }
   });

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Sidebar from "@/components/sidebar";
 import ChatArea from "@/components/chat-area";
 import DocumentPreview from "@/components/document-preview";
@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
 import { clearSession } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { chatApi } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { sessionsApi } from "@/lib/api";
 
 export default function Home() {
   const [currentSessionId, setCurrentSessionId] = useState<string>("");
@@ -21,6 +24,14 @@ export default function Home() {
   const [showLogoutTransition, setShowLogoutTransition] = useState(false);
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const { toast } = useToast();
+  // Add sessionPreviews state
+  const [sessionPreviews, setSessionPreviews] = useState<{ [sessionId: string]: string }>({});
+  const [createdSessions, setCreatedSessions] = useState<string[]>([]);
+  // Fetch sessions here
+  const { data: sessions = [] } = useQuery({
+    queryKey: ['/api/sessions'],
+    queryFn: sessionsApi.getAll,
+  });
 
   useEffect(() => {
     // Generate initial session ID
@@ -33,11 +44,33 @@ export default function Home() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!Array.isArray(sessions)) return;
+    sessions.forEach(async (sessionId) => {
+      if (!sessionPreviews[sessionId]) {
+        try {
+          const history = await chatApi.getHistory(sessionId);
+          if (Array.isArray(history) && history.length > 0 && history[0].message?.content) {
+            setSessionPreviews(prev => ({
+              ...prev,
+              [sessionId]: history[0].message.content
+            }));
+          }
+        } catch (e) {
+          // ignore errors for now
+        }
+      }
+    });
+  }, [sessions]);
+
   const generateSessionId = () => {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   };
 
   const handleNewChat = () => {
+    if (currentSessionId && !createdSessions.includes(currentSessionId)) {
+      setCreatedSessions(prev => [...prev, currentSessionId]);
+    }
     setCurrentSessionId(generateSessionId());
   };
 
@@ -69,6 +102,11 @@ export default function Home() {
     return <LoadingTransition message="Logging you out securely..." duration={1500} />;
   }
 
+  const mergedSessions = useMemo(() => {
+    const set = new Set([...sessions, ...createdSessions]);
+    return Array.from(set);
+  }, [sessions, createdSessions]);
+
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       {/* Header with welcome message */}
@@ -99,6 +137,8 @@ export default function Home() {
           onNewChat={handleNewChat}
           onToggleMinimize={() => setIsSidebarMinimized(!isSidebarMinimized)}
           onDocumentPreview={handleDocumentPreview}
+          sessionPreviews={sessionPreviews}
+          sessions={mergedSessions}
         />
         
         {/* Main Chat Layout - Always Present */}
@@ -110,6 +150,8 @@ export default function Home() {
               onViewAllDocs={() => setIsAllDocsModalOpen(true)}
               onDocumentPreview={handleDocumentPreview}
               isCompact={false}
+              sessionPreviews={sessionPreviews}
+              setSessionPreviews={setSessionPreviews}
             />
           </div>
           

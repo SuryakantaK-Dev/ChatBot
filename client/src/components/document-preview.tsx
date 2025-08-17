@@ -370,6 +370,10 @@ Features:
     return url.includes('drive.google.com/file/d/');
   };
 
+  const isWebSearchResult = (fileId: string) => {
+    return fileId === "WebSearch" || fileId === "NoFileID";
+  };
+
   const highlightContent = (content: string) => {
     const lines = content.split('\n');
     
@@ -408,7 +412,9 @@ Features:
           <div className="w-3 h-3 bg-red-500 rounded-full"></div>
           <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
           <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          <h3 className="text-lg font-semibold text-gray-900 ml-4">Document Preview</h3>
+          <h3 className="text-lg font-semibold text-gray-900 ml-4">
+            {isWebSearchResult(data.fileId) ? "Web Search Results" : "Document Preview"}
+          </h3>
         </div>
         <div className="flex items-center space-x-2">
           {(!isPdf || (isPdf && !pdfDoc)) && (
@@ -540,6 +546,38 @@ Features:
                   </div>
                 )}
               </div>
+            ) : isWebSearchResult(data.fileId) ? (
+              <div className="h-full relative bg-white">
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center text-gray-600 max-w-md mx-auto p-8">
+                    <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                      <ExternalLink className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Web Search Results</h3>
+                    <p className="text-sm text-gray-600 mb-6">
+                      This information was found through web search. Click the button below to view the search results.
+                    </p>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                      <div className="flex items-center justify-center space-x-2 mb-2">
+                        <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                        <span className="text-sm text-blue-800 font-medium">
+                          Web Search Source
+                        </span>
+                      </div>
+                      <p className="text-xs text-blue-700">
+                        Information gathered from multiple web sources for accuracy.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={() => window.open(data.fileLink, '_blank')}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3"
+                    >
+                      <ExternalLink className="mr-2 h-5 w-5" />
+                      View Web Search Results
+                    </Button>
+                  </div>
+                </div>
+              </div>
             ) : isGoogleDriveDocument(data.fileLink) ? (
               <div className="h-full relative bg-white">
                 <iframe
@@ -614,21 +652,33 @@ Features:
       {/* Action Buttons - Enhanced for overlay */}
       <div className="p-6 border-t border-gray-200 flex-shrink-0 bg-gray-50">
         <div className="flex space-x-4">
-          <Button 
-            onClick={handleOpenFull}
-            className="flex-1 bg-primary hover:bg-primary-dark text-white h-12 text-base font-medium shadow-md"
-          >
-            <ExternalLink className="mr-3 h-5 w-5" />
-            Open Full Document
-          </Button>
-          <Button 
-            onClick={handleDownload}
-            variant="secondary"
-            className="flex-1 h-12 text-base font-medium shadow-md"
-          >
-            <Download className="mr-3 h-5 w-5" />
-            Download Document
-          </Button>
+          {isWebSearchResult(data.fileId) ? (
+            <Button 
+              onClick={() => window.open(data.fileLink, '_blank')}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-12 text-base font-medium shadow-md"
+            >
+              <ExternalLink className="mr-3 h-5 w-5" />
+              View Web Search Results
+            </Button>
+          ) : (
+            <>
+              <Button 
+                onClick={handleOpenFull}
+                className="flex-1 bg-primary hover:bg-primary-dark text-white h-12 text-base font-medium shadow-md"
+              >
+                <ExternalLink className="mr-3 h-5 w-5" />
+                Open Full Document
+              </Button>
+              <Button 
+                onClick={handleDownload}
+                variant="secondary"
+                className="flex-1 h-12 text-base font-medium shadow-md"
+              >
+                <Download className="mr-3 h-5 w-5" />
+                Download Document
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

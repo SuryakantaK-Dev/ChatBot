@@ -33,6 +33,8 @@ interface ChatAreaProps {
   onViewAllDocs: () => void;
   onDocumentPreview: (data: DocumentPreviewData) => void;
   isCompact: boolean;
+  sessionPreviews: { [sessionId: string]: string };
+  setSessionPreviews: (previews: { [sessionId: string]: string }) => void;
 }
 
 export default function ChatArea({
@@ -40,7 +42,9 @@ export default function ChatArea({
   onToggleSidebar,
   onViewAllDocs,
   onDocumentPreview,
-  isCompact
+  isCompact,
+  sessionPreviews,
+  setSessionPreviews
 }: ChatAreaProps) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -83,6 +87,13 @@ export default function ChatArea({
     if (chatHistory && Array.isArray(chatHistory) && chatHistory.length > 0) {
       const historyMessages = chatHistory.map((session: any) => session.message);
       setMessages(historyMessages);
+      // Update sessionPreviews with the first message for this session
+      if (historyMessages[0]?.content) {
+        setSessionPreviews({
+          ...sessionPreviews,
+          [sessionId]: historyMessages[0].content
+        });
+      }
     } else {
       // Reset to welcome message for new sessions
       setMessages([{
@@ -151,6 +162,25 @@ export default function ChatArea({
     });
   };
 
+  // Function to render message content with markdown bold formatting
+  const renderMessageContent = (content: string) => {
+    // Split the content by **bold** markers
+    const parts = content.split(/(\*\*.*?\*\*)/g);
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        // Remove the ** markers and render as bold
+        const boldContent = part.slice(2, -2);
+        return (
+          <strong key={index} className="font-semibold text-gray-900">
+            {boldContent}
+          </strong>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
     <div className="flex flex-col bg-gradient-card rounded-lg shadow-md border border-gray-100 h-[calc(100vh-80px)]">
       {/* Chat Header - Always show for non-compact */}
@@ -188,8 +218,8 @@ export default function ChatArea({
       {/* Chat Messages */}
       <div className="flex-1 overflow-hidden min-h-0">
         <ScrollArea className="h-full">
-          <div className="space-y-3 p-4">
-            {messages.length === 1 && messages[0].type === 'ai' && !isCompact && (
+          <div className="space-y-1 p-4">
+            {messages.length === 1 && messages[0].type === 'ai' && messages[0].content.includes('Welcome') && !isCompact && (
               <div className="text-center py-8">
                 <div className="text-gray-500 mb-6">
                   <Bot className="w-12 h-12 mx-auto mb-2 text-primary" />
@@ -198,45 +228,53 @@ export default function ChatArea({
                 <p className="text-sm text-gray-500 mb-6">Ask me anything about your documents!</p>
                 
                 <div className="space-y-3 max-w-md mx-auto">
-                  <p className="text-sm font-medium text-gray-700 mb-3">Try these sample questions:</p>
+                  <p className="text-xs font-medium text-gray-700 mb-2">Try these sample questions:</p>
                   <button
-                    onClick={() => setMessage("What is the rate of interest for the Company XYZ?")}
-                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                    onClick={() => setMessage("Who is Suryakanta Karan?")}
+                    className="w-full text-left p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-xs"
                   >
-                    💰 "What is the rate of interest for the Company XYZ?"
+                    👤 "Who is Suryakanta Karan?"
                   </button>
                   <button
-                    onClick={() => setMessage("Show me the ROI of Company XYZ")}
-                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                    onClick={() => setMessage("Where is Mumbai located?")}
+                    className="w-full text-left p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-xs"
                   >
-                    📊 "Show me the ROI of Company XYZ"
+                    🌍 "Where is Mumbai located?"
                   </button>
                   <button
-                    onClick={() => setMessage("Can you summarize the key financial metrics?")}
-                    className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                    onClick={() => setMessage("What are the contract terms?")}
+                    className="w-full text-left p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-xs"
                   >
-                    📋 "Can you summarize the key financial metrics?"
+                    📄 "What are the contract terms?"
                   </button>
                 </div>
               </div>
             )}
             
-            {messages.slice(1).map((msg, index) => (
+            {messages.map((msg, index) => (
               <div key={index} className="w-full">
-                <div className={`flex items-start space-x-3 ${msg.type === 'human' ? 'justify-end' : ''}`}>
+                <div className={`flex items-start space-x-2 ${msg.type === 'human' ? 'justify-end' : ''}`}>
                   {msg.type === 'ai' && (
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                      <Bot className="text-white" size={16} />
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                      <Bot className="text-white" size={12} />
                     </div>
                   )}
                   
                   <div className={`flex-1 ${msg.type === 'human' ? 'flex justify-end' : ''}`}>
-                    <div className={`max-w-lg ${
+                    <div className={`max-w-md ${
                       msg.type === 'human' 
-                        ? 'bg-primary text-white rounded-2xl px-4 py-3' 
-                        : 'bg-gray-50 rounded-2xl px-4 py-3'
+                        ? 'bg-primary text-white rounded-2xl px-2 py-1.5' 
+                        : 'bg-gray-50 rounded-2xl px-2 py-1.5'
                     }`}>
-                      <p className={`whitespace-pre-line ${msg.type === 'human' ? 'text-white' : 'text-gray-800'}`}>{msg.content}</p>
+                      <div className={`whitespace-pre-line ${msg.type === 'human' ? 'text-white text-xs' : 'text-gray-800 text-xs'}`}>
+                        {msg.type === 'human' ? 
+                          msg.content : 
+                          (msg.content.includes('Welcome') && messages.length > 1 ? 
+                            'Welcome to the Document Extraction Chatbot! Ask me anything about your documents.' : 
+                            renderMessageContent(msg.content)
+                          )
+                        }
+                      </div>
                       
                       {msg.documentReference && (
                         <div className="bg-white border border-gray-200 rounded-lg p-3 mt-3">
@@ -268,8 +306,8 @@ export default function ChatArea({
                   </div>
                   
                   {msg.type === 'human' && (
-                    <div className="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                      <User className="text-gray-600" size={16} />
+                    <div className="flex-shrink-0 w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                      <User className="text-gray-600" size={12} />
                     </div>
                   )}
                 </div>

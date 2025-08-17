@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WISSEN Document Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif']
+                    },
+                    colors: {
+                        'primary': '#2563eb',
+                        'primary-dark': '#1e40af',
+                        'sidebar': '#f8fafc',
+                        'border': '#e2e8f0'
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="font-inter bg-gray-50 h-screen overflow-hidden">
+    
+    <!-- @COMPONENT: MainLayout -->
+    <div class="flex h-full">
+        
+        <!-- @COMPONENT: Sidebar -->
+        <div id="sidebar" class="w-80 bg-white border-r border-border flex flex-col transition-all duration-300">
+            
+            <!-- @COMPONENT: Logo/Header -->
+            <div class="p-6 border-b border-border">
+                <div class="flex items-center space-x-3">
+                    <div class="text-2xl font-bold text-gray-800">
+                        WISSEN <span class="text-primary">W</span>
+                    </div>
+                </div>
+                <h2 class="text-sm font-medium text-gray-600 mt-2">Document Chatbot</h2>
+            </div>
+
+            <!-- @COMPONENT: Navigation Tabs -->
+            <div class="px-4 py-4 border-b border-border">
+                <div class="flex bg-gray-100 rounded-lg p-1">
+                    <button id="documentsTab" class="flex-1 px-3 py-2 text-sm font-medium rounded-md bg-white text-gray-900 shadow-sm transition-colors">
+                        <i class="fas fa-file-alt mr-2"></i>Documents
+                    </button>
+                    <button id="historyTab" class="flex-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-history mr-2"></i>History
+                    </button>
+                </div>
+            </div>
+
+            <!-- @COMPONENT: DocumentsList -->
+            <div id="documentsPanel" class="flex-1 overflow-y-auto">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-gray-900">Available Documents</h3>
+                        <button class="text-primary hover:text-primary-dark text-sm font-medium">
+                            <i class="fas fa-refresh mr-1"></i>Refresh
+                        </button>
+                    </div>
+                    
+                    <!-- @MAP: documents.map(doc => ( -->
+                    <div class="space-y-2">
+                        <div class="group p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-blue-50 cursor-pointer transition-all duration-200" data-mock="true">
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-file-pdf text-red-500 text-lg"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate" data-bind="doc.name">US_TERMS_COND-0056.pdf</p>
+                                    <p class="text-xs text-gray-500 mt-1">PDF • 2.4 MB</p>
+                                    <p class="text-xs text-gray-400 mt-1">Uploaded 2 days ago</p>
+                                </div>
+                                <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-external-link-alt text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="group p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-blue-50 cursor-pointer transition-all duration-200" data-mock="true">
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-file-excel text-green-600 text-lg"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">ADGT3435667.xlsx</p>
+                                    <p class="text-xs text-gray-500 mt-1">XLSX • 1.2 MB</p>
+                                    <p class="text-xs text-gray-400 mt-1">Uploaded 1 day ago</p>
+                                </div>
+                                <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-external-link-alt text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="group p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-blue-50 cursor-pointer transition-all duration-200" data-mock="true">
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-file-word text-blue-600 text-lg"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">Contract_Analysis_Q4.docx</p>
+                                    <p class="text-xs text-gray-500 mt-1">DOCX • 890 KB</p>
+                                    <p class="text-xs text-gray-400 mt-1">Uploaded 3 days ago</p>
+                                </div>
+                                <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-external-link-alt text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+
+            <!-- @COMPONENT: ChatHistoryPanel -->
+            <div id="historyPanel" class="flex-1 overflow-y-auto hidden">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-gray-900">Chat Sessions</h3>
+                        <button class="text-primary hover:text-primary-dark text-sm font-medium">
+                            <i class="fas fa-trash mr-1"></i>Clear All
+                        </button>
+                    </div>
+                    
+                    <!-- @MAP: sessions.map(session => ( -->
+                    <div class="space-y-2">
+                        <div class="group p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-blue-50 cursor-pointer transition-all duration-200" data-mock="true">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">Contract terms discussion</p>
+                                    <p class="text-xs text-gray-500 mt-1">12 messages</p>
+                                    <p class="text-xs text-gray-400 mt-1">2 hours ago</p>
+                                </div>
+                                <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="text-gray-400 hover:text-red-500">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="group p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-blue-50 cursor-pointer transition-all duration-200" data-mock="true">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">Rate analysis for XYZ</p>
+                                    <p class="text-xs text-gray-500 mt-1">8 messages</p>
+                                    <p class="text-xs text-gray-400 mt-1">1 day ago</p>
+                                </div>
+                                <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="text-gray-400 hover:text-red-500">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+
+            <!-- @COMPONENT: NewChatButton -->
+            <div class="p-4 border-t border-border">
+                <button id="newChatBtn" class="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                    <i class="fas fa-plus mr-2"></i>
+                    New Chat
+                </button>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Sidebar -->
+
+        <!-- @COMPONENT: MainChatArea -->
+        <div class="flex-1 flex flex-col">
+            
+            <!-- @COMPONENT: ChatHeader -->
+            <div class="bg-white border-b border-border px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-lg font-semibold text-gray-900">Document Q&A Assistant</h1>
+                        <p class="text-sm text-gray-600">Ask questions about your uploaded documents</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button id="toggleSidebar" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <button id="viewAllDocs" class="text-primary hover:text-primary-dark text-sm font-medium">
+                            <i class="fas fa-folder-open mr-1"></i>View All Documents
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- @COMPONENT: ChatMessages -->
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- @STATE: messages: Array<Message> = [] -->
+                
+                <!-- Welcome Message -->
+                <div class="flex items-start space-x-3" data-mock="true">
+                    <div class="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-2xl">
+                            <p class="text-gray-800">Hello! I'm your document assistant. I can help you find information from your uploaded documents. What would you like to know?</p>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">AI Assistant • Just now</p>
+                    </div>
+                </div>
+
+                <!-- Sample User Message -->
+                <div class="flex items-start space-x-3 justify-end" data-mock="true">
+                    <div class="flex-1 flex justify-end">
+                        <div class="bg-primary text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-2xl">
+                            <p>What was the Rate of Interest for the Company XYZ?</p>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-gray-600 text-sm"></i>
+                    </div>
+                </div>
+
+                <!-- Sample AI Response with Document Reference -->
+                <div class="flex items-start space-x-3" data-mock="true">
+                    <div class="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-2xl">
+                            <p class="text-gray-800 mb-3">The ROI of the Company XYZ is 15%.</p>
+                            <div class="bg-white border border-gray-200 rounded-lg p-3">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <i class="fas fa-file-pdf text-red-500"></i>
+                                    <span class="text-sm font-medium text-gray-900">US_TERMS_COND-0056.pdf</span>
+                                </div>
+                                <button class="text-primary hover:text-primary-dark text-sm font-medium flex items-center">
+                                    <i class="fas fa-external-link-alt mr-1"></i>
+                                    View Document (Lines 411-414)
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">AI Assistant • 2 minutes ago</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- @COMPONENT: ChatInput -->
+            <div class="bg-white border-t border-border p-6">
+                <div class="flex items-end space-x-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <textarea 
+                                id="messageInput" 
+                                placeholder="Type your message here..."
+                                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                                rows="1"
+                                data-implementation="Auto-resize based on content, max 4 rows"></textarea>
+                            <button 
+                                id="sendMessage"
+                                class="absolute right-3 bottom-3 p-1.5 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors duration-200"
+                                data-event="click:sendMessage">
+                                <i class="fas fa-paper-plane text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Press Enter to send, Shift+Enter for new line</p>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: MainChatArea -->
+
+        <!-- @COMPONENT: DocumentPreviewPanel (Hidden by default) -->
+        <div id="documentPreview" class="w-96 bg-white border-l border-border hidden">
+            <div class="flex items-center justify-between p-4 border-b border-border">
+                <h3 class="text-lg font-semibold text-gray-900">Document Preview</h3>
+                <button id="closePreview" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-4">
+                <div class="bg-gray-100 rounded-lg p-3 mb-4">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fas fa-file-pdf text-red-500"></i>
+                        <span class="text-sm font-medium text-gray-900">US_TERMS_COND-0056.pdf</span>
+                    </div>
+                    <p class="text-xs text-gray-600">Showing highlighted content (Lines 411-414)</p>
+                </div>
+                
+                <!-- @FUNCTIONALITY: PDF.js integration for embedded PDF viewing -->
+                <div class="bg-white border border-gray-200 rounded-lg h-96 flex items-center justify-center">
+                    <div class="text-center text-gray-500">
+                        <i class="fas fa-file-pdf text-4xl mb-3"></i>
+                        <p class="text-sm">PDF Preview</p>
+                        <p class="text-xs text-gray-400 mt-1">Lines 411-414 highlighted</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4 space-y-2">
+                    <button class="w-full bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-external-link-alt mr-2"></i>
+                        Open Full Document
+                    </button>
+                    <button class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-download mr-2"></i>
+                        Download Document
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: DocumentPreviewPanel -->
+    </div>
+    <!-- @END_COMPONENT: MainLayout -->
+
+    <!-- @COMPONENT: DocumentListModal -->
+    <div id="allDocsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-96 overflow-hidden">
+                <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">All Documents</h3>
+                    <button id="closeAllDocsModal" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6 overflow-y-auto max-h-80">
+                    <div class="space-y-3">
+                        <!-- @MAP: allDocuments.map(doc => ( -->
+                        <div class="flex items-center space-x-4 p-3 rounded-lg border border-gray-200 hover:bg-gray-50" data-mock="true">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-file-pdf text-red-500 text-lg"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">DFBG1000400.pdf</p>
+                                <p class="text-xs text-gray-500">uploaded by Person Name | 12/06/2025 at 12:00 PM</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="text-primary hover:text-primary-dark">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-4 p-3 rounded-lg border border-gray-200 hover:bg-gray-50" data-mock="true">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-file-excel text-green-600 text-lg"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">ADGT3435667.xlsx</p>
+                                <p class="text-xs text-gray-500">uploaded by Person Name | 10/05/2025 at 12:00 PM</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="text-primary hover:text-primary-dark">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: DocumentListModal -->
+
+    <script>
+        (function() {
+            // TODO: Implement API integrations, state management, and business logic
+            
+            // UI State Management
+            let currentSessionId = generateSessionId();
+            let isDocumentPreviewOpen = false;
+            
+            // DOM Elements
+            const sidebar = document.getElementById('sidebar');
+            const documentsTab = document.getElementById('documentsTab');
+            const historyTab = document.getElementById('historyTab');
+            const documentsPanel = document.getElementById('documentsPanel');
+            const historyPanel = document.getElementById('historyPanel');
+            const toggleSidebarBtn = document.getElementById('toggleSidebar');
+            const viewAllDocsBtn = document.getElementById('viewAllDocs');
+            const allDocsModal = document.getElementById('allDocsModal');
+            const closeAllDocsModalBtn = document.getElementById('closeAllDocsModal');
+            const documentPreview = document.getElementById('documentPreview');
+            const closePreviewBtn = document.getElementById('closePreview');
+            const messageInput = document.getElementById('messageInput');
+            const sendMessageBtn = document.getElementById('sendMessage');
+            const newChatBtn = document.getElementById('newChatBtn');
+            const chatMessages = document.getElementById('chatMessages');
+
+            // Tab switching functionality
+            documentsTab.addEventListener('click', () => {
+                documentsTab.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                documentsTab.classList.remove('text-gray-600');
+                historyTab.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                historyTab.classList.add('text-gray-600');
+                documentsPanel.classList.remove('hidden');
+                historyPanel.classList.add('hidden');
+            });
+
+            historyTab.addEventListener('click', () => {
+                historyTab.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                historyTab.classList.remove('text-gray-600');
+                documentsTab.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                documentsTab.classList.add('text-gray-600');
+                historyPanel.classList.remove('hidden');
+                documentsPanel.classList.add('hidden');
+            });
+
+            // Sidebar toggle
+            toggleSidebarBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+
+            // Modal handlers
+            viewAllDocsBtn.addEventListener('click', () => {
+                allDocsModal.classList.remove('hidden');
+            });
+
+            closeAllDocsModalBtn.addEventListener('click', () => {
+                allDocsModal.classList.add('hidden');
+            });
+
+            // Document preview handlers
+            closePreviewBtn.addEventListener('click', () => {
+                documentPreview.classList.add('hidden');
+                isDocumentPreviewOpen = false;
+            });
+
+            // Message input auto-resize
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 96) + 'px';
+            });
+
+            // Send message handlers
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message) {
+                    // TODO: Implement chat API call to POST /webhook/chatbot-api
+                    addUserMessage(message);
+                    messageInput.value = '';
+                    messageInput.style.height = 'auto';
+                    
+                    // Simulate AI response
+                    setTimeout(() => {
+                        simulateAIResponse();
+                    }, 1000);
+                }
+            }
+
+            sendMessageBtn.addEventListener('click', sendMessage);
+            
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // New chat functionality
+            newChatBtn.addEventListener('click', () => {
+                currentSessionId = generateSessionId();
+                chatMessages.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-2xl">
+                                <p class="text-gray-800">Hello! I'm your document assistant. I can help you find information from your uploaded documents. What would you like to know?</p>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">AI Assistant • Just now</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Helper functions
+            function generateSessionId() {
+                return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            function addUserMessage(message) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'flex items-start space-x-3 justify-end';
+                messageElement.innerHTML = `
+                    <div class="flex-1 flex justify-end">
+                        <div class="bg-primary text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-2xl">
+                            <p>${message}</p>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-gray-600 text-sm"></i>
+                    </div>
+                `;
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function simulateAIResponse() {
+                // TODO: Replace with actual API call to POST /webhook/chatbot-api
+                const responses = [
+                    'I found that information in the document. Let me show you the relevant section.',
+                    'Based on the uploaded documents, here\'s what I found...',
+                    'I couldn\'t find specific information about that in your documents. Let me search the web for you.'
+                ];
+                
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                
+                const messageElement = document.createElement('div');
+                messageElement.className = 'flex items-start space-x-3';
+                messageElement.innerHTML = `
+                    <div class="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-2xl">
+                            <p class="text-gray-800">${randomResponse}</p>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">AI Assistant • Just now</p>
+                    </div>
+                `;
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Document click handlers
+            document.addEventListener('click', (e) => {
+                // Document list item clicks
+                if (e.target.closest('[data-mock="true"]') && e.target.closest('#documentsPanel')) {
+                    documentPreview.classList.remove('hidden');
+                    isDocumentPreviewOpen = true;
+                }
+                
+                // Modal backdrop clicks
+                if (e.target === allDocsModal) {
+                    allDocsModal.classList.add('hidden');
+                }
+            });
+
+            // Initialize app
+            console.log('Document Chatbot UI initialized with session:', currentSessionId);
+        })();
+    </script>
+</body>
+</html>
