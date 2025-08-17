@@ -207,7 +207,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const output = $input.first().json.output || '';\n\nlet parsedOutput;\ntry {\n  // Attempt to parse the output as JSON\n  parsedOutput = JSON.parse(output);\n} catch (e) {\n  // If parsing fails, log the error and treat as plain text (or handle as needed)\n  console.error('Failed to parse AI output as JSON:', e);\n  // Fallback: if it's not valid JSON, assume it's a direct answer for now, or handle as plain text\n  return [{ callWebSearch: false, stopFlow: true, answer: output, chatInput: $('Set max chunks to send to model').first().json.chatInput }];\n}\n\n// Check if the parsed output indicates a WebSearch tool call\nif (parsedOutput.tool === 'WebSearch') {\n  return [{ callWebSearch: true, stopFlow: false, query: parsedOutput.query }];\n} else {\n  // Otherwise, assume it's a direct answer from RAG\n  return [{\n    callWebSearch: false,\n    stopFlow: true,\n    answer: parsedOutput.answer,\n    source: parsedOutput.source, // Include source information if available\n    chatInput: $('Set max chunks to send to model').first().json.chatInput\n  }];\n}"}]}}}
+        "jsCode": "const output = $input.first().json.output || '';\n\nif (output.startsWith('Tool: WebSearch:')) {\n  return [{ callWebSearch: true, stopFlow: false, query: output.replace('Tool: WebSearch:', '').trim() }];\n}\n\n// If it's a direct answer from RAG:\nreturn [{ callWebSearch: false, stopFlow: true, answer: output ,\n  chatInput :  $('Set max chunks to send to model').first().json.chatInput} ];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
