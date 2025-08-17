@@ -14,6 +14,7 @@ export interface ChatMessage {
     from: number;
     to: number;
   };
+  searchInfo?: string; // Information about web search results including URLs
 }
 
 export interface ChatSession {

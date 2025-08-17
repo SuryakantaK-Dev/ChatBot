@@ -11,8 +11,8 @@ import { LogOut, User } from "lucide-react";
 import { clearSession } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { chatApi } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
-import { sessionsApi } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query"; // Ensure useQuery is imported
+import { sessionsApi } from "@/lib/api"; // Ensure sessionsApi is imported
 
 export default function Home() {
   const [currentSessionId, setCurrentSessionId] = useState<string>("");
@@ -27,16 +27,26 @@ export default function Home() {
   // Add sessionPreviews state
   const [sessionPreviews, setSessionPreviews] = useState<{ [sessionId: string]: string }>({});
   const [createdSessions, setCreatedSessions] = useState<string[]>([]);
-  // Fetch sessions here
+
+  // ALL HOOKS MUST BE DECLARED HERE, AT THE TOP LEVEL OF THE COMPONENT
+
+  // Fetch sessions here (this useQuery was already here)
   const { data: sessions = [] } = useQuery({
     queryKey: ['/api/sessions'],
     queryFn: sessionsApi.getAll,
   });
 
+  // This useMemo MUST be before any conditional returns
+  const mergedSessions = useMemo(() => {
+    const set = new Set([...sessions, ...createdSessions]);
+    return Array.from(set);
+  }, [sessions, createdSessions]);
+
+  // This useEffect (for initial session ID and username) MUST be before any conditional returns
   useEffect(() => {
     // Generate initial session ID
     setCurrentSessionId(generateSessionId());
-    
+
     // Get username from session storage
     const storedUsername = sessionStorage.getItem('username');
     if (storedUsername) {
@@ -44,6 +54,7 @@ export default function Home() {
     }
   }, []);
 
+  // This useEffect (for fetching session history previews) MUST be before any conditional returns
   useEffect(() => {
     if (!Array.isArray(sessions)) return;
     sessions.forEach(async (sessionId) => {
@@ -63,6 +74,8 @@ export default function Home() {
     });
   }, [sessions]);
 
+
+  // All other functions and conditional returns come AFTER all hooks
   const generateSessionId = () => {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   };
@@ -86,26 +99,22 @@ export default function Home() {
 
   const handleLogout = () => {
     setShowLogoutTransition(true);
-    
+
     toast({
       title: "Logging Out",
       description: "Securely ending your session...",
     });
-    
+
     setTimeout(() => {
       clearSession();
       // The App component will detect the session change and show login
     }, 1500);
   };
 
+  // This is the ONLY conditional return that should be here
   if (showLogoutTransition) {
     return <LoadingTransition message="Logging you out securely..." duration={1500} />;
   }
-
-  const mergedSessions = useMemo(() => {
-    const set = new Set([...sessions, ...createdSessions]);
-    return Array.from(set);
-  }, [sessions, createdSessions]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">

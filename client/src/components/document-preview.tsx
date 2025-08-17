@@ -18,7 +18,16 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [renderError, setRenderError] = useState<string>("");
+  const [showOverlay, setShowOverlay] = useState(true);
+  const [previewMethod, setPreviewMethod] = useState<'google-docs' | 'google-drive' | 'fallback'>('google-docs');
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const handlePageInputJump = (value: string) => {
+    const pageNum = parseInt(value, 10);
+    if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
+      setCurrentPage(pageNum);
+    }
+  };
 
   const getFileExtension = (fileName: string) => {
     return fileName.split('.').pop()?.toLowerCase() || '';
@@ -27,32 +36,40 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
   const isPdf = getFileExtension(data.fileName) === 'pdf';
   const isDoc = ['docx', 'doc'].includes(getFileExtension(data.fileName));
   const isSpreadsheet = ['xlsx', 'xls', 'csv'].includes(getFileExtension(data.fileName));
+  const isOtherDocument = !isPdf && !isDoc && !isSpreadsheet;
 
+  // Effect for initial setup and PDF loading - runs only once when component mounts or data changes
   useEffect(() => {
     // Configure PDF.js worker to match package version (5.4.54)
     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.54/build/pdf.worker.min.mjs`;
     
-    // Reset states
+    // Reset states only when document data changes
     setIsLoading(true);
     setRenderError("");
     setPdfDoc(null);
     setCurrentPage(1);
+    setPreviewMethod('google-docs');
+    setShowOverlay(true);
     
     // Handle different document types
-    if (isPdf && isGoogleDriveDocument(data.fileLink)) {
-      loadGoogleDrivePDF();
-    } else if (!isPdf && !isGoogleDriveDocument(data.fileLink)) {
-      generateSampleContent();
-    } else {
-      // Auto-hide loading for other documents after timeout
-      const timeout = setTimeout(() => {
+    if (isGoogleDriveDocument(data.fileLink)) {
+      if (isPdf) {
+        loadGoogleDrivePDF();
+      } else {
         setIsLoading(false);
-      }, 3000);
-      return () => clearTimeout(timeout);
+      }
+    } else if (isPdf) {
+      // This case is for direct PDF links, not yet fully implemented
+      // For now, we'll treat it like other documents
+      setIsLoading(false);
+      setRenderError("Direct PDF link preview not yet supported.");
+    } else {
+      // For all other local file types (doc, spreadsheet, etc.)
+      setIsLoading(false);
     }
-  }, [data.fileName, data.fileLink]);
+  }, [data.fileLink, data.fileName]); // Only run when document data changes
 
-  // Effect to render PDF page when both PDF and canvas are ready
+  // Separate effect for rendering pages when PDF is ready
   useEffect(() => {
     const renderInitialPage = async () => {
       if (pdfDoc && canvasRef.current && currentPage && !renderError) {
@@ -63,7 +80,20 @@ export default function DocumentPreview({ data, onClose }: DocumentPreviewProps)
     };
     
     renderInitialPage();
-  }, [pdfDoc, currentPage, zoomLevel, renderError]);
+  }, [pdfDoc, currentPage, zoomLevel]); // Remove renderError from dependencies to prevent loops
+
+  // Auto-hide overlay for non-PDF files after a delay
+  useEffect(() => {
+    if (!isPdf && !isLoading) {
+      const timer = setTimeout(() => {
+        // After 3 seconds, try to hide the overlay to show the iframe content
+        console.log('Auto-hiding overlay for non-PDF file');
+        setShowOverlay(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isPdf, isLoading]);
 
   // Load and render Google Drive PDF using PDF.js via backend proxy
   const loadGoogleDrivePDF = async () => {
@@ -354,13 +384,35 @@ Features:
     window.open(data.fileLink, '_blank');
   };
 
-  const getEmbedUrl = (driveUrl: string) => {
+  const getEmbedUrl = (driveUrl: string, method: 'google-docs' | 'google-drive' | 'fallback' = 'google-docs') => {
     // Convert Google Drive view URL to embed URL
     if (driveUrl.includes('drive.google.com/file/d/')) {
       const fileId = driveUrl.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1];
       if (fileId) {
-        // Use the preview URL for all file types - most reliable for Google Drive
-        return `https://drive.google.com/file/d/${fileId}/preview`;
+        const fileExtension = getFileExtension(data.fileName);
+        
+        if (method === 'google-docs' && ['docx', 'doc', 'xlsx', 'xls', 'ppt', 'pptx'].includes(fileExtension)) {
+          // Try Google Docs/Sheets/Slides viewer for Office files
+          if (['docx', 'doc'].includes(fileExtension)) {
+            return `https://docs.google.com/document/d/${fileId}/preview`;
+          } else if (['xlsx', 'xls'].includes(fileExtension)) {
+            return `https://docs.google.com/spreadsheets/d/${fileId}/preview`;
+          } else if (['ppt', 'pptx'].includes(fileExtension)) {
+            return `https://docs.google.com/presentation/d/${fileId}/preview`;
+          }
+        } else if (method === 'google-drive') {
+          // Try standard Google Drive preview
+          return `https://drive.google.com/file/d/${fileId}/preview`;
+        } else if (method === 'fallback') {
+          // Try alternative preview methods
+          if (['docx', 'doc'].includes(fileExtension)) {
+            return `https://docs.google.com/document/d/${fileId}/edit?usp=sharing`;
+          } else if (['xlsx', 'xls'].includes(fileExtension)) {
+            return `https://docs.google.com/spreadsheets/d/${fileId}/edit?usp=sharing`;
+          } else if (['ppt', 'pptx'].includes(fileExtension)) {
+            return `https://docs.google.com/presentation/d/${fileId}/edit?usp=sharing`;
+          }
+        }
       }
     }
     return driveUrl;
@@ -370,9 +422,7 @@ Features:
     return url.includes('drive.google.com/file/d/');
   };
 
-  const isWebSearchResult = (fileId: string) => {
-    return fileId === "WebSearch" || fileId === "NoFileID";
-  };
+
 
   const highlightContent = (content: string) => {
     const lines = content.split('\n');
@@ -413,7 +463,7 @@ Features:
           <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
           <div className="w-3 h-3 bg-green-500 rounded-full"></div>
           <h3 className="text-lg font-semibold text-gray-900 ml-4">
-            {isWebSearchResult(data.fileId) ? "Web Search Results" : "Document Preview"}
+            Document Preview
           </h3>
         </div>
         <div className="flex items-center space-x-2">
@@ -465,9 +515,21 @@ Features:
                     >
                       ← Prev
                     </Button>
-                    <span className="text-sm text-gray-700 font-semibold bg-white px-3 py-1 rounded border">
-                      Page {currentPage} of {totalPages}
-                    </span>
+                    <div className="flex items-center space-x-2 bg-white px-3 py-1 rounded border h-8">
+                      <span className="text-sm text-gray-700 font-semibold">Page</span>
+                      <input
+                        type="number"
+                        value={currentPage}
+                        onChange={(e) => setCurrentPage(Number(e.target.value))}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handlePageInputJump((e.target as HTMLInputElement).value);
+                          }
+                        }}
+                        className="w-16 text-center border rounded-md text-sm h-6"
+                      />
+                      <span className="text-sm text-gray-700 font-semibold">of {totalPages}</span>
+                    </div>
                     <Button 
                       onClick={() => handlePageChange(currentPage + 1)} 
                       size="sm" 
@@ -546,84 +608,255 @@ Features:
                   </div>
                 )}
               </div>
-            ) : isWebSearchResult(data.fileId) ? (
-              <div className="h-full relative bg-white">
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center text-gray-600 max-w-md mx-auto p-8">
-                    <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                      <ExternalLink className="h-8 w-8 text-blue-600" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Web Search Results</h3>
-                    <p className="text-sm text-gray-600 mb-6">
-                      This information was found through web search. Click the button below to view the search results.
-                    </p>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                      <div className="flex items-center justify-center space-x-2 mb-2">
-                        <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
-                        <span className="text-sm text-blue-800 font-medium">
-                          Web Search Source
-                        </span>
-                      </div>
-                      <p className="text-xs text-blue-700">
-                        Information gathered from multiple web sources for accuracy.
-                      </p>
-                    </div>
-                    <Button 
-                      onClick={() => window.open(data.fileLink, '_blank')}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3"
-                    >
-                      <ExternalLink className="mr-2 h-5 w-5" />
-                      View Web Search Results
-                    </Button>
-                  </div>
-                </div>
-              </div>
             ) : isGoogleDriveDocument(data.fileLink) ? (
               <div className="h-full relative bg-white">
-                <iframe
-                  src={getEmbedUrl(data.fileLink)}
-                  className="w-full h-full border-0"
-                  title={data.fileName}
-                  onLoad={() => setIsLoading(false)}
-                  onError={() => setIsLoading(false)}
-                  allow="autoplay"
-                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                />
-                
-                {/* Overlay with document info */}
-                {!isLoading && (
-                  <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center">
-                    <div className="text-center text-gray-500 max-w-sm mx-auto p-6">
-                      <FileText className="mx-auto mb-4 text-blue-500" size={48} />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">{data.fileName}</h3>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Google Drive Document
-                      </p>
-                      {data.from && data.to && (
-                        <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4">
-                          <div className="flex items-center justify-center space-x-2">
-                            <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                            <span className="text-sm text-yellow-800 font-medium">
-                              Answer highlighted in document
-                            </span>
+                {isPdf ? (
+                  // For PDFs, try to load with PDF.js
+                  <div className="h-full relative bg-gray-50 flex flex-col">
+                    {pdfDoc ? (
+                      <>
+                        {/* PDF Navigation Header */}
+                        <div className="flex items-center justify-between bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-3 border-b flex-shrink-0 shadow-sm">
+                          <div className="flex items-center space-x-3">
+                            <Button 
+                              onClick={() => handlePageChange(currentPage - 1)} 
+                              size="sm" 
+                              variant="outline" 
+                              disabled={currentPage <= 1}
+                              className="px-3 h-8 font-medium"
+                            >
+                              ← Prev
+                            </Button>
+                            <div className="flex items-center space-x-2 bg-white px-3 py-1 rounded border h-8">
+                              <span className="text-sm text-gray-700 font-semibold">Page</span>
+                              <input
+                                type="number"
+                                value={currentPage}
+                                onChange={(e) => setCurrentPage(Number(e.target.value))}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handlePageInputJump((e.target as HTMLInputElement).value);
+                                  }
+                                }}
+                                className="w-16 text-center border rounded-md text-sm h-6"
+                              />
+                              <span className="text-sm text-gray-700 font-semibold">of {totalPages}</span>
+                            </div>
+                            <Button 
+                              onClick={() => handlePageChange(currentPage + 1)} 
+                              size="sm" 
+                              variant="outline" 
+                              disabled={currentPage >= totalPages}
+                              className="px-3 h-8 font-medium"
+                            >
+                              Next →
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <Button onClick={handleZoomOut} size="sm" variant="outline" disabled={zoomLevel <= 50} className="px-3 h-8">
+                              <ZoomOut size={14} />
+                            </Button>
+                            <span className="text-sm text-gray-700 min-w-[50px] text-center font-semibold bg-white px-2 py-1 rounded border">{zoomLevel}%</span>
+                            <Button onClick={handleZoomIn} size="sm" variant="outline" disabled={zoomLevel >= 200} className="px-3 h-8">
+                              <ZoomIn size={14} />
+                            </Button>
                           </div>
                         </div>
-                      )}
-                      <p className="text-xs text-gray-500 mb-4">
-                        Due to Google Drive security settings, preview may not be available for all documents.
-                      </p>
-                      <div className="text-xs text-blue-600 font-medium">
-                        Use "Open Full Document" to view in Google Drive
+                        
+                        {/* PDF Canvas Display */}
+                        <ScrollArea className="flex-1">
+                          <div className="p-4 flex justify-center">
+                            {renderError ? (
+                              <div className="flex items-center justify-center h-full text-center p-4">
+                                <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm max-w-md">
+                                  <FileText className="mx-auto mb-4 text-blue-500" size={48} />
+                                  <p className="text-sm text-gray-600 mb-4">
+                                    {renderError}
+                                  </p>
+                                  <Button onClick={handleOpenFull} size="sm" className="w-full">
+                                    <ExternalLink size={14} className="mr-1" />
+                                    Open Full Document
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <canvas
+                                ref={canvasRef}
+                                className="border border-gray-200 shadow-lg"
+                                style={{ maxWidth: '100%', height: 'auto' }}
+                              />
+                            )}
+                          </div>
+                        </ScrollArea>
+                        
+                        {/* Highlight Indicator */}
+                        {data.from && data.to && !renderError && (
+                          <div className="absolute top-20 right-6 bg-yellow-300 border-2 border-yellow-500 rounded-lg px-4 py-3 text-sm text-yellow-900 shadow-lg z-10 animate-pulse">
+                            <div className="font-bold flex items-center space-x-2">
+                              <span>🎯</span>
+                              <span>Lines {data.from}-{data.to}</span>
+                            </div>
+                            <div className="text-xs opacity-80 mt-1">Highlighted in bright yellow</div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      // Loading state for PDF
+                      <div className="flex items-center justify-center h-full bg-gray-50">
+                        <div className="text-center text-gray-500">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                          <p className="text-sm">Loading PDF...</p>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
-                )}
-                
-                {data.from && data.to && (
-                  <div className="absolute top-2 right-2 bg-yellow-200 border border-yellow-400 rounded px-2 py-1 text-xs text-yellow-800 shadow-sm z-10">
-                    Highlighted Content
-                  </div>
-                )}
+                ) : (
+                  // For non-PDF files, show Google Drive preview or fallback
+                  <div className="h-full relative bg-white">
+                     <iframe
+                       src={getEmbedUrl(data.fileLink, previewMethod)}
+                       className="w-full h-full border-0"
+                       title={data.fileName}
+                       onLoad={(e) => {
+                         console.log('Iframe loaded with method:', previewMethod, e);
+                         setIsLoading(false);
+                         // Check if the iframe content loaded successfully
+                         const iframe = e.target as HTMLIFrameElement;
+                         try {
+                           // Try to access iframe content to see if it loaded
+                           if (iframe.contentWindow && iframe.contentWindow.location.href !== 'about:blank') {
+                             console.log('Iframe content loaded successfully');
+                           }
+                         } catch (error) {
+                           console.log('Iframe content check failed (expected for cross-origin):', error);
+                         }
+                       }}
+                       onError={() => {
+                         console.log('Iframe failed to load with method:', previewMethod);
+                         setIsLoading(false);
+                         // Try to fallback to a different preview method
+                         if (previewMethod === 'google-docs') {
+                           console.log('Falling back to Google Drive preview');
+                           setPreviewMethod('google-drive');
+                         } else if (previewMethod === 'google-drive') {
+                           console.log('Falling back to alternative preview');
+                           setPreviewMethod('fallback');
+                         }
+                       }}
+                       allow="autoplay"
+                       sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                     />
+                     
+                     {/* Fallback overlay for unsupported file types */}
+                     {!isLoading && showOverlay && (
+                       <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center">
+                         <div className="text-center text-gray-500 max-w-sm mx-auto p-6">
+                           <FileText className="mx-auto mb-4 text-blue-500" size={48} />
+                           <h3 className="text-lg font-medium text-gray-900 mb-2">{data.fileName}</h3>
+                           <p className="text-sm text-gray-600 mb-4">
+                             {isDoc ? 'Word Document' : isSpreadsheet ? 'Spreadsheet' : 'Document'}
+                           </p>
+                           {data.from && data.to && (
+                             <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4">
+                               <div className="flex items-center justify-center space-x-2">
+                                 <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                 <span className="text-sm text-yellow-800 font-medium">
+                                   Answer highlighted in document
+                                 </span>
+                               </div>
+                             </div>
+                           )}
+                           <p className="text-xs text-gray-500 mb-4">
+                             Loading document preview...
+                           </p>
+                           <div className="text-xs text-blue-600 font-medium mb-4">
+                             If preview doesn't work, use the buttons below
+                           </div>
+                           <div className="flex space-x-2 mb-3">
+                             <Button 
+                               onClick={handleOpenFull} 
+                               size="sm" 
+                               variant="outline"
+                               className="flex-1"
+                             >
+                               <ExternalLink size={14} className="mr-1" />
+                               Open in Google Drive
+                             </Button>
+                             <Button 
+                               onClick={handleDownload} 
+                               size="sm" 
+                               variant="outline"
+                               className="flex-1"
+                             >
+                               <Download size={14} className="mr-1" />
+                               Download
+                             </Button>
+                           </div>
+                           <div className="text-xs text-gray-500 mb-3">
+                             Try different preview methods:
+                           </div>
+                           <div className="flex space-x-2 mb-3">
+                             <Button 
+                               onClick={() => {
+                                 setPreviewMethod('google-docs');
+                                 setShowOverlay(false);
+                               }}
+                               size="sm" 
+                               variant="outline"
+                               className="flex-1"
+                             >
+                               Google Docs
+                             </Button>
+                             <Button 
+                               onClick={() => {
+                                 setPreviewMethod('google-drive');
+                                 setShowOverlay(false);
+                               }}
+                               size="sm" 
+                               variant="outline"
+                               className="flex-1"
+                             >
+                               Google Drive
+                             </Button>
+                           </div>
+                           <Button 
+                             onClick={() => setShowOverlay(false)}
+                             size="sm" 
+                             variant="secondary"
+                             className="w-full"
+                           >
+                             Try Current Method
+                           </Button>
+                         </div>
+                       </div>
+                     )}
+                     
+                     {data.from && data.to && (
+                       <div className="absolute top-2 right-2 bg-yellow-200 border border-yellow-400 rounded px-2 py-1 text-xs text-yellow-800 shadow-sm z-10">
+                         Highlighted Content
+                       </div>
+                     )}
+                   </div>
+                 )}
+              </div>
+            ) : isDoc ? (
+              <div className="flex items-center justify-center h-full bg-gray-50">
+                <div className="text-center text-gray-500 p-6 max-w-sm mx-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+                  <FileText className="mx-auto mb-4 text-blue-500" size={48} />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">{data.fileName}</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Preview is not available for this file type.
+                  </p>
+                  <Button 
+                    onClick={handleOpenFull} 
+                    size="sm" 
+                    className="w-full"
+                  >
+                    <ExternalLink size={14} className="mr-1" />
+                    Open Document
+                  </Button>
+                </div>
               </div>
             ) : isPdf ? (
               <div className="h-full relative">
@@ -652,33 +885,21 @@ Features:
       {/* Action Buttons - Enhanced for overlay */}
       <div className="p-6 border-t border-gray-200 flex-shrink-0 bg-gray-50">
         <div className="flex space-x-4">
-          {isWebSearchResult(data.fileId) ? (
-            <Button 
-              onClick={() => window.open(data.fileLink, '_blank')}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-12 text-base font-medium shadow-md"
-            >
-              <ExternalLink className="mr-3 h-5 w-5" />
-              View Web Search Results
-            </Button>
-          ) : (
-            <>
-              <Button 
-                onClick={handleOpenFull}
-                className="flex-1 bg-primary hover:bg-primary-dark text-white h-12 text-base font-medium shadow-md"
-              >
-                <ExternalLink className="mr-3 h-5 w-5" />
-                Open Full Document
-              </Button>
-              <Button 
-                onClick={handleDownload}
-                variant="secondary"
-                className="flex-1 h-12 text-base font-medium shadow-md"
-              >
-                <Download className="mr-3 h-5 w-5" />
-                Download Document
-              </Button>
-            </>
-          )}
+          <Button 
+            onClick={handleOpenFull}
+            className="flex-1 bg-primary hover:bg-primary-dark text-white h-12 text-base font-medium shadow-md"
+          >
+            <ExternalLink className="mr-3 h-5 w-5" />
+            Open Full Document
+          </Button>
+          <Button 
+            onClick={handleDownload}
+            variant="secondary"
+            className="flex-1 h-12 text-base font-medium shadow-md"
+          >
+            <Download className="mr-3 h-5 w-5" />
+            Download Document
+          </Button>
         </div>
       </div>
     </div>

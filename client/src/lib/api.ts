@@ -20,6 +20,20 @@ export const chatApi = {
   },
 };
 
+// NEW: direct call to n8n webhook
+export const n8nApi = {
+  getFileLoadHistory: async (): Promise<any> => {
+    const res = await fetch('http://localhost:5678/webhook/file-load-history', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const json = await res.json();
+    // Console log for cross-checking as requested
+    console.log('[n8n] file-load-history response:', json);
+    return json;
+  },
+};
+
 export const sessionsApi = {
   getAll: async (): Promise<string[]> => {
     const response = await apiRequest("GET", "/api/sessions");

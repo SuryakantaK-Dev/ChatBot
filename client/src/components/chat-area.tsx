@@ -18,6 +18,7 @@ interface ChatMessage {
     from?: number;
     to?: number;
   };
+  searchInfo?: string;
 }
 
 interface DocumentPreviewData {
@@ -70,7 +71,82 @@ export default function ChatArea({
       }
     },
     onSuccess: (aiResponse) => {
-      setMessages(prev => [...prev, aiResponse]);
+      let parsedResponse = aiResponse;
+      const newMessages: ChatMessage[] = [];
+
+      if (typeof aiResponse.output === 'string') {
+        let jsonString = aiResponse.output;
+
+        try {
+          // First, try to parse the string directly
+          parsedResponse = JSON.parse(jsonString);
+          console.log("Direct JSON parse successful.");
+        } catch (e) {
+          console.log("Direct JSON parse failed, trying to extract from markdown.");
+          // If direct parsing fails, try to extract JSON from markdown or other text
+          // If direct parsing fails, try to extract JSON from markdown or other text
+          const markdownMatch = jsonString.match(/```(?:json)?\s*([\s\S]*?)```/);
+          let extractedJsonString = jsonString;
+
+          if (markdownMatch && markdownMatch[1]) {
+            extractedJsonString = markdownMatch[1].trim();
+            console.log("Extracted potential JSON from markdown.");
+          } else {
+            // Fallback to brace extraction if no markdown block is found
+            const firstBrace = jsonString.indexOf('{');
+            const lastBrace = jsonString.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace > firstBrace) {
+              extractedJsonString = jsonString.substring(firstBrace, lastBrace + 1).trim();
+              console.log("Extracted potential JSON using brace fallback.");
+            }
+          }
+
+          // Clean the extracted string: remove JS string concatenation artifacts
+          let cleanedJsonString = extractedJsonString.replace(/`\s*\+\s*'\s*/g, ''); // Remove ` + '\n
+          cleanedJsonString = cleanedJsonString.replace(/\n'\s*\+\s*'/g, ''); // Remove \n' + '\n
+          cleanedJsonString = cleanedJsonString.replace(/\n`\s*\+\s*'/g, ''); // Remove \n` + '\n
+          cleanedJsonString = cleanedJsonString.replace(/`\s*\+\s*"/g, ''); // Remove ` + "\n
+          cleanedJsonString = cleanedJsonString.replace(/\n"\s*\+\s*"/g, ''); // Remove \n" + "\n
+          
+          // Also remove any leading/trailing whitespace or newlines that might remain
+          cleanedJsonString = cleanedJsonString.trim();
+
+          try {
+            parsedResponse = JSON.parse(cleanedJsonString);
+            console.log("Successfully parsed JSON from extracted and cleaned string.");
+          } catch (e2) {
+            console.error("Failed to parse extracted and cleaned JSON string:", e2);
+            // If we still fail, we'll treat the output as a plain string.
+            parsedResponse = { answer: jsonString };
+          }
+        }
+      }
+
+      // Add the AI's answer as a message
+      if (parsedResponse.answer) {
+        const aiMessage: ChatMessage = {
+          type: 'ai',
+          content: parsedResponse.answer,
+          timestamp: Date.now(),
+        };
+
+        if (parsedResponse.FileID) {
+          aiMessage.documentReference = {
+            fileName: parsedResponse.FileName,
+            fileLink: parsedResponse.FileLink ? String(parsedResponse.FileLink).replace(/`/g, '') : '',
+            from: parsedResponse.From,
+            to: parsedResponse.To,
+          };
+        }
+
+        if (parsedResponse.searchInfo) {
+          aiMessage.searchInfo = parsedResponse.searchInfo;
+        }
+
+        newMessages.push(aiMessage);
+      }
+
+      setMessages(prev => [...prev, ...newMessages]);
       queryClient.invalidateQueries({ queryKey: ['/api/chat', sessionId] });
     },
     onError: (error: any) => {
@@ -300,6 +376,23 @@ export default function ChatArea({
                             <ExternalLink className="mr-1" size={12} />
                             View Document Preview
                           </Button>
+                        </div>
+                      )}
+                      
+                      {/* Display web search info if available */}
+                      {msg.searchInfo && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <ExternalLink className="text-blue-500" size={16} />
+                            <span className="text-sm font-medium text-blue-900">
+                              Web Search Sources
+                            </span>
+                          </div>
+                          <div className="mb-2">
+                            <span className="text-xs text-blue-700 break-words whitespace-pre-line">
+                              {msg.searchInfo}
+                            </span>
+                          </div>
                         </div>
                       )}
                     </div>

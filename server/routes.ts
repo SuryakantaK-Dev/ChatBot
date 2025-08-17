@@ -129,6 +129,23 @@ function generateMockChatResponse(userInput: string): ChatResponse {
     };
   }
   
+  // Handle web search requests
+  if (input.includes("web search") || input.includes("search the web") || input.includes("google") || input.includes("internet")) {
+    return {
+      output: `\`\`\`json
+{
+  "answer": "Here are the results from my web search:\n\n1. **Example.com** - This is a placeholder website used for illustrative examples in documents.\n2. **Sample.org** - Another placeholder domain commonly used in documentation.\n\nWould you like me to search for something specific?",
+  "FileID": "WebSearch",
+  "FileName": "Web Search Results",
+  "FileLink": "https://www.google.com",
+  "From": 0,
+  "To": 0,
+  "searchInfo": "https://example.com - Example Domain\nhttps://sample.org - Sample Organization"
+}
+\`\`\``
+    };
+  }
+  
   // Default response for general questions - always return JSON format
   return {
     output: `\`\`\`json
@@ -401,11 +418,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // First, try to parse the response as direct JSON
         try {
           parsedData = JSON.parse(chatResponse.output);
+          console.log("[DEBUG] Direct JSON parse successful:", parsedData);
         } catch (directParseError) {
+          console.log("[DEBUG] Direct JSON parse failed, trying markdown code blocks");
+          console.log("[DEBUG] Raw output to parse:", chatResponse.output);
+          console.log("[DEBUG] Output length:", chatResponse.output.length);
+          
           // If direct parsing fails, try to extract JSON from markdown code blocks
-          const jsonMatch = chatResponse.output.match(/```json\n([\s\S]*?)\n```/);
+          // Updated regex to handle both ```json and ``` formats with flexible whitespace
+          // Also handle cases where there might be 4 backticks at the end
+          const jsonMatch = chatResponse.output.match(/```(?:json)?\s*([\s\S]*?)\s*```+/);
+          console.log("[DEBUG] Regex match result:", jsonMatch);
           if (jsonMatch) {
-            parsedData = JSON.parse(jsonMatch[1]);
+            console.log("[DEBUG] Found JSON in markdown code block");
+            try {
+              // Clean the extracted JSON string before parsing
+              let cleanJsonString = jsonMatch[1].trim();
+              
+              // More aggressive cleaning for problematic characters
+              cleanJsonString = cleanJsonString
+                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '') // Remove all control chars except \t, \n, \r
+                .replace(/\r\n/g, '\n') // Normalize line endings
+                .replace(/\r/g, '\n') // Normalize line endings
+                .replace(/\t/g, ' ') // Replace tabs with spaces
+                .replace(/\n\s*\n/g, '\n') // Remove empty lines
+                .replace(/\s+/g, ' ') // Normalize multiple spaces
+                .trim(); // Final trim
+              
+              console.log("[DEBUG] Cleaned JSON string:", cleanJsonString);
+              
+              parsedData = JSON.parse(cleanJsonString);
+              console.log("[DEBUG] Markdown JSON parse successful:", parsedData);
+            } catch (jsonParseError) {
+              console.error("[ERROR] Failed to parse extracted JSON:", jsonParseError);
+              console.error("[DEBUG] Raw extracted string:", jsonMatch[1]);
+              // Don't set parsedData, let it fall through to error handling
+            }
+          } else {
+            console.log("[DEBUG] No JSON found in markdown code blocks");
           }
         }
         
@@ -417,6 +467,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .replace(/`(.*?)`/g, '$1'); // Remove inline code
           // Note: We keep **bold** formatting intact for values like **$60,000** and section headers
           
+          console.log("[DEBUG] searchInfo in parsedData:", parsedData.searchInfo);
+          
           aiMessage = {
             type: 'ai',
             content: cleanAnswer,
@@ -427,8 +479,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               fileLink: parsedData.FileLink,
               from: parsedData.From,
               to: parsedData.To
-            } : undefined
+            } : undefined,
+            searchInfo: parsedData.searchInfo // Pass searchInfo to client if it exists
           };
+          
+          // Ensure searchInfo is properly formatted as a string
+          if (aiMessage.searchInfo && typeof aiMessage.searchInfo !== 'string') {
+            aiMessage.searchInfo = JSON.stringify(aiMessage.searchInfo);
+          }
+          
+          console.log("[DEBUG] Final aiMessage with searchInfo:", aiMessage);
         }
       } catch (parseError) {
         console.warn("Could not parse structured response:", parseError);

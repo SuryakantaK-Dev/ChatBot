@@ -1,0 +1,864 @@
+{
+  "name": "My workflow 20",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatbot-api",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -3648,
+        208
+      ],
+      "id": "4f329891-9a89-400c-909c-a1975396bd68",
+      "name": "chatInput",
+      "webhookId": "75f6193c-ee92-4559-a80b-eab875879d53"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ffdcc90-3cf1-48ca-a9a4-5515608173c2",
+              "name": "chatInput",
+              "value": "={{ $json.query.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "cb9c51f4-b2ff-4a37-ace7-2e395100bf5b",
+              "name": "sessionId",
+              "value": "={{ $json.query.sessionId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3376,
+        224
+      ],
+      "id": "e4b2a912-a936-44a4-925f-10ddf029e906",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -480,
+        256
+      ],
+      "id": "3ab8adb4-32cf-4e15-b3dc-cb5211348aaa",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "11f2ba8e-1e1b-4dc7-a816-6a90572c6fb7",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -2368,
+        432
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "bWMQLE6mVDkiFvG4",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "145e8448-ac9c-4fcf-8abd-ed269391e79a",
+      "name": "Embeddings OpenAI2",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "position": [
+        -2944,
+        480
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "bWMQLE6mVDkiFvG4",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "33f4addf-72f3-4618-a6ba-5b762257d723",
+              "name": "chunks",
+              "type": "number",
+              "value": 4
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "ae06812c-6f49-4275-b876-b5b14d5ffc29",
+      "name": "Set max chunks to send to model",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -3008,
+        240
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "codestral-embed-2505",
+          "mode": "id"
+        },
+        "prompt": "={{ $json.chatInput }}",
+        "topK": "={{ $json.chunks }}",
+        "options": {
+          "pineconeNamespace": "Restaurant_New"
+        }
+      },
+      "id": "2e631475-7f15-425e-9de6-3db4d045e213",
+      "name": "Get top chunks matching query",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        -2800,
+        240
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pineconeApi": {
+          "id": "zfCrzIyvEk0MLFVS",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get metadata from the first input item\nconst meta = $input.first().json.document.metadata || {};\nconst FileID = meta.FileID || '';\nconst fileName = meta.FileName || 'Unknown File';\nconst linesFrom = meta['loc.lines.from'] || '';\nconst linesTo = meta['loc.lines.to'] || '';\n\n// Start output string with File ID first\nlet out = `File ID - ${FileID} | File Name - ${fileName} | Lines From ${linesFrom} | Lines To ${linesTo}\\n\\n`;\n\n// Iterate through all chunks/items\n$input.all().forEach((item, idx) => {\n  const pageContent = item.json.document.pageContent || '';\n  out += `--- CHUNK ${idx + 1} ---\\n${pageContent}\\n\\n`;\n});\n\n// Return output context only\nreturn {\n  context: out,\n  chatInput: $('Set max chunks to send to model').first().json.chatInput\n};"
+      },
+      "id": "5e06364b-5ba8-4c57-a8cd-77e4efdced0d",
+      "name": "Prepare chunks",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -2448,
+        240
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=🛠️ System Message – Assistant Behavior Setup \n\nYou are an intelligent assistant specialized in analyzing business documents such as contracts, invoices, balance sheets, and other structured reports.\n\nYou have access to two tools:\n\n📚 Vector Store Tool (Primary Source)\nThis tool contains internal company documents (RAG).\n\n- Always consult this source first.\n- The vector search result appears in: {{ $json.context }}\n- If the content in {{ $json.context }} is meaningful and relevant:\n  - Respond naturally, confidently, and clearly in your own words.\n  - Highlight key points using simple and professional language.\n  - End your response with the following source reference format:  \n    (File Name – , File ID – , Lines From- , to -)\n  - Answer, File Name, File ID, Lines From, Lines To are mandatory fields.\n  - Do NOT include any system references or technical metadata.\n\n🌐 WebSearch: Research_Agent2 (Fallback Tool)\n- If RAG does not find a relevant answer, immediately send the request to WebSearch.\n- In such cases, return only this line:\nTool: WebSearch: <user’s original question>\n- Do NOT add:\n  - Apologies\n  - Explanations about using WebSearch\n  - “No info found” type statements\n\n✅ Examples:\n\nCase 1: Valid Vector Result\nUser: What is the total income of Tata Industries in FY24?\n\nResponse:\nTata Industries Limited reported a total income of ₹35,198.19 lakhs for the fiscal year 2023–24, reflecting strong financial performance and sustained growth.  \n(PDF – Annual-Report-for-the-Financial-Year-2023-2024.pdf, File ID – 1bZjVAYWJ1VNJ10_lFLpsoQmHr_61VEen, Lines From 246 to 260)\n\nCase 2: No Valid Context in Vector Store\nUser: What is a truth table?\n\nResponse:\nTool: WebSearch: What is a truth table?\n\n🔒 Summary Rule\n- ✅ If relevant context exists: Return a clear answer with source reference.\n- 🔁 If no relevant RAG context exists: Immediately send the query to WebSearch.\n- 🚫 Do NOT add any explanations, limitations, or “no info found” messages.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        -2160,
+        240
+      ],
+      "id": "5a1d2b9b-b940-45d7-8de4-656cac4046c9",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -2096,
+        512
+      ],
+      "id": "87b150ff-3b87-47d5-b608-258d17b0ca6d",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wPTCL3ZbTf8bVCoB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $input.first().json.output || '';\n\nlet parsedOutput;\ntry {\n  // Attempt to parse the output as JSON\n  parsedOutput = JSON.parse(output);\n} catch (e) {\n  // If parsing fails, log the error and treat as plain text (or handle as needed)\n  console.error('Failed to parse AI output as JSON:', e);\n  // Fallback: if it's not valid JSON, assume it's a direct answer for now, or handle as plain text\n  return [{ callWebSearch: false, stopFlow: true, answer: output, chatInput: $('Set max chunks to send to model').first().json.chatInput }];\n}\n\n// Check if the parsed output indicates a WebSearch tool call\nif (parsedOutput.tool === 'WebSearch') {\n  return [{ callWebSearch: true, stopFlow: false, query: parsedOutput.query }];\n} else {\n  // Otherwise, assume it's a direct answer from RAG\n  return [{\n    callWebSearch: false,\n    stopFlow: true,\n    answer: parsedOutput.answer,\n    source: parsedOutput.source, // Include source information if available\n    chatInput: $('Set max chunks to send to model').first().json.chatInput\n  }];\n}"}]}}}
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1728,
+        160
+      ],
+      "id": "eb126b72-b208-4f43-8cfd-8aaa3630fc95",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "query": "={{ $json.query }}",
+        "webSearchOptions": {
+          "maxResults": 10,
+          "region": "us-en",
+          "safeSearch": 0
+        },
+        "cacheSettings": {
+          "enableCache": true,
+          "cacheTTL": 300
+        },
+        "proxySettings": {},
+        "searchFilters": {}
+      },
+      "type": "n8n-nodes-duckduckgo-search.duckDuckGo",
+      "typeVersion": 1,
+      "position": [
+        -1312,
+        96
+      ],
+      "id": "41983bfc-0c1e-4eb5-8454-a3c039e72128",
+      "name": "DuckDuckGo2",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9512eba5-6427-4e75-b4b8-3137bbec616a",
+              "leftValue": "={{ $json.callWebSearch }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1568,
+        144
+      ],
+      "id": "db0224b8-d04e-4ee2-9664-d1f747f596ec",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst userQuestion = $('Prepare chunks').first().json.chatInput;\n\nconst searchResults = items.map((item, index) => {\n  const j = item.json;\n  return `🔹 Result ${index + 1}:\\nTitle: ${j.title || ''}\\nDescription: ${j.description || ''}\\nSnippet: ${j.snippet || ''}\\nURL: ${j.url || ''}\\n`;\n}).join('\\n\\n');\n\nreturn [{\n  json: {\n    mergedContext: searchResults,\n    chatInput: userQuestion,   // 👈 changed from \"question\" to \"chatInput\",\n    Web_Url : $input.first().json.url\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1088,
+        0
+      ],
+      "id": "d0c4d688-132c-4153-9cc6-954b4b9be590",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=You are a smart assistant focused on delivering clear, concise, and accurate answers using real-time web search information.\n\nUser Question:\n{{ $json.chatInput }}\n\nRelevant Information:\n{{ $json.mergedContext }}\n\n✅ Respond in natural, professional language.\n✅ Present the answer in bullet points or a well-structured format for maximum clarity and impact.\n✅ Ensure your information is correct, accurate, and based on the best available data.\n🔒 Do not reference internal data formats, variable names, or system details.\n\nFormat your response as follows in Proper JSON Fomat:\n\nreturn {\n  answer: `${yourAnswer}`,\n  searchInfo: `This information was collected via web search – ${$json.Web_Url}`\n}\n\n"
+        }
+      },
+      "id": "2ef09387-05f1-44b7-a64e-e1de32a25889",
+      "name": "AI Agent4",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        -864,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=🛠️ System Message – Assistant Behavior Setup\n\nRole:\nYou are a precise, reliable assistant focused on analyzing business documents (contracts, invoices, balance sheets, structured reports) and delivering fact-checked, document-backed responses.\n\nResponse Guidelines:\n\nProvide information only after verifying from the vector database and cross-checking with the {{ $json.answer }} from the previous AI Agent3.\n\nSelect the most accurate and relevant information when differences exist between sources.\n\nPresent the answer clearly and professionally. ✅\n\nUse bullet points or emojis for better readability 🎯.\n\nHighlight key facts concisely and factually.\n\nMaintain a polite, professional, and neutral tone.\n\nNever mention rephrasing or restating the input.\n\nAlways output in the exact JSON format required.\n\nInstruction Flow:\n\nRetrieve the relevant information from the vector database.\n\nCompare it against the {{ $json.answer }} provided by the previous AI Agent3.\n\nChoose the most correct, evidence-backed result.\n\nOutput only verified facts to reduce hallucinations.\n\nRequired JSON Output (for business documents):\n\n{\n  \"answer\": \"<YourAnswer>\",\n  \"FileID\": \"<ExtractedFileID>\",\n  \"FileName\": \"<ExtractedFileName>\",\n  \"FileLink\": \"https://drive.google.com/file/d/<ExtractedFileID>/view\",\n  \"From\": \"<ExtractedFromLineNumber>\",\n  \"To\": \"<ExtractedToLineNumber>\"\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        -1376,
+        320
+      ],
+      "id": "887e61f1-e807-458e-9fe5-3c09c183f390",
+      "name": "AI Agent5"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1536,
+        528
+      ],
+      "id": "dd66a96c-f6a8-4b26-824a-5d8646b35b3d",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wPTCL3ZbTf8bVCoB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1008,
+        144
+      ],
+      "id": "0650149b-ebd4-4338-b55b-469f4c49972a",
+      "name": "Google Gemini Chat Model5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wPTCL3ZbTf8bVCoB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -2800,
+        480
+      ],
+      "id": "b4c1c83e-975d-408f-b096-5af60450bd62",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wPTCL3ZbTf8bVCoB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "codestral-embed-2505",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        -2624,
+        544
+      ],
+      "id": "da50b13d-cd88-4a5f-b7ca-addc68f8b015",
+      "name": "Embeddings Mistral Cloud2",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "PbbQns0wHul3TjFJ",
+          "name": "Mistral Cloud account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "mistral-large-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        -2256,
+        496
+      ],
+      "id": "ea53633c-ec66-4536-9827-4d1159b0de17",
+      "name": "Mistral Cloud Chat Model5",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "PbbQns0wHul3TjFJ",
+          "name": "Mistral Cloud account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "mistral-large-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        -1408,
+        624
+      ],
+      "id": "a47d5f26-baac-4512-93ef-e5067d3ed92a",
+      "name": "Mistral Cloud Chat Model6",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "PbbQns0wHul3TjFJ",
+          "name": "Mistral Cloud account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId || $execution.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -560,
+        1152
+      ],
+      "id": "61f9ad4c-c5c0-46be-84e4-858b5fd01241",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "Vm6bD7bUvvcsU7CX",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Data",
+        "description": "Call this tool to access the database to answer the user's question. We can also add pdf name at the end where the information coming?"
+      },
+      "id": "6568213c-0338-4782-a521-63c0ea5e365f",
+      "name": "Vector Store Tool1",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        -1872,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "codestral-embed-2505",
+          "mode": "list",
+          "cachedResultName": "codestral-embed-2505"
+        },
+        "options": {
+          "pineconeNamespace": "Restaurant_New"
+        }
+      },
+      "id": "022f82dc-eaee-4aff-ba1f-388d79b6a760",
+      "name": "Pinecone Vector Store2",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        -1776,
+        784
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "pineconeApi": {
+          "id": "zfCrzIyvEk0MLFVS",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "codestral-embed-2505",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        -1600,
+        960
+      ],
+      "id": "d749fdbd-c2c7-4a3c-a7d3-4aac1a443288",
+      "name": "Embeddings Mistral Cloud3",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "PbbQns0wHul3TjFJ",
+          "name": "Mistral Cloud account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1376,
+        928
+      ],
+      "id": "2c499f43-d3b7-4c0d-8ccc-834e058297d2",
+      "name": "Google Gemini Chat Model6",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "wPTCL3ZbTf8bVCoB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "mistral-large-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        912
+      ],
+      "id": "21fb47bf-2b8d-4db3-89fa-bc1df7df4e72",
+      "name": "Mistral Cloud Chat Model7",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "PbbQns0wHul3TjFJ",
+          "name": "Mistral Cloud account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "mistral-large-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        208
+      ],
+      "id": "1406296d-d518-4e6b-954b-e5533f700a5f",
+      "name": "Mistral Cloud Chat Model8",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "PbbQns0wHul3TjFJ",
+          "name": "Mistral Cloud account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "$('Edit Fields1').first().json.sessionId"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -2304,
+        1136
+      ],
+      "id": "7381076c-981a-4d5d-a502-321e8a461884",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {
+    "chatInput": [
+      {
+        "json": {
+          "headers": {
+            "host": "localhost:5678",
+            "connection": "keep-alive",
+            "content-type": "application/json",
+            "accept": "*/*",
+            "accept-language": "*",
+            "sec-fetch-mode": "cors",
+            "user-agent": "node",
+            "accept-encoding": "gzip, deflate",
+            "content-length": "0"
+          },
+          "params": {},
+          "query": {
+            "chatInput": "What was Meta’s Net Tangible Assets in 2023?",
+            "sessionId": "session_1754841252753_jdod2fxkf"
+          },
+          "body": {},
+          "webhookUrl": "http://localhost:5678/webhook/chatbot-api",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "chatInput": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Set max chunks to send to model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set max chunks to send to model": {
+      "main": [
+        [
+          {
+            "node": "Get top chunks matching query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get top chunks matching query": {
+      "main": [
+        [
+          {
+            "node": "Prepare chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare chunks": {
+      "main": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DuckDuckGo2": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "DuckDuckGo2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent4": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent5": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Mistral Cloud2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Get top chunks matching query",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Tool1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store2": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Tool1",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Mistral Cloud3": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model7": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Vector Store Tool1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "78a5d3e7-4b5e-4a88-91a0-e54fecc057e8",
+  "meta": {
+    "instanceId": "6cf0737659fbf69c7c364d464ce5e2fde51ded509ace806767e1f3b3b3481e89"
+  },
+  "id": "R4QQ7UHYNSPJjv08",
+  "tags": []
+}
