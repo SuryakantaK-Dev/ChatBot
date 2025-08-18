@@ -5,6 +5,13 @@ import { insertChatSessionSchema, insertUserSchema, type Document, type ChatResp
 import { z } from "zod";
 import { randomUUID } from "crypto";
 
+// Configuration for API timeouts and retries
+const API_CONFIG = {
+  TIMEOUT_MS: 90000,        // 90 seconds timeout for external API calls
+  MAX_RETRIES: 2,           // Maximum number of retry attempts
+  RETRY_DELAY_BASE_MS: 1000 // Base delay for exponential backoff (1s, 2s, 4s...)
+};
+
 // Session middleware
 const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   const sessionId = req.headers['x-session-id'] as string;
@@ -24,6 +31,135 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   
   next();
 };
+
+// Format chatbot responses for better UI presentation
+function formatChatbotResponse(answer: string): string {
+  // Remove markdown code blocks and inline code
+  let cleanAnswer = answer
+    .replace(/```(.*?)```/g, '$1') // Remove code blocks
+    .replace(/`(.*?)`/g, '$1'); // Remove inline code
+  
+  // Keep bold formatting but remove italics
+  cleanAnswer = cleanAnswer.replace(/\*(.*?)\*/g, '$1');
+  
+  // Transform the response into a more structured format
+  const lines = cleanAnswer.split('\n').filter(line => line.trim());
+  
+  // Check if it's already well-structured
+  if (lines.length <= 2) {
+    // Simple response, just clean it up
+    return cleanAnswer.trim();
+  }
+  
+  // Look for patterns that suggest structured content
+  const hasBulletPoints = lines.some(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
+  const hasNumberedList = lines.some(line => /^\d+\./.test(line.trim()));
+  const hasKeyValuePairs = lines.some(line => line.includes(':') && line.includes('**'));
+  
+  if (hasBulletPoints || hasNumberedList) {
+    // Already structured, just clean up
+    return cleanAnswer.trim();
+  }
+  
+  if (hasKeyValuePairs) {
+    // Transform key-value pairs into bullet points
+    const formattedLines = lines.map(line => {
+      if (line.includes(':') && line.includes('**')) {
+        return `• ${line.trim()}`;
+      }
+      return line.trim();
+    });
+    return formattedLines.join('\n');
+  }
+  
+  // Look for natural sentence breaks to create structure
+  const sentences = cleanAnswer.split(/[.!?]+/).filter(s => s.trim().length > 10);
+  
+  if (sentences.length > 2) {
+    // Create bullet points from sentences
+    const bulletPoints = sentences.map(sentence => {
+      const cleanSentence = sentence.trim();
+      if (cleanSentence.length > 0) {
+        return `• ${cleanSentence}`;
+      }
+      return '';
+    }).filter(point => point.length > 0);
+    
+    return bulletPoints.join('\n');
+  }
+  
+  // Enhanced formatting for financial data and key metrics
+  if (cleanAnswer.includes('₹') || cleanAnswer.includes('$') || cleanAnswer.includes('%')) {
+    // Format financial responses with better structure
+    const financialLines = cleanAnswer.split(/[.!?]+/).filter(s => s.trim().length > 5);
+    if (financialLines.length > 1) {
+      // Add a summary header for financial responses
+      let formattedFinancial = ['**📊 Financial Summary**'];
+      
+      formattedFinancial = formattedFinancial.concat(financialLines.map(line => {
+        const trimmed = line.trim();
+        if (trimmed.length > 0) {
+          // Highlight key numbers and metrics
+          const highlighted = trimmed
+            .replace(/(₹[\d,]+\.?\d*)/g, '**$1**')
+            .replace(/(\$[\d,]+\.?\d*)/g, '**$1**')
+            .replace(/(\d+%)/g, '**$1**');
+          return `• ${highlighted}`;
+        }
+        return '';
+      }).filter(line => line.length > 0));
+      
+      return formattedFinancial.join('\n');
+    }
+  }
+  
+  // Special formatting for company/board information
+  if (cleanAnswer.toLowerCase().includes('director') || cleanAnswer.toLowerCase().includes('board') || cleanAnswer.toLowerCase().includes('ceo')) {
+    const companyLines = cleanAnswer.split(/[.!?]+/).filter(s => s.trim().length > 5);
+    if (companyLines.length > 1) {
+      let formattedCompany = ['**👥 Company Leadership**'];
+      
+      formattedCompany = formattedCompany.concat(companyLines.map(line => {
+        const trimmed = line.trim();
+        if (trimmed.length > 0) {
+          // Highlight names and titles
+          const highlighted = trimmed
+            .replace(/(Mr\.|Ms\.|Mrs\.)\s+([A-Z][a-z]+)/g, '**$1 $2**')
+            .replace(/(CEO|CFO|Chairman|Director)/g, '**$1**');
+          return `• ${highlighted}`;
+        }
+        return '';
+      }).filter(line => line.length > 0));
+      
+      return formattedCompany.join('\n');
+    }
+  }
+  
+  // Special formatting for project/timeline information
+  if (cleanAnswer.toLowerCase().includes('project') || cleanAnswer.toLowerCase().includes('timeline') || cleanAnswer.toLowerCase().includes('phase')) {
+    const projectLines = cleanAnswer.split(/[.!?]+/).filter(s => s.trim().length > 5);
+    if (projectLines.length > 1) {
+      let formattedProject = ['**📅 Project Timeline**'];
+      
+      formattedProject = formattedProject.concat(projectLines.map(line => {
+        const trimmed = line.trim();
+        if (trimmed.length > 0) {
+          // Highlight phases and timeframes
+          const highlighted = trimmed
+            .replace(/(\d+)\s*(month|week|day)/g, '**$1 $2**')
+            .replace(/(Phase|Planning|Development|Testing|Deployment)/g, '**$1**');
+          return `• ${highlighted}`;
+        }
+        return '';
+      }).filter(line => line.length > 0));
+      
+      return formattedProject.join('\n');
+    }
+  }
+  
+  // Default: return cleaned answer
+  return cleanAnswer.trim();
+}
 
 // Mock response generator for demonstration
 function generateMockChatResponse(userInput: string): ChatResponse {
@@ -362,103 +498,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Try to forward request to external chatbot API
       let chatResponse: ChatResponse | null = null;
       
-      try {
-        const apiUrl = `http://localhost:5678/webhook/chatbot-api?chatInput=${encodeURIComponent(chatInput)}&sessionId=${encodeURIComponent(sessionId)}`;
-        
-        console.log(`[DEBUG] Attempting to call external API: ${apiUrl}`);
-        console.log(`[DEBUG] Request payload:`, { chatInput, sessionId });
-        
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          signal: AbortSignal.timeout(30000) // 30 second timeout for N8N service
-        });
+             try {
+         const apiUrl = `http://localhost:5678/webhook/chatbot-api?chatInput=${encodeURIComponent(chatInput)}&sessionId=${encodeURIComponent(sessionId)}`;
+         
+         console.log(`[DEBUG] Attempting to call external API: ${apiUrl}`);
+         console.log(`[DEBUG] Request payload:`, { chatInput, sessionId });
+         
+                  // Retry logic with exponential backoff
+         let lastError: any = null;
+         
+         for (let attempt = 1; attempt <= API_CONFIG.MAX_RETRIES; attempt++) {
+           try {
+                            console.log(`[DEBUG] Attempt ${attempt}/${API_CONFIG.MAX_RETRIES} to call external API`);
+             
+             const response = await fetch(apiUrl, {
+               method: "POST",
+               headers: {
+                 "Content-Type": "application/json",
+               },
+               signal: AbortSignal.timeout(API_CONFIG.TIMEOUT_MS) // Configurable timeout for external API calls
+             });
 
-        console.log(`[DEBUG] Response status: ${response.status} ${response.statusText}`);
-        console.log(`[DEBUG] Response headers:`, Object.fromEntries(response.headers.entries()));
+             console.log(`[DEBUG] Response status: ${response.status} ${response.statusText}`);
+             console.log(`[DEBUG] Response headers:`, Object.fromEntries(response.headers.entries()));
 
-        if (response.ok) {
-          const responseText = await response.text();
-          console.log(`[DEBUG] Response body:`, responseText);
-          
-          try {
-            const parsedResponse = JSON.parse(responseText);
-            console.log(`[DEBUG] Parsed response:`, parsedResponse);
-            
-            // Handle different response formats
-            if (parsedResponse.output) {
-                           if (typeof parsedResponse.output === 'string') {
-               // Case 1: output is a JSON string that needs parsing
+             if (response.ok) {
+               const responseText = await response.text();
+               console.log(`[DEBUG] Response body:`, responseText);
+               
                try {
-                 // First, try to extract JSON from markdown code blocks if present
-                 let jsonString = parsedResponse.output;
+                 const parsedResponse = JSON.parse(responseText);
+                 console.log(`[DEBUG] Parsed response:`, parsedResponse);
                  
-                 // Check if it's wrapped in markdown code blocks
-                 const codeBlockMatch = parsedResponse.output.match(/```(?:json)?\s*([\s\S]*?)```/);
-                 if (codeBlockMatch) {
-                   jsonString = codeBlockMatch[1]; // Extract content inside code blocks
-                   console.log(`[DEBUG] Extracted JSON from markdown code blocks:`, jsonString);
+                 // Handle different response formats
+                 if (parsedResponse.output) {
+                   if (typeof parsedResponse.output === 'string') {
+                     // Case 1: output is a JSON string that needs parsing
+                     try {
+                       // First, try to extract JSON from markdown code blocks if present
+                       let jsonString = parsedResponse.output;
+                       
+                       // Check if it's wrapped in markdown code blocks
+                       const codeBlockMatch = parsedResponse.output.match(/```(?:json)?\s*([\s\S]*?)```/);
+                       if (codeBlockMatch) {
+                         jsonString = codeBlockMatch[1]; // Extract content inside code blocks
+                         console.log(`[DEBUG] Extracted JSON from markdown code blocks:`, jsonString);
+                       }
+                       
+                       // Clean the string to handle newlines and formatting issues
+                       let cleanString = jsonString
+                         .replace(/\n/g, ' ')           // Replace newlines with spaces
+                         .replace(/\r/g, ' ')           // Replace carriage returns with spaces
+                         .replace(/\t/g, ' ')           // Replace tabs with spaces
+                         .replace(/\s+/g, ' ')          // Normalize multiple spaces
+                         .trim();                       // Trim whitespace
+                       
+                       const outputData = JSON.parse(cleanString);
+                       chatResponse = { output: outputData };
+                       console.log(`[DEBUG] Successfully parsed output field from string:`, outputData);
+                     } catch (outputParseError) {
+                       // Case 2: output is a plain string, not JSON
+                       chatResponse = { output: parsedResponse.output };
+                       console.log(`[DEBUG] Output is plain string, using as is:`, parsedResponse.output);
+                     }
+                   } else if (typeof parsedResponse.output === 'object') {
+                     // Case 3: output is already a parsed object
+                     chatResponse = { output: parsedResponse.output };
+                     console.log(`[DEBUG] Output is already parsed object:`, parsedResponse.output);
+                   }
+                 } else if (parsedResponse.answer) {
+                   // Case 4: response has answer field directly
+                   chatResponse = { output: parsedResponse };
+                   console.log(`[DEBUG] Response has answer field directly:`, parsedResponse);
+                 } else {
+                   // Case 5: unknown format, try to use as is
+                   chatResponse = { output: parsedResponse };
+                   console.log(`[DEBUG] Unknown format, using response as is:`, parsedResponse);
                  }
-                 
-                 // Clean the string to handle newlines and formatting issues
-                 let cleanString = jsonString
-                   .replace(/\n/g, ' ')           // Replace newlines with spaces
-                   .replace(/\r/g, ' ')           // Replace carriage returns with spaces
-                   .replace(/\t/g, ' ')           // Replace tabs with spaces
-                   .replace(/\s+/g, ' ')          // Normalize multiple spaces
-                   .trim();                       // Trim whitespace
-                 
-                 const outputData = JSON.parse(cleanString);
-                 chatResponse = { output: outputData };
-                 console.log(`[DEBUG] Successfully parsed output field from string:`, outputData);
-               } catch (outputParseError) {
-                 // Case 2: output is a plain string, not JSON
-                 chatResponse = { output: parsedResponse.output };
-                 console.log(`[DEBUG] Output is plain string, using as is:`, parsedResponse.output);
+               } catch (parseError) {
+                 console.error(`[ERROR] Failed to parse JSON response:`, parseError);
+                 throw new Error(`Invalid JSON response from chatbot API`);
                }
-              } else if (typeof parsedResponse.output === 'object') {
-                // Case 3: output is already a parsed object
-                chatResponse = { output: parsedResponse.output };
-                console.log(`[DEBUG] Output is already parsed object:`, parsedResponse.output);
+               
+               // If we get here, the request was successful, break out of retry loop
+               break;
+               
+                            } else {
+                 const errorText = await response.text();
+                 console.error(`[ERROR] Chatbot API error: ${response.status} ${response.statusText}`);
+                 console.error(`[ERROR] Error response body:`, errorText);
+                 throw new Error(`Chatbot API error: ${response.status} ${response.statusText}`);
+               }
+             } catch (attemptError) {
+               lastError = attemptError;
+               console.error(`[ERROR] Attempt ${attempt} failed:`, attemptError);
+               
+               if (attempt < API_CONFIG.MAX_RETRIES) {
+                 // Wait before retrying (exponential backoff)
+                 const waitTime = Math.pow(2, attempt) * API_CONFIG.RETRY_DELAY_BASE_MS; // 1s, 2s
+                 console.log(`[DEBUG] Waiting ${waitTime}ms before retry...`);
+                 await new Promise(resolve => setTimeout(resolve, waitTime));
+               }
+             }
+           }
+           
+           // If all retries failed, throw the last error
+           if (!chatResponse) {
+             throw lastError || new Error('All retry attempts failed');
+           }
+                   } catch (fetchError) {
+            console.error(`[ERROR] Failed to call external chatbot service after retries:`, fetchError);
+            console.warn("[WARN] External chatbot service unavailable, using mock response");
+            
+            // Generate mock responses based on user input
+            chatResponse = generateMockChatResponse(chatInput);
+            
+            // Ensure mock response has the correct structure
+            if (typeof chatResponse.output === 'string') {
+              try {
+                const mockParsed = JSON.parse(chatResponse.output);
+                chatResponse = { output: mockParsed };
+              } catch (e) {
+                // Keep as is if parsing fails
               }
-            } else if (parsedResponse.answer) {
-              // Case 4: response has answer field directly
-              chatResponse = { output: parsedResponse };
-              console.log(`[DEBUG] Response has answer field directly:`, parsedResponse);
-            } else {
-              // Case 5: unknown format, try to use as is
-              chatResponse = { output: parsedResponse };
-              console.log(`[DEBUG] Unknown format, using response as is:`, parsedResponse);
             }
-          } catch (parseError) {
-            console.error(`[ERROR] Failed to parse JSON response:`, parseError);
-            throw new Error(`Invalid JSON response from chatbot API`);
           }
-        } else {
-          const errorText = await response.text();
-          console.error(`[ERROR] Chatbot API error: ${response.status} ${response.statusText}`);
-          console.error(`[ERROR] Error response body:`, errorText);
-          throw new Error(`Chatbot API error: ${response.status} ${response.statusText}`);
-        }
-      } catch (fetchError) {
-        console.error(`[ERROR] Failed to call external chatbot service:`, fetchError);
-        console.warn("[WARN] External chatbot service unavailable, using mock response");
-        
-        // Generate mock responses based on user input
-        chatResponse = generateMockChatResponse(chatInput);
-        
-        // Ensure mock response has the correct structure
-        if (typeof chatResponse.output === 'string') {
-          try {
-            const mockParsed = JSON.parse(chatResponse.output);
-            chatResponse = { output: mockParsed };
-          } catch (e) {
-            // Keep as is if parsing fails
-          }
-        }
-      }
       
       // Ensure chatResponse is always defined
       if (!chatResponse) {
@@ -484,12 +648,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (chatResponse && chatResponse.output && typeof chatResponse.output === 'object' && (chatResponse.output as any).answer) {
           const parsedData = chatResponse.output as any;
           
-          // Clean up markdown formatting for better display but preserve important bold values
-          let cleanAnswer = parsedData.answer
-            .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
-            .replace(/```(.*?)```/g, '$1') // Remove code blocks  
-            .replace(/`(.*?)`/g, '$1'); // Remove inline code
-          // Note: We keep **bold** formatting intact for values like **$60,000** and section headers
+                     // Transform the answer into a cleaner, more polished format
+           let cleanAnswer = formatChatbotResponse(parsedData.answer);
           
           console.log("[DEBUG] searchInfo in parsedData:", parsedData.searchInfo);
           
@@ -539,19 +699,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
                  .trim();                       // Trim whitespace
                
                const fallbackParsed = JSON.parse(cleanString);
-               if (fallbackParsed.answer) {
-                 aiMessage.content = fallbackParsed.answer;
-                 aiMessage.documentReference = fallbackParsed.FileID ? {
-                   fileId: fallbackParsed.FileID,
-                   fileName: fallbackParsed.FileName,
-                   fileLink: fallbackParsed.FileLink,
-                   from: fallbackParsed.From,
-                   to: fallbackParsed.To
-                 } : undefined;
-                 console.log("[DEBUG] Successfully parsed fallback response:", fallbackParsed);
-               } else {
-                 aiMessage.content = "I received a response, but it did not contain a clear answer. Please try rephrasing your question.";
-               }
+                               if (fallbackParsed.answer) {
+                  aiMessage.content = formatChatbotResponse(fallbackParsed.answer);
+                  aiMessage.documentReference = fallbackParsed.FileID ? {
+                    fileId: fallbackParsed.FileID,
+                    fileName: fallbackParsed.FileName,
+                    fileLink: fallbackParsed.FileLink,
+                    from: fallbackParsed.From,
+                    to: fallbackParsed.To
+                  } : undefined;
+                  console.log("[DEBUG] Successfully parsed fallback response:", fallbackParsed);
+                } else {
+                  aiMessage.content = "I received a response, but it did not contain a clear answer. Please try rephrasing your question.";
+                }
              } catch (fallbackError) {
                // If it's not JSON, use as plain text
                aiMessage.content = chatResponse.output;
