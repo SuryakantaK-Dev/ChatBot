@@ -360,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Try to forward request to external chatbot API
-      let chatResponse: ChatResponse;
+      let chatResponse: ChatResponse | null = null;
       
       try {
         const apiUrl = `http://localhost:5678/webhook/chatbot-api?chatInput=${encodeURIComponent(chatInput)}&sessionId=${encodeURIComponent(sessionId)}`;
@@ -384,8 +384,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`[DEBUG] Response body:`, responseText);
           
           try {
-            chatResponse = JSON.parse(responseText);
-            console.log(`[DEBUG] Parsed response:`, chatResponse);
+            const parsedResponse = JSON.parse(responseText);
+            console.log(`[DEBUG] Parsed response:`, parsedResponse);
+            
+            // Handle different response formats
+            if (parsedResponse.output) {
+                           if (typeof parsedResponse.output === 'string') {
+               // Case 1: output is a JSON string that needs parsing
+               try {
+                 // First, try to extract JSON from markdown code blocks if present
+                 let jsonString = parsedResponse.output;
+                 
+                 // Check if it's wrapped in markdown code blocks
+                 const codeBlockMatch = parsedResponse.output.match(/```(?:json)?\s*([\s\S]*?)```/);
+                 if (codeBlockMatch) {
+                   jsonString = codeBlockMatch[1]; // Extract content inside code blocks
+                   console.log(`[DEBUG] Extracted JSON from markdown code blocks:`, jsonString);
+                 }
+                 
+                 // Clean the string to handle newlines and formatting issues
+                 let cleanString = jsonString
+                   .replace(/\n/g, ' ')           // Replace newlines with spaces
+                   .replace(/\r/g, ' ')           // Replace carriage returns with spaces
+                   .replace(/\t/g, ' ')           // Replace tabs with spaces
+                   .replace(/\s+/g, ' ')          // Normalize multiple spaces
+                   .trim();                       // Trim whitespace
+                 
+                 const outputData = JSON.parse(cleanString);
+                 chatResponse = { output: outputData };
+                 console.log(`[DEBUG] Successfully parsed output field from string:`, outputData);
+               } catch (outputParseError) {
+                 // Case 2: output is a plain string, not JSON
+                 chatResponse = { output: parsedResponse.output };
+                 console.log(`[DEBUG] Output is plain string, using as is:`, parsedResponse.output);
+               }
+              } else if (typeof parsedResponse.output === 'object') {
+                // Case 3: output is already a parsed object
+                chatResponse = { output: parsedResponse.output };
+                console.log(`[DEBUG] Output is already parsed object:`, parsedResponse.output);
+              }
+            } else if (parsedResponse.answer) {
+              // Case 4: response has answer field directly
+              chatResponse = { output: parsedResponse };
+              console.log(`[DEBUG] Response has answer field directly:`, parsedResponse);
+            } else {
+              // Case 5: unknown format, try to use as is
+              chatResponse = { output: parsedResponse };
+              console.log(`[DEBUG] Unknown format, using response as is:`, parsedResponse);
+            }
           } catch (parseError) {
             console.error(`[ERROR] Failed to parse JSON response:`, parseError);
             throw new Error(`Invalid JSON response from chatbot API`);
@@ -402,64 +448,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Generate mock responses based on user input
         chatResponse = generateMockChatResponse(chatInput);
+        
+        // Ensure mock response has the correct structure
+        if (typeof chatResponse.output === 'string') {
+          try {
+            const mockParsed = JSON.parse(chatResponse.output);
+            chatResponse = { output: mockParsed };
+          } catch (e) {
+            // Keep as is if parsing fails
+          }
+        }
       }
+      
+      // Ensure chatResponse is always defined
+      if (!chatResponse) {
+        console.error("[ERROR] chatResponse is null, this should not happen");
+        chatResponse = generateMockChatResponse(chatInput);
+      }
+      
+      console.log("[DEBUG] Final chatResponse structure:", {
+        hasOutput: !!chatResponse.output,
+        outputType: typeof chatResponse.output,
+        outputKeys: chatResponse.output && typeof chatResponse.output === 'object' ? Object.keys(chatResponse.output) : 'N/A'
+      });
       
       // Parse the output to extract structured response
       let aiMessage: any = {
         type: 'ai',
-        content: chatResponse.output,
+        content: "Processing your request...",
         timestamp: Date.now()
       };
 
-      // Try to parse JSON from output if it contains structured data
+      // Now chatResponse.output should already be parsed JSON object
       try {
-        let parsedData = null;
-        
-        // First, try to parse the response as direct JSON
-        try {
-          parsedData = JSON.parse(chatResponse.output);
-          console.log("[DEBUG] Direct JSON parse successful:", parsedData);
-        } catch (directParseError) {
-          console.log("[DEBUG] Direct JSON parse failed, trying markdown code blocks");
-          console.log("[DEBUG] Raw output to parse:", chatResponse.output);
-          console.log("[DEBUG] Output length:", chatResponse.output.length);
+        if (chatResponse && chatResponse.output && typeof chatResponse.output === 'object' && (chatResponse.output as any).answer) {
+          const parsedData = chatResponse.output as any;
           
-          // If direct parsing fails, try to extract JSON from markdown code blocks
-          // Updated regex to handle both ```json and ``` formats with flexible whitespace
-          // Also handle cases where there might be 4 backticks at the end
-          const jsonMatch = chatResponse.output.match(/```(?:json)?\s*([\s\S]*?)\s*```+/);
-          console.log("[DEBUG] Regex match result:", jsonMatch);
-          if (jsonMatch) {
-            console.log("[DEBUG] Found JSON in markdown code block");
-            try {
-              // Clean the extracted JSON string before parsing
-              let cleanJsonString = jsonMatch[1].trim();
-              
-              // More aggressive cleaning for problematic characters
-              cleanJsonString = cleanJsonString
-                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '') // Remove all control chars except \t, \n, \r
-                .replace(/\r\n/g, '\n') // Normalize line endings
-                .replace(/\r/g, '\n') // Normalize line endings
-                .replace(/\t/g, ' ') // Replace tabs with spaces
-                .replace(/\n\s*\n/g, '\n') // Remove empty lines
-                .replace(/\s+/g, ' ') // Normalize multiple spaces
-                .trim(); // Final trim
-              
-              console.log("[DEBUG] Cleaned JSON string:", cleanJsonString);
-              
-              parsedData = JSON.parse(cleanJsonString);
-              console.log("[DEBUG] Markdown JSON parse successful:", parsedData);
-            } catch (jsonParseError) {
-              console.error("[ERROR] Failed to parse extracted JSON:", jsonParseError);
-              console.error("[DEBUG] Raw extracted string:", jsonMatch[1]);
-              // Don't set parsedData, let it fall through to error handling
-            }
-          } else {
-            console.log("[DEBUG] No JSON found in markdown code blocks");
-          }
-        }
-        
-        if (parsedData && parsedData.answer) {
           // Clean up markdown formatting for better display but preserve important bold values
           let cleanAnswer = parsedData.answer
             .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
@@ -489,15 +513,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           console.log("[DEBUG] Final aiMessage with searchInfo:", aiMessage);
+        } else {
+          // If no valid 'answer' field found, try to extract from different formats
+          console.warn("[WARN] No valid answer field found in response:", chatResponse.output);
+          
+                     if (chatResponse.output && typeof chatResponse.output === 'string') {
+             // Try to parse as JSON if it's a string
+             try {
+               // First, try to extract JSON from markdown code blocks if present
+               let jsonString = chatResponse.output;
+               
+               // Check if it's wrapped in markdown code blocks
+               const codeBlockMatch = chatResponse.output.match(/```(?:json)?\s*([\s\S]*?)```/);
+               if (codeBlockMatch) {
+                 jsonString = codeBlockMatch[1]; // Extract content inside code blocks
+                 console.log(`[DEBUG] Extracted JSON from markdown code blocks in fallback:`, jsonString);
+               }
+               
+               // Clean the string to handle newlines and formatting issues
+               let cleanString = jsonString
+                 .replace(/\n/g, ' ')           // Replace newlines with spaces
+                 .replace(/\r/g, ' ')           // Replace carriage returns with spaces
+                 .replace(/\t/g, ' ')           // Replace tabs with spaces
+                 .replace(/\s+/g, ' ')          // Normalize multiple spaces
+                 .trim();                       // Trim whitespace
+               
+               const fallbackParsed = JSON.parse(cleanString);
+               if (fallbackParsed.answer) {
+                 aiMessage.content = fallbackParsed.answer;
+                 aiMessage.documentReference = fallbackParsed.FileID ? {
+                   fileId: fallbackParsed.FileID,
+                   fileName: fallbackParsed.FileName,
+                   fileLink: fallbackParsed.FileLink,
+                   from: fallbackParsed.From,
+                   to: fallbackParsed.To
+                 } : undefined;
+                 console.log("[DEBUG] Successfully parsed fallback response:", fallbackParsed);
+               } else {
+                 aiMessage.content = "I received a response, but it did not contain a clear answer. Please try rephrasing your question.";
+               }
+             } catch (fallbackError) {
+               // If it's not JSON, use as plain text
+               aiMessage.content = chatResponse.output;
+               console.log("[DEBUG] Using output as plain text:", chatResponse.output);
+             }
+          } else {
+            aiMessage.content = "I received a response, but it did not contain a clear answer. Please try rephrasing your question.";
+          }
         }
       } catch (parseError) {
-        console.warn("Could not parse structured response:", parseError);
+        console.error("Error during final parsing of chatResponse.output to structured data:", parseError);
+        aiMessage.content = "An unexpected error occurred while interpreting the chatbot's response format.";
       }
 
       // Save AI response to storage
       await storage.saveChatMessage({
         session_id: sessionId,
         message: aiMessage
+      });
+
+      // Final validation before sending response
+      console.log("[DEBUG] Final aiMessage being sent to client:", {
+        type: aiMessage.type,
+        contentLength: aiMessage.content?.length || 0,
+        hasDocumentReference: !!aiMessage.documentReference,
+        hasSearchInfo: !!aiMessage.searchInfo
       });
 
       res.json(aiMessage);
