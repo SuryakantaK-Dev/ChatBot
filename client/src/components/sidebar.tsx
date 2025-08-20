@@ -201,11 +201,11 @@ export default function Sidebar({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {sessionPreviews[sessionId]
-                            ? sessionPreviews[sessionId].slice(0, 30) + (sessionPreviews[sessionId].length > 30 ? '...' : '')
-                            : 'No preview'}
-                        </p>
+                                                 <p className="text-sm font-medium text-gray-900 truncate">
+                           {sessionPreviews[sessionId]
+                             ? sessionPreviews[sessionId].slice(0, 25) + (sessionPreviews[sessionId].length > 25 ? '...' : '')
+                             : 'No preview'}
+                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                           {formatSessionTime(sessionId)}
                         </p>
@@ -214,17 +214,17 @@ export default function Sidebar({
                         <Badge variant="secondary" className="text-xs">
                           Chat
                         </Badge>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 h-6 w-6"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteSessionMutation.mutate(sessionId);
-                          }}
-                        >
-                          <Trash2 className="h-3 w-3 text-red-500" />
-                        </Button>
+                                                 <Button
+                           variant="ghost"
+                           size="sm"
+                           className="opacity-100 p-0.5 h-5 w-5 text-red-500 hover:text-red-600 hover:bg-red-50 min-w-0"
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             deleteSessionMutation.mutate(sessionId);
+                           }}
+                         >
+                           <Trash2 className="h-2.5 w-2.5" />
+                         </Button>
                       </div>
                     </div>
                   </div>
