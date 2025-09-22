@@ -2,11 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
-import { Bot, User, Send, Menu, FolderOpen, FileText, ExternalLink } from "lucide-react";
+import { Bot, User, Send, Menu, FolderOpen, FileText, ExternalLink, Database } from "lucide-react";
 
 interface ChatMessage {
   type: 'human' | 'ai';
@@ -49,6 +50,7 @@ export default function ChatArea({
 }: ChatAreaProps) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [dbEnabled, setDbEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
@@ -61,9 +63,13 @@ export default function ChatArea({
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ chatInput, sessionId }: { chatInput: string; sessionId: string }) => {
+    mutationFn: async ({ chatInput, sessionId, dbEnabled }: { chatInput: string; sessionId: string; dbEnabled: boolean }) => {
       try {
-        const response = await apiRequest('POST', '/api/chat', { chatInput, sessionId });
+        console.log(`[DEBUG] Mutation function called with dbEnabled: ${dbEnabled}, type: ${typeof dbEnabled}`);
+        const requestData = { chatInput, sessionId, dbEnabled };
+        console.log(`[DEBUG] Request data:`, requestData);
+        console.log(`[DEBUG] JSON stringified:`, JSON.stringify(requestData));
+        const response = await apiRequest('POST', '/api/chat', requestData);
         return await response.json();
       } catch (error) {
         console.error('Chat API error:', error);
@@ -211,10 +217,22 @@ export default function ChatArea({
     }
     scrollToBottom();
 
+    console.log(`[DEBUG] ===== SENDING MESSAGE =====`);
+    console.log(`[DEBUG] Sending message with dbEnabled: ${dbEnabled}, type: ${typeof dbEnabled}`);
+    console.log(`[DEBUG] dbEnabled === true: ${dbEnabled === true}`);
+    console.log(`[DEBUG] Boolean(dbEnabled): ${Boolean(dbEnabled)}`);
+    console.log(`[DEBUG] Message: "${message}"`);
+    console.log(`[DEBUG] SessionId: "${sessionId}"`);
+    console.log(`[DEBUG] ============================`);
+    
+    // Test if mutation is being called
+    console.log(`[DEBUG] About to call sendMessageMutation.mutate`);
     sendMessageMutation.mutate({
       chatInput: message,
-      sessionId: sessionId
+      sessionId: sessionId,
+      dbEnabled: dbEnabled
     });
+    console.log(`[DEBUG] sendMessageMutation.mutate called`);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -431,6 +449,36 @@ export default function ChatArea({
 
       {/* Chat Input - Below messages with same width */}
       <div className="border-t border-gray-100 px-4 py-1.5 flex-shrink-0 bg-white/80 backdrop-blur-sm">
+        {/* DB Enabled Checkbox */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2">
+          <Checkbox
+            id="db-enabled"
+            checked={dbEnabled}
+            onCheckedChange={(checked) => {
+              console.log(`[DEBUG] Checkbox changed to: ${checked}, type: ${typeof checked}`);
+              const newValue = checked === true;
+              console.log(`[DEBUG] Setting dbEnabled to: ${newValue}`);
+              setDbEnabled(newValue);
+            }}
+          />
+            <label
+              htmlFor="db-enabled"
+              className="text-sm font-medium text-gray-700 cursor-pointer flex items-center space-x-1"
+            >
+              <Database size={14} />
+              <span>DB Enabled</span>
+              <span className="text-xs text-gray-500">({dbEnabled ? 'ON' : 'OFF'})</span>
+            </label>
+          </div>
+          {dbEnabled === true && (
+            <div className="flex items-center space-x-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+              <Database size={12} />
+              <span>Database Mode Active</span>
+            </div>
+          )}
+        </div>
+        
         <div className="flex items-center space-x-3">
           <div className="flex-1 relative">
             <Textarea

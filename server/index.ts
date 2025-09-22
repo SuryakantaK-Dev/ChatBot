@@ -6,6 +6,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+  if (req.path === '/api/chat') {
+    console.log('[DEBUG] Chat API request received');
+    console.log('[DEBUG] Body:', req.body);
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -66,5 +75,6 @@ app.use((req, res, next) => {
     host: "127.0.0.1"
   }, () => {
     log(`serving on port ${port}`);
+    console.log(`🚀 Server is running at: http://localhost:${port}/`);
   });
 })();

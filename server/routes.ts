@@ -476,7 +476,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat API endpoint
   app.post("/api/chat", async (req, res) => {
     try {
-      const { chatInput, sessionId } = req.body;
+      const { chatInput, sessionId, dbEnabled = false } = req.body;
+      
+      console.log(`[DEBUG] ===== CHAT API REQUEST =====`);
+      console.log(`[DEBUG] Received request with dbEnabled: ${dbEnabled}, type: ${typeof dbEnabled}`);
+      console.log(`[DEBUG] Full request body:`, JSON.stringify(req.body, null, 2));
+      console.log(`[DEBUG] ================================`);
       
       if (!chatInput || !sessionId) {
         return res.status(400).json({ 
@@ -498,131 +503,201 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Try to forward request to external chatbot API
       let chatResponse: ChatResponse | null = null;
       
-             try {
-         const apiUrl = `http://localhost:5678/webhook/chatbot-api?chatInput=${encodeURIComponent(chatInput)}&sessionId=${encodeURIComponent(sessionId)}`;
+      // If DB is enabled, try to call the DB API first
+      console.log(`[DEBUG] ===== DB API CHECK =====`);
+      console.log(`[DEBUG] Checking dbEnabled condition: ${dbEnabled} (${typeof dbEnabled})`);
+      console.log(`[DEBUG] dbEnabled === true: ${dbEnabled === true}`);
+      console.log(`[DEBUG] Boolean(dbEnabled): ${Boolean(dbEnabled)}`);
+      console.log(`[DEBUG] ========================`);
+      
+      if (dbEnabled) {
+        try {
+          console.log(`[DEBUG] DB enabled - calling DB API for: ${chatInput}`);
+          const dbApiUrl = `http://localhost:5678/webhook/chatbot-db-api?chatInput=${encodeURIComponent(chatInput)}&sessionId=${encodeURIComponent(sessionId)}`;
+          
+          console.log(`[DEBUG] DB API URL: ${dbApiUrl}`);
+          
+          const dbResponse = await fetch(dbApiUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ chatInput, sessionId }),
+            signal: AbortSignal.timeout(API_CONFIG.TIMEOUT_MS)
+          });
+
+          console.log(`[DEBUG] DB API response status: ${dbResponse.status} ${dbResponse.statusText}`);
+
+          if (dbResponse.ok) {
+            const dbResponseText = await dbResponse.text();
+            console.log(`[DEBUG] DB API response body:`, dbResponseText);
+            
+            try {
+              const dbParsedResponse = JSON.parse(dbResponseText);
+              console.log(`[DEBUG] DB API parsed response:`, dbParsedResponse);
+              
+              // Handle DB API response format
+              if (dbParsedResponse.answer || dbParsedResponse.output) {
+                const answer = dbParsedResponse.answer || dbParsedResponse.output;
+                chatResponse = {
+                  output: {
+                    answer: answer,
+                    FileID: dbParsedResponse.FileID || null,
+                    FileName: dbParsedResponse.FileName || null,
+                    FileLink: dbParsedResponse.FileLink || null,
+                    From: dbParsedResponse.From || null,
+                    To: dbParsedResponse.To || null,
+                    searchInfo: dbParsedResponse.searchInfo || null
+                  }
+                };
+                console.log(`[DEBUG] Successfully processed DB API response`);
+              } else {
+                console.warn(`[WARN] DB API response missing answer field, falling back to regular API`);
+              }
+            } catch (dbParseError) {
+              console.error(`[ERROR] Failed to parse DB API response:`, dbParseError);
+              console.warn(`[WARN] DB API response parsing failed, falling back to regular API`);
+            }
+          } else {
+            const dbErrorText = await dbResponse.text();
+            console.error(`[ERROR] DB API error: ${dbResponse.status} ${dbResponse.statusText}`);
+            console.error(`[ERROR] DB API error response:`, dbErrorText);
+            console.warn(`[WARN] DB API failed, falling back to regular API`);
+          }
+        } catch (dbError) {
+          console.error(`[ERROR] DB API call failed:`, dbError);
+          console.warn(`[WARN] DB API unavailable, falling back to regular API`);
+        }
+      }
+      
+      // Only call regular API if DB is not enabled or DB API call failed
+      if (!dbEnabled || !chatResponse) {
+        try {
+          const apiUrl = `http://localhost:5678/webhook/chatbot-api?chatInput=${encodeURIComponent(chatInput)}&sessionId=${encodeURIComponent(sessionId)}`;
+          
+          console.log(`[DEBUG] Attempting to call external API: ${apiUrl}`);
+          console.log(`[DEBUG] Request payload:`, { chatInput, sessionId });
+          
+          // Retry logic with exponential backoff
+          let lastError: any = null;
          
-         console.log(`[DEBUG] Attempting to call external API: ${apiUrl}`);
-         console.log(`[DEBUG] Request payload:`, { chatInput, sessionId });
-         
-                  // Retry logic with exponential backoff
-         let lastError: any = null;
-         
-         for (let attempt = 1; attempt <= API_CONFIG.MAX_RETRIES; attempt++) {
-           try {
-                            console.log(`[DEBUG] Attempt ${attempt}/${API_CONFIG.MAX_RETRIES} to call external API`);
+          for (let attempt = 1; attempt <= API_CONFIG.MAX_RETRIES; attempt++) {
+            try {
+              console.log(`[DEBUG] Attempt ${attempt}/${API_CONFIG.MAX_RETRIES} to call external API`);
              
-             const response = await fetch(apiUrl, {
-               method: "POST",
-               headers: {
-                 "Content-Type": "application/json",
-               },
-               signal: AbortSignal.timeout(API_CONFIG.TIMEOUT_MS) // Configurable timeout for external API calls
-             });
+              const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                signal: AbortSignal.timeout(API_CONFIG.TIMEOUT_MS) // Configurable timeout for external API calls
+              });
 
-             console.log(`[DEBUG] Response status: ${response.status} ${response.statusText}`);
-             console.log(`[DEBUG] Response headers:`, Object.fromEntries(response.headers.entries()));
+              console.log(`[DEBUG] Response status: ${response.status} ${response.statusText}`);
+              console.log(`[DEBUG] Response headers:`, Object.fromEntries(response.headers.entries()));
 
-             if (response.ok) {
-               const responseText = await response.text();
-               console.log(`[DEBUG] Response body:`, responseText);
-               
-               try {
-                 const parsedResponse = JSON.parse(responseText);
-                 console.log(`[DEBUG] Parsed response:`, parsedResponse);
-                 
-                 // Handle different response formats
-                 if (parsedResponse.output) {
-                   if (typeof parsedResponse.output === 'string') {
-                     // Case 1: output is a JSON string that needs parsing
-                     try {
-                       // First, try to extract JSON from markdown code blocks if present
-                       let jsonString = parsedResponse.output;
-                       
-                       // Check if it's wrapped in markdown code blocks
-                       const codeBlockMatch = parsedResponse.output.match(/```(?:json)?\s*([\s\S]*?)```/);
-                       if (codeBlockMatch) {
-                         jsonString = codeBlockMatch[1]; // Extract content inside code blocks
-                         console.log(`[DEBUG] Extracted JSON from markdown code blocks:`, jsonString);
-                       }
-                       
-                       // Clean the string to handle newlines and formatting issues
-                       let cleanString = jsonString
-                         .replace(/\n/g, ' ')           // Replace newlines with spaces
-                         .replace(/\r/g, ' ')           // Replace carriage returns with spaces
-                         .replace(/\t/g, ' ')           // Replace tabs with spaces
-                         .replace(/\s+/g, ' ')          // Normalize multiple spaces
-                         .trim();                       // Trim whitespace
-                       
-                       const outputData = JSON.parse(cleanString);
-                       chatResponse = { output: outputData };
-                       console.log(`[DEBUG] Successfully parsed output field from string:`, outputData);
-                     } catch (outputParseError) {
-                       // Case 2: output is a plain string, not JSON
-                       chatResponse = { output: parsedResponse.output };
-                       console.log(`[DEBUG] Output is plain string, using as is:`, parsedResponse.output);
-                     }
-                   } else if (typeof parsedResponse.output === 'object') {
-                     // Case 3: output is already a parsed object
-                     chatResponse = { output: parsedResponse.output };
-                     console.log(`[DEBUG] Output is already parsed object:`, parsedResponse.output);
-                   }
-                 } else if (parsedResponse.answer) {
-                   // Case 4: response has answer field directly
-                   chatResponse = { output: parsedResponse };
-                   console.log(`[DEBUG] Response has answer field directly:`, parsedResponse);
-                 } else {
-                   // Case 5: unknown format, try to use as is
-                   chatResponse = { output: parsedResponse };
-                   console.log(`[DEBUG] Unknown format, using response as is:`, parsedResponse);
-                 }
-               } catch (parseError) {
-                 console.error(`[ERROR] Failed to parse JSON response:`, parseError);
-                 throw new Error(`Invalid JSON response from chatbot API`);
-               }
-               
-               // If we get here, the request was successful, break out of retry loop
-               break;
-               
-                            } else {
-                 const errorText = await response.text();
-                 console.error(`[ERROR] Chatbot API error: ${response.status} ${response.statusText}`);
-                 console.error(`[ERROR] Error response body:`, errorText);
-                 throw new Error(`Chatbot API error: ${response.status} ${response.statusText}`);
-               }
-             } catch (attemptError) {
-               lastError = attemptError;
-               console.error(`[ERROR] Attempt ${attempt} failed:`, attemptError);
-               
-               if (attempt < API_CONFIG.MAX_RETRIES) {
-                 // Wait before retrying (exponential backoff)
-                 const waitTime = Math.pow(2, attempt) * API_CONFIG.RETRY_DELAY_BASE_MS; // 1s, 2s
-                 console.log(`[DEBUG] Waiting ${waitTime}ms before retry...`);
-                 await new Promise(resolve => setTimeout(resolve, waitTime));
-               }
-             }
-           }
-           
-           // If all retries failed, throw the last error
-           if (!chatResponse) {
-             throw lastError || new Error('All retry attempts failed');
-           }
-                   } catch (fetchError) {
-            console.error(`[ERROR] Failed to call external chatbot service after retries:`, fetchError);
-            console.warn("[WARN] External chatbot service unavailable, using mock response");
-            
-            // Generate mock responses based on user input
-            chatResponse = generateMockChatResponse(chatInput);
-            
-            // Ensure mock response has the correct structure
-            if (typeof chatResponse.output === 'string') {
-              try {
-                const mockParsed = JSON.parse(chatResponse.output);
-                chatResponse = { output: mockParsed };
-              } catch (e) {
-                // Keep as is if parsing fails
+              if (response.ok) {
+                const responseText = await response.text();
+                console.log(`[DEBUG] Response body:`, responseText);
+                
+                try {
+                  const parsedResponse = JSON.parse(responseText);
+                  console.log(`[DEBUG] Parsed response:`, parsedResponse);
+                  
+                  // Handle different response formats
+                  if (parsedResponse.output) {
+                    if (typeof parsedResponse.output === 'string') {
+                      // Case 1: output is a JSON string that needs parsing
+                      try {
+                        // First, try to extract JSON from markdown code blocks if present
+                        let jsonString = parsedResponse.output;
+                        
+                        // Check if it's wrapped in markdown code blocks
+                        const codeBlockMatch = parsedResponse.output.match(/```(?:json)?\s*([\s\S]*?)```/);
+                        if (codeBlockMatch) {
+                          jsonString = codeBlockMatch[1]; // Extract content inside code blocks
+                          console.log(`[DEBUG] Extracted JSON from markdown code blocks:`, jsonString);
+                        }
+                        
+                        // Clean the string to handle newlines and formatting issues
+                        let cleanString = jsonString
+                          .replace(/\n/g, ' ')           // Replace newlines with spaces
+                          .replace(/\r/g, ' ')           // Replace carriage returns with spaces
+                          .replace(/\t/g, ' ')           // Replace tabs with spaces
+                          .replace(/\s+/g, ' ')          // Normalize multiple spaces
+                          .trim();                       // Trim whitespace
+                        
+                        const outputData = JSON.parse(cleanString);
+                        chatResponse = { output: outputData };
+                        console.log(`[DEBUG] Successfully parsed output field from string:`, outputData);
+                      } catch (outputParseError) {
+                        // Case 2: output is a plain string, not JSON
+                        chatResponse = { output: parsedResponse.output };
+                        console.log(`[DEBUG] Output is plain string, using as is:`, parsedResponse.output);
+                      }
+                    } else if (typeof parsedResponse.output === 'object') {
+                      // Case 3: output is already a parsed object
+                      chatResponse = { output: parsedResponse.output };
+                      console.log(`[DEBUG] Output is already parsed object:`, parsedResponse.output);
+                    }
+                  } else if (parsedResponse.answer) {
+                    // Case 4: response has answer field directly
+                    chatResponse = { output: parsedResponse };
+                    console.log(`[DEBUG] Response has answer field directly:`, parsedResponse);
+                  } else {
+                    // Case 5: unknown format, try to use as is
+                    chatResponse = { output: parsedResponse };
+                    console.log(`[DEBUG] Unknown format, using response as is:`, parsedResponse);
+                  }
+                } catch (parseError) {
+                  console.error(`[ERROR] Failed to parse JSON response:`, parseError);
+                  throw new Error(`Invalid JSON response from chatbot API`);
+                }
+                
+                // If we get here, the request was successful, break out of retry loop
+                break;
+                
+              } else {
+                const errorText = await response.text();
+                console.error(`[ERROR] Chatbot API error: ${response.status} ${response.statusText}`);
+                console.error(`[ERROR] Error response body:`, errorText);
+                throw new Error(`Chatbot API error: ${response.status} ${response.statusText}`);
+              }
+            } catch (attemptError) {
+              lastError = attemptError;
+              console.error(`[ERROR] Attempt ${attempt} failed:`, attemptError);
+              
+              if (attempt < API_CONFIG.MAX_RETRIES) {
+                // Wait before retrying (exponential backoff)
+                const waitTime = Math.pow(2, attempt) * API_CONFIG.RETRY_DELAY_BASE_MS; // 1s, 2s
+                console.log(`[DEBUG] Waiting ${waitTime}ms before retry...`);
+                await new Promise(resolve => setTimeout(resolve, waitTime));
               }
             }
           }
+          
+          // If all retries failed, throw the last error
+          if (!chatResponse) {
+            throw lastError || new Error('All retry attempts failed');
+          }
+        } catch (fetchError) {
+          console.error(`[ERROR] Failed to call external chatbot service after retries:`, fetchError);
+          console.warn("[WARN] External chatbot service unavailable, using mock response");
+          
+          // Generate mock responses based on user input
+          chatResponse = generateMockChatResponse(chatInput);
+          
+          // Ensure mock response has the correct structure
+          if (typeof chatResponse.output === 'string') {
+            try {
+              const mockParsed = JSON.parse(chatResponse.output);
+              chatResponse = { output: mockParsed };
+            } catch (e) {
+              // Keep as is if parsing fails
+            }
+          }
+        }
+      }
       
       // Ensure chatResponse is always defined
       if (!chatResponse) {
@@ -761,6 +836,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         error: "Failed to fetch chat history",
         message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Test endpoint to check if DB API is reachable
+  app.get("/api/test-db-service", async (req, res) => {
+    try {
+      console.log("[DEBUG] Testing connection to DB API service...");
+      
+      const testUrl = "http://localhost:5678/webhook/chatbot-db-api?chatInput=test&sessionId=test-session";
+      const response = await fetch(testUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: AbortSignal.timeout(5000) // 5 second timeout for testing
+      });
+
+      console.log(`[DEBUG] DB API test response status: ${response.status} ${response.statusText}`);
+      
+      if (response.ok) {
+        const responseText = await response.text();
+        console.log(`[DEBUG] DB API test response body:`, responseText);
+        
+        res.json({
+          status: "success",
+          message: "DB API service is reachable",
+          responseStatus: response.status,
+          responseBody: responseText
+        });
+      } else {
+        const errorText = await response.text();
+        res.status(502).json({
+          status: "error",
+          message: "DB API service returned error",
+          responseStatus: response.status,
+          responseStatusText: response.statusText,
+          errorBody: errorText
+        });
+      }
+    } catch (error) {
+      console.error("[ERROR] DB API test failed:", error);
+      res.status(503).json({
+        status: "error",
+        message: "DB API service is not reachable",
+        error: error instanceof Error ? error.message : "Unknown error"
       });
     }
   });
